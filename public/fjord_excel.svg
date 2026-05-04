@@ -1,0 +1,10 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Left panel with X -->
+  <rect x="2" y="4" width="9" height="16" rx="1" stroke="#616161" stroke-width="1.4" fill="none"/>
+  <path d="M4.5 9.5L8.5 14.5M8.5 9.5L4.5 14.5" stroke="#616161" stroke-width="1.4" stroke-linecap="round"/>
+  <!-- Right panel with grid -->
+  <rect x="11" y="4" width="11" height="16" rx="1" stroke="#616161" stroke-width="1.4" fill="none"/>
+  <line x1="11" y1="9.3" x2="22" y2="9.3" stroke="#616161" stroke-width="1.2"/>
+  <line x1="11" y1="14.7" x2="22" y2="14.7" stroke="#616161" stroke-width="1.2"/>
+  <line x1="16.5" y1="4" x2="16.5" y2="20" stroke="#616161" stroke-width="1.2"/>
+</svg>
