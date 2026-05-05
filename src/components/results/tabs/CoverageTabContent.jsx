@@ -1,4 +1,4 @@
-import { Box, Typography, Paper, Divider, IconButton, Tooltip } from '@mui/material'
+import { Box, Typography, Paper, Divider, IconButton, ToggleButton, ToggleButtonGroup } from '@mui/material'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
@@ -9,10 +9,7 @@ import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd'
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt'
 import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
-import ShowChartIcon from '@mui/icons-material/ShowChart'
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder'
-import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined'
-import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined'
 import { useState, useRef, useEffect } from 'react'
 
 const TEAL   = '#1D9F9F'
@@ -23,11 +20,11 @@ const BLUE   = '#2196F3'
 const GREEN  = '#4CAF50'
 const RED    = '#F44336'
 
-const NAV_TABS = [
-  { id: 'mentions',   label: 'Mentions',         Icon: ShowChartIcon },
-  { id: 'engagement', label: 'Engagement',       Icon: FavoriteBorderIcon },
-  { id: 'locations',  label: 'Locations',        Icon: LocationOnOutlinedIcon },
-  { id: 'trending',   label: 'Trending sources', Icon: ArticleOutlinedIcon },
+const NAV_SECTIONS = [
+  { id: 'cov-mentions',   label: 'Mentions' },
+  { id: 'cov-engagement', label: 'Engagement' },
+  { id: 'cov-locations',  label: 'Locations' },
+  { id: 'cov-trending',   label: 'Trending sources' },
 ]
 
 const X_LABELS = ['Aug 25', 'Aug 26', 'Aug 27', 'Aug 28', 'Aug 29', 'Aug 30', 'Aug 31']
@@ -273,76 +270,68 @@ function MiniSparkline({ data, up }) {
   )
 }
 
-// ── anchor nav ────────────────────────────────────────────────────────────────
+// ── sticky segment nav ────────────────────────────────────────────────────────
 
-function AnchorNav() {
-  const [active, setActive] = useState(NAV_TABS[0].id)
-  const [compact, setCompact] = useState(false)
-  const navRef = useRef(null)
+function StickySegmentNav({ items }) {
+  const [active, setActive] = useState(items[0]?.id || '')
+  const [isSticky, setIsSticky] = useState(false)
+  const ref = useRef(null)
 
   useEffect(() => {
-    const el = navRef.current
+    const el = ref.current
     if (!el) return
-    let scrollEl = el.parentElement
-    while (scrollEl && scrollEl !== document.body) {
-      const s = window.getComputedStyle(scrollEl)
-      if (s.overflow === 'auto' || s.overflowY === 'auto') break
-      scrollEl = scrollEl.parentElement
+    let parent = el.parentElement
+    while (parent && parent !== document.body) {
+      const s = window.getComputedStyle(parent)
+      if (s.overflow === 'auto' || s.overflowY === 'auto' || s.overflow === 'scroll' || s.overflowY === 'scroll') break
+      parent = parent.parentElement
     }
-    if (!scrollEl || scrollEl === document.body) return
-
-    const onScroll = () => {
-      const containerTop = scrollEl.getBoundingClientRect().top
-      let current = NAV_TABS[0].id
-      for (const { id } of NAV_TABS) {
-        const sEl = document.getElementById(`cov-${id}`)
-        if (!sEl) continue
-        if (sEl.getBoundingClientRect().top - containerTop < 80) current = id
-      }
-      setActive(current)
+    if (!parent || parent === document.body) return
+    const check = () => {
+      const r = el.getBoundingClientRect()
+      const p = parent.getBoundingClientRect()
+      setIsSticky(r.top <= p.top + 1)
     }
-    scrollEl.addEventListener('scroll', onScroll, { passive: true })
-
-    const ro = new ResizeObserver(([entry]) => setCompact(entry.contentRect.width < 620))
-    ro.observe(scrollEl)
-    return () => {
-      scrollEl.removeEventListener('scroll', onScroll)
-      ro.disconnect()
-    }
+    parent.addEventListener('scroll', check, { passive: true })
+    return () => parent.removeEventListener('scroll', check)
   }, [])
 
   return (
-    <Box ref={navRef} sx={{ position: 'sticky', top: 0, alignSelf: 'flex-start', flexShrink: 0, pt: 0.5 }}>
-      {NAV_TABS.map(({ id, label, Icon }) => {
-        const isActive = active === id
-        return (
-          <Tooltip key={id} title={compact ? label : ''} placement="left" arrow>
-            <Box
-              onClick={() => document.getElementById(`cov-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-              sx={{
-                display: 'flex', alignItems: 'center',
-                gap: compact ? 0 : 1.25,
-                pl: 1.5, pr: compact ? 1 : 2, py: 0.875,
-                cursor: 'pointer',
-                borderLeft: `3px solid ${isActive ? TEAL : 'transparent'}`,
-                bgcolor: isActive ? 'rgba(29,159,159,0.08)' : 'transparent',
-                borderRadius: '0 4px 4px 0',
-                transition: 'background-color 0.15s ease',
-                userSelect: 'none',
-                width: compact ? 44 : 'auto',
-                '&:hover': { bgcolor: isActive ? 'rgba(29,159,159,0.12)' : 'rgba(0,0,0,0.04)' },
-              }}
-            >
-              <Icon sx={{ fontSize: 18, color: isActive ? TEAL : '#757575', flexShrink: 0 }} />
-              {!compact && (
-                <Typography sx={{ fontSize: 14, fontWeight: isActive ? 700 : 400, color: isActive ? '#212121' : '#424242', whiteSpace: 'nowrap' }}>
-                  {label}
-                </Typography>
-              )}
-            </Box>
-          </Tooltip>
-        )
-      })}
+    <Box ref={ref} sx={{
+      position: 'sticky', top: 0, zIndex: 10,
+      bgcolor: '#F5F5F5', py: 1.25,
+      boxShadow: isSticky ? '0 2px 8px rgba(0,0,0,0.10)' : 'none',
+      transition: 'box-shadow 0.2s ease',
+    }}>
+      <ToggleButtonGroup
+        value={active} exclusive
+        onChange={(_, val) => {
+          if (!val) return
+          setActive(val)
+          document.getElementById(val)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }}
+        sx={{
+          '& .MuiToggleButton-root': {
+            py: 0.75, px: 2, fontSize: 14, fontWeight: 400,
+            textTransform: 'none', letterSpacing: 0,
+            color: '#212121', bgcolor: 'transparent', borderColor: '#9E9E9E', borderRadius: 0,
+            whiteSpace: 'nowrap',
+            '&:first-of-type': { borderRadius: '4px 0 0 4px' },
+            '&:last-of-type':  { borderRadius: '0 4px 4px 0' },
+            '&.Mui-selected': {
+              bgcolor: 'rgba(29,159,159,0.12)', color: '#212121', borderColor: '#00827F',
+              '&:hover': { bgcolor: 'rgba(29,159,159,0.18)' },
+            },
+            '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' },
+          },
+        }}
+      >
+        {items.map(item => (
+          <ToggleButton key={item.id} value={item.id} disableRipple={false}>
+            {item.label}
+          </ToggleButton>
+        ))}
+      </ToggleButtonGroup>
     </Box>
   )
 }
@@ -735,17 +724,15 @@ function TrendingContent() {
 
 // ── main export ───────────────────────────────────────────────────────────────
 
-export default function CoverageTabContent({ loading }) {
+export default function CoverageTabContent({ onDashboardSave, loading }) {
   if (loading) return null
   return (
-    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
-      <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 3 }}>
-        <Box id="cov-mentions"><MentionsContent /></Box>
-        <Box id="cov-engagement"><EngagementContent /></Box>
-        <Box id="cov-locations"><LocationsContent /></Box>
-        <Box id="cov-trending"><TrendingContent /></Box>
-      </Box>
-      <AnchorNav />
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+      <StickySegmentNav items={NAV_SECTIONS} />
+      <Box id="cov-mentions"><MentionsContent /></Box>
+      <Box id="cov-engagement" sx={{ mt: 1.5 }}><EngagementContent /></Box>
+      <Box id="cov-locations" sx={{ mt: 1.5 }}><LocationsContent /></Box>
+      <Box id="cov-trending" sx={{ mt: 1.5 }}><TrendingContent /></Box>
     </Box>
   )
 }
