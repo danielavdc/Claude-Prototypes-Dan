@@ -2,12 +2,7 @@ import { Box, Typography, Chip } from '@mui/material'
 import TrendingUpIcon from '@mui/icons-material/TrendingUp'
 import TrendingDownIcon from '@mui/icons-material/TrendingDown'
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
-import WidgetCard, { SegmentNav, HBar } from './WidgetCard'
-
-const SECTIONS = [
-  { id: 'nar-topics', label: 'Topic Analysis' },
-  { id: 'nar-keywords', label: 'Keywords' },
-]
+import WidgetCard, { HBar } from './WidgetCard'
 
 const CLUSTERS = [
   { label: 'Business & Packaging — Discussing containers and business impacts, the press actively discusses and evaluates their economic outcomes and industry consequences.', mentions: '1.5k' },
@@ -88,9 +83,7 @@ export default function NarrativeTabContent({ loading }) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
 
-      <SegmentNav items={SECTIONS} />
-
-      <Box id="nar-topics" sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+<Box id="nar-topics" sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <WidgetCard title="AI-Powered Clusters">
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1.5 }}>
           <AutoAwesomeIcon sx={{ fontSize: 14, color: '#9C4DD6' }} />

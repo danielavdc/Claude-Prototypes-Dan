@@ -1,13 +1,5 @@
 import { Box, Typography, Chip } from '@mui/material'
-import WidgetCard, { SegmentNav, MetricBlock, MiniLineChart } from './WidgetCard'
-
-const SECTIONS = [
-  { id: 'sent-overview', label: 'Overview' },
-  { id: 'sent-source', label: 'By Source' },
-  { id: 'sent-emotions', label: 'Emotions' },
-  { id: 'sent-keywords', label: 'Keywords' },
-  { id: 'sent-mentions', label: 'Top Mentions' },
-]
+import WidgetCard, { MetricBlock, MiniLineChart } from './WidgetCard'
 
 const SENTIMENT_DONUT = [
   { label: 'Positive', pct: 58, color: '#4CAF50' },
@@ -103,9 +95,7 @@ export default function SentimentTabContent({ loading }) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
 
-      <SegmentNav items={SECTIONS} />
-
-      <Box id="sent-overview" sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+<Box id="sent-overview" sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <WidgetCard title="Sentiment Distribution">
         <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>

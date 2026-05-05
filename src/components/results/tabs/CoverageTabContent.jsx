@@ -21,10 +21,8 @@ const GREEN  = '#4CAF50'
 const RED    = '#F44336'
 
 const NAV_SECTIONS = [
-  { id: 'cov-mentions',   label: 'Mentions' },
-  { id: 'cov-engagement', label: 'Engagement' },
-  { id: 'cov-locations',  label: 'Locations' },
-  { id: 'cov-trending',   label: 'Trending sources' },
+  { id: 'mentions-engagement', label: 'Mentions and Engagement' },
+  { id: 'locations-sources',   label: 'Locations and Sources' },
 ]
 
 const X_LABELS = ['Aug 25', 'Aug 26', 'Aug 27', 'Aug 28', 'Aug 29', 'Aug 30', 'Aug 31']
@@ -272,8 +270,7 @@ function MiniSparkline({ data, up }) {
 
 // ── sticky segment nav ────────────────────────────────────────────────────────
 
-function StickySegmentNav({ items }) {
-  const [active, setActive] = useState(items[0]?.id || '')
+function StickySegmentNav({ items, value, onChange }) {
   const [isSticky, setIsSticky] = useState(false)
   const ref = useRef(null)
 
@@ -304,12 +301,8 @@ function StickySegmentNav({ items }) {
       transition: 'box-shadow 0.2s ease',
     }}>
       <ToggleButtonGroup
-        value={active} exclusive
-        onChange={(_, val) => {
-          if (!val) return
-          setActive(val)
-          document.getElementById(val)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-        }}
+        value={value} exclusive
+        onChange={(_, val) => { if (val) onChange(val) }}
         sx={{
           '& .MuiToggleButton-root': {
             py: 0.75, px: 2, fontSize: 14, fontWeight: 400,
@@ -336,39 +329,47 @@ function StickySegmentNav({ items }) {
   )
 }
 
+// ── shared ai insight ─────────────────────────────────────────────────────────
+
+function AIInsightWidget() {
+  return (
+    <Box sx={{ p: '1.5px', borderRadius: 2, background: 'linear-gradient(135deg, #9C4DD6 0%, #CF2D8A 40%, #1D9F9F 100%)' }}>
+      <Box sx={{ bgcolor: 'background.paper', borderRadius: '6px', p: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+            <AutoAwesomeIcon sx={{ fontSize: 16, color: '#9C4DD6' }} />
+            <Typography sx={{ fontSize: 13, fontWeight: 700, background: 'linear-gradient(90deg, #9C4DD6 0%, #CF2D8A 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+              AI-Powered Insight
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', gap: 0.5 }}>
+            <IconButton size="small" sx={{ p: 0.5 }}><ThumbUpOffAltIcon sx={{ fontSize: 18, color: 'text.secondary' }} /></IconButton>
+            <IconButton size="small" sx={{ p: 0.5 }}><ThumbDownOffAltIcon sx={{ fontSize: 18, color: 'text.secondary' }} /></IconButton>
+            <IconButton size="small" sx={{ p: 0.5 }}><ContentCopyIcon sx={{ fontSize: 18, color: 'text.secondary' }} /></IconButton>
+          </Box>
+        </Box>
+        <Box component="ul" sx={{ m: 0, pl: 2.5, mb: 1.5 }}>
+          {[
+            'Mention volume surged 37% on Aug 28 — driven primarily by Online News (45%) and X (28%), coinciding with the new product announcement. 1, 2, 3',
+            'Tier 1 premium outlets account for 92% of reach, with The Washington Post, CNN and NYT leading coverage, indicating strong mainstream media traction. 4, 5',
+            'Sustainability and zero-sugar keywords are gaining momentum week-over-week, suggesting an emerging narrative shift worth tracking. 6, 7, 8…',
+          ].map((t, i) => (
+            <Typography key={i} component="li" sx={{ fontSize: 14, lineHeight: '22px', color: '#212121', mb: 0.75 }}>{t}</Typography>
+          ))}
+        </Box>
+        <Typography sx={{ fontSize: 14, fontWeight: 700, color: TEAL, cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}>View More Insights</Typography>
+      </Box>
+    </Box>
+  )
+}
+
 // ── mentions tab ──────────────────────────────────────────────────────────────
 
 function MentionsContent() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
 
-      <Box sx={{ p: '1.5px', borderRadius: 2, background: 'linear-gradient(135deg, #9C4DD6 0%, #CF2D8A 40%, #1D9F9F 100%)' }}>
-        <Box sx={{ bgcolor: 'background.paper', borderRadius: '6px', p: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-              <AutoAwesomeIcon sx={{ fontSize: 16, color: '#9C4DD6' }} />
-              <Typography sx={{ fontSize: 13, fontWeight: 700, background: 'linear-gradient(90deg, #9C4DD6 0%, #CF2D8A 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                AI-Powered Insight
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', gap: 0.5 }}>
-              <IconButton size="small" sx={{ p: 0.5 }}><ThumbUpOffAltIcon sx={{ fontSize: 18, color: 'text.secondary' }} /></IconButton>
-              <IconButton size="small" sx={{ p: 0.5 }}><ThumbDownOffAltIcon sx={{ fontSize: 18, color: 'text.secondary' }} /></IconButton>
-              <IconButton size="small" sx={{ p: 0.5 }}><ContentCopyIcon sx={{ fontSize: 18, color: 'text.secondary' }} /></IconButton>
-            </Box>
-          </Box>
-          <Box component="ul" sx={{ m: 0, pl: 2.5, mb: 1.5 }}>
-            {[
-              'Mention volume surged 37% on Aug 28 — driven primarily by Online News (45%) and X (28%), coinciding with the new product announcement. 1, 2, 3',
-              'Tier 1 premium outlets account for 92% of reach, with The Washington Post, CNN and NYT leading coverage, indicating strong mainstream media traction. 4, 5',
-              'Sustainability and zero-sugar keywords are gaining momentum week-over-week, suggesting an emerging narrative shift worth tracking. 6, 7, 8…',
-            ].map((t, i) => (
-              <Typography key={i} component="li" sx={{ fontSize: 14, lineHeight: '22px', color: '#212121', mb: 0.75 }}>{t}</Typography>
-            ))}
-          </Box>
-          <Typography sx={{ fontSize: 14, fontWeight: 700, color: TEAL, cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}>View More Insights</Typography>
-        </Box>
-      </Box>
+      <AIInsightWidget />
 
       <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2 }}>
         <WidgetHeader title="Mentions Trend" />
@@ -725,14 +726,24 @@ function TrendingContent() {
 // ── main export ───────────────────────────────────────────────────────────────
 
 export default function CoverageTabContent({ onDashboardSave, loading }) {
+  const [activeTab, setActiveTab] = useState('mentions-engagement')
   if (loading) return null
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-      <StickySegmentNav items={NAV_SECTIONS} />
-      <Box id="cov-mentions"><MentionsContent /></Box>
-      <Box id="cov-engagement" sx={{ mt: 1.5 }}><EngagementContent /></Box>
-      <Box id="cov-locations" sx={{ mt: 1.5 }}><LocationsContent /></Box>
-      <Box id="cov-trending" sx={{ mt: 1.5 }}><TrendingContent /></Box>
+      <StickySegmentNav items={NAV_SECTIONS} value={activeTab} onChange={setActiveTab} />
+      {activeTab === 'mentions-engagement' && (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          <MentionsContent />
+          <EngagementContent />
+        </Box>
+      )}
+      {activeTab === 'locations-sources' && (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          <AIInsightWidget />
+          <LocationsContent />
+          <TrendingContent />
+        </Box>
+      )}
     </Box>
   )
 }
