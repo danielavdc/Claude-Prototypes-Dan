@@ -1,4 +1,8 @@
-import { Box, Typography, Paper, Divider, IconButton, ToggleButton, ToggleButtonGroup } from '@mui/material'
+import { Box, Typography, Paper, Divider, IconButton, Tooltip } from '@mui/material'
+import ShowChartIcon from '@mui/icons-material/ShowChart'
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder'
+import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined'
+import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
@@ -22,10 +26,10 @@ const GREEN  = '#4CAF50'
 const COLORS = [TEAL, PURPLE, PINK, ORANGE, BLUE, GREEN]
 
 const NAV_SECTIONS = [
-  { id: 'cov-mentions',   label: 'Mentions' },
-  { id: 'cov-engagement', label: 'Engagement' },
-  { id: 'cov-locations',  label: 'Locations' },
-  { id: 'cov-sources',    label: 'Trending sources' },
+  { id: 'cov-mentions',   label: 'Mentions',         Icon: ShowChartIcon },
+  { id: 'cov-engagement', label: 'Engagement',       Icon: FavoriteBorderIcon },
+  { id: 'cov-locations',  label: 'Locations',        Icon: LocationOnOutlinedIcon },
+  { id: 'cov-sources',    label: 'Trending sources', Icon: ArticleOutlinedIcon },
 ]
 
 // ── mock data ────────────────────────────────────────────────────────────────
@@ -120,79 +124,88 @@ const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 
-function StickySegmentNav({ items }) {
+function AnchorNav({ items }) {
   const [active, setActive] = useState(items[0]?.id || '')
-  const [isSticky, setIsSticky] = useState(false)
-  const ref = useRef(null)
+  const [compact, setCompact] = useState(false)
+  const navRef = useRef(null)
 
   useEffect(() => {
-    const el = ref.current
+    const el = navRef.current
     if (!el) return
-    let parent = el.parentElement
-    while (parent && parent !== document.body) {
-      const s = window.getComputedStyle(parent)
+    // Find the scrollable ancestor (the right panel)
+    let scrollEl = el.parentElement
+    while (scrollEl && scrollEl !== document.body) {
+      const s = window.getComputedStyle(scrollEl)
       if (s.overflow === 'auto' || s.overflowY === 'auto' || s.overflow === 'scroll' || s.overflowY === 'scroll') break
-      parent = parent.parentElement
+      scrollEl = scrollEl.parentElement
     }
-    if (!parent || parent === document.body) return
-    const check = () => {
-      const r = el.getBoundingClientRect()
-      const p = parent.getBoundingClientRect()
-      setIsSticky(r.top <= p.top + 1)
+    if (!scrollEl || scrollEl === document.body) return
+
+    // Highlight the section currently in view
+    const onScroll = () => {
+      const containerTop = scrollEl.getBoundingClientRect().top
+      let current = items[0]?.id
+      for (const { id } of items) {
+        const sEl = document.getElementById(id)
+        if (!sEl) continue
+        if (sEl.getBoundingClientRect().top - containerTop < 80) current = id
+      }
+      setActive(current)
     }
-    parent.addEventListener('scroll', check, { passive: true })
-    return () => parent.removeEventListener('scroll', check)
-  }, [])
+    scrollEl.addEventListener('scroll', onScroll, { passive: true })
+
+    // Switch between full/compact based on scroll container width
+    const ro = new ResizeObserver(([entry]) => {
+      setCompact(entry.contentRect.width < 620)
+    })
+    ro.observe(scrollEl)
+
+    return () => {
+      scrollEl.removeEventListener('scroll', onScroll)
+      ro.disconnect()
+    }
+  }, [items])
 
   return (
-    <Box ref={ref} sx={{
-      position: 'sticky',
-      top: 0,
-      zIndex: 10,
-      bgcolor: '#F5F5F5',
-      py: 1.25,
-      boxShadow: isSticky ? '0 2px 8px rgba(0,0,0,0.10)' : 'none',
-      transition: 'box-shadow 0.2s ease',
-    }}>
-      <ToggleButtonGroup
-        value={active}
-        exclusive
-        onChange={(_, val) => {
-          if (!val) return
-          setActive(val)
-          document.getElementById(val)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-        }}
-        sx={{
-          '& .MuiToggleButton-root': {
-            py: 0.75,
-            px: 2,
-            fontSize: 14,
-            fontWeight: 400,
-            textTransform: 'none',
-            letterSpacing: 0,
-            color: '#212121',
-            bgcolor: 'transparent',
-            borderColor: '#9E9E9E',
-            borderRadius: 0,
-            whiteSpace: 'nowrap',
-            '&:first-of-type': { borderRadius: '4px 0 0 4px' },
-            '&:last-of-type':  { borderRadius: '0 4px 4px 0' },
-            '&.Mui-selected': {
-              bgcolor: 'rgba(29,159,159,0.12)',
-              color: '#212121',
-              borderColor: '#00827F',
-              '&:hover': { bgcolor: 'rgba(29,159,159,0.18)' },
-            },
-            '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' },
-          },
-        }}
-      >
-        {items.map(item => (
-          <ToggleButton key={item.id} value={item.id} disableRipple={false}>
-            {item.label}
-          </ToggleButton>
-        ))}
-      </ToggleButtonGroup>
+    <Box ref={navRef} sx={{ position: 'sticky', top: 0, alignSelf: 'flex-start', flexShrink: 0, pt: 0.5 }}>
+      {items.map(({ id, label, Icon }) => {
+        const isActive = active === id
+        return (
+          <Tooltip key={id} title={compact ? label : ''} placement="left" arrow>
+            <Box
+              onClick={() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: compact ? 0 : 1.25,
+                pl: 1.5,
+                pr: compact ? 1 : 2,
+                py: 0.875,
+                cursor: 'pointer',
+                borderLeft: `3px solid ${isActive ? TEAL : 'transparent'}`,
+                bgcolor: isActive ? 'rgba(29,159,159,0.08)' : 'transparent',
+                borderRadius: '0 4px 4px 0',
+                transition: 'background-color 0.15s ease',
+                userSelect: 'none',
+                width: compact ? 44 : 'auto',
+                '&:hover': { bgcolor: isActive ? 'rgba(29,159,159,0.12)' : 'rgba(0,0,0,0.04)' },
+              }}
+            >
+              <Icon sx={{ fontSize: 18, color: isActive ? TEAL : '#757575', flexShrink: 0 }} />
+              {!compact && (
+                <Typography sx={{
+                  fontSize: 14,
+                  fontWeight: isActive ? 700 : 400,
+                  color: isActive ? '#212121' : '#424242',
+                  whiteSpace: 'nowrap',
+                }}>
+                  {label}
+                </Typography>
+              )}
+            </Box>
+          </Tooltip>
+        )
+      })}
     </Box>
   )
 }
@@ -320,10 +333,10 @@ const X_LABELS_DAILY = ['Aug 25', 'Aug 26', 'Aug 27', 'Aug 28', 'Aug 29', 'Aug 3
 export default function CoverageTabContent({ onDashboardSave, loading }) {
   if (loading) return null
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
 
-      {/* ── Sticky floating segment nav ───────────────────────────────────── */}
-      <StickySegmentNav items={NAV_SECTIONS} />
+      {/* ── Content column ───────────────────────────────────────────────── */}
+      <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
 
       {/* ── AI Insights ──────────────────────────────────────────────────── */}
       <Box sx={{ p: '1.5px', borderRadius: 2, background: 'linear-gradient(135deg, #9C4DD6 0%, #CF2D8A 40%, #1D9F9F 100%)' }}>
@@ -652,6 +665,11 @@ export default function CoverageTabContent({ onDashboardSave, loading }) {
         </Paper>
 
       </Box>
+
+      </Box>{/* end content column */}
+
+      {/* ── Anchor nav ───────────────────────────────────────────────────── */}
+      <AnchorNav items={NAV_SECTIONS} />
 
     </Box>
   )
