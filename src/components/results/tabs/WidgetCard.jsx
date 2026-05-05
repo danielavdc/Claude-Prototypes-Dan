@@ -4,10 +4,11 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 
 export default function WidgetCard({ title, children, height, action, noPad }) {
+  const fillHeight = height === '100%'
   return (
-    <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: noPad ? 0 : 2, height }}>
+    <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: noPad ? 0 : 2, height, ...(fillHeight && { display: 'flex', flexDirection: 'column' }) }}>
       {title && (
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5, px: noPad ? 2 : 0, pt: noPad ? 2 : 0 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5, px: noPad ? 2 : 0, pt: noPad ? 2 : 0, flexShrink: 0 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
             <Typography sx={{ fontSize: 16, fontWeight: 700, color: '#212121' }}>{title}</Typography>
             <InfoOutlinedIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
@@ -18,7 +19,9 @@ export default function WidgetCard({ title, children, height, action, noPad }) {
           </Box>
         </Box>
       )}
-      {children}
+      <Box sx={{ ...(fillHeight && { flex: 1, display: 'flex', flexDirection: 'column' }) }}>
+        {children}
+      </Box>
     </Paper>
   )
 }

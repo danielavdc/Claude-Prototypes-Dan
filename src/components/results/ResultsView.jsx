@@ -40,6 +40,7 @@ import NarrativeTabContent from './tabs/NarrativeTabContent'
 import SentimentTabContent from './tabs/SentimentTabContent'
 import AudienceTabContent from './tabs/AudienceTabContent'
 import OverviewTabContent from './tabs/OverviewTabContent'
+import VisualAnalysisTabContent from './tabs/VisualAnalysisTabContent'
 
 function ResultsView({ query, brandName, loading, resultCount = 107, onDashboardSave, onWidgetInsight, activeTab }) {
   const [exportModalOpen, setExportModalOpen] = useState(false)
@@ -242,8 +243,10 @@ function ResultsView({ query, brandName, loading, resultCount = 107, onDashboard
         {/* Filtered mentions overlay panel */}
         <FilteredMentionsPanel filter={filteredMentions} onClose={() => setFilteredMentions(null)} />
         <SpikeAnalysisPanel spike={spikeAnalysis} onClose={() => setSpikeAnalysis(null)} />
-        {activeTab === 5 ? (
+        {activeTab === 6 ? (
           <MediaContactsPanel onDashboardSave={onDashboardSave} />
+        ) : activeTab === 5 ? (
+          <VisualAnalysisTabContent loading={loading} />
         ) : activeTab === 1 ? (
           <CoverageTabContent loading={loading} onDashboardSave={onDashboardSave} />
         ) : activeTab === 2 ? (

@@ -3,11 +3,12 @@ export const INDUSTRY_STEPS = ['Industry', 'Key topics', 'Source types', 'Your s
 export const LANGUAGES = ['English', 'Spanish', 'French', 'German', 'Portuguese', 'Italian', 'Japanese', 'Chinese']
 export const SOURCE_TYPES = ['Online News', 'Print', 'Broadcast', 'Blogs', 'Forums', 'Twitter / X', 'Instagram']
 export const TABS = [
-  { label: 'Overview', description: "What's Happening?" },
-  { label: 'Coverage', description: 'How Much and Where?' },
-  { label: 'Narrative', description: "What's the Story?" },
-  { label: 'Sentiment', description: "What's the Tone?" },
-  { label: 'Audience', description: "Who's Driving It?" },
+  { label: 'Overview',         description: "What's Happening?" },
+  { label: 'Coverage',         description: 'How Much and Where?' },
+  { label: 'Narrative',        description: "What's the Story?" },
+  { label: 'Sentiment',        description: "What's the Tone?" },
+  { label: 'Audience',         description: "Who's Driving It?" },
+  { label: 'Visual Analysis',  description: "What Do Images Show?" },
 ]
 
 export const MIRA_MESSAGES = {

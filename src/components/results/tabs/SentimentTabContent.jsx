@@ -146,8 +146,8 @@ function SentimentTrendChart() {
   const padL = 36, padB = 20, padT = 8, chartW = w - padL - 16, chartH = h - padB - padT
 
   return (
-    <Box>
-      <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="xMidYMid meet" style={{ display: 'block' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+      <svg width="100%" height="100%" viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="xMidYMid meet" style={{ display: 'block', flex: 1 }}>
         {/* Y-axis labels + grid */}
         {labels.map(v => {
           const y = padT + (1 - v / maxVal) * chartH
@@ -346,12 +346,16 @@ export default function SentimentTabContent({ loading }) {
 
       {/* Sentiment + Sentiment Trend side by side */}
       <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
-        <WidgetCard title="Sentiment">
-          <SentimentDonut />
-        </WidgetCard>
-        <WidgetCard title="Sentiment Trend">
-          <SentimentTrendChart />
-        </WidgetCard>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <WidgetCard title="Sentiment">
+            <SentimentDonut />
+          </WidgetCard>
+        </Box>
+        <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+          <WidgetCard title="Sentiment Trend" height="100%">
+            <SentimentTrendChart />
+          </WidgetCard>
+        </Box>
       </Box>
 
       {/* Sentiment by Source Type */}
