@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Box, Typography, IconButton, Paper } from '@mui/material'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
@@ -26,6 +27,32 @@ export function SectionHeader({ children }) {
   return (
     <Box sx={{ mt: 0.5, pb: 0.5, borderBottom: '2px solid #e0e0e0' }}>
       <Typography sx={{ fontSize: 17, fontWeight: 700, color: '#212121', pb: 0.5 }}>{children}</Typography>
+    </Box>
+  )
+}
+
+export function SegmentNav({ items }) {
+  const [active, setActive] = useState(items[0]?.id || '')
+  const handleClick = (id) => {
+    setActive(id)
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+  return (
+    <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap', pb: 1.5, borderBottom: '1px solid #e0e0e0', mb: 0.5 }}>
+      {items.map((item) => (
+        <Box key={item.id} onClick={() => handleClick(item.id)} sx={{
+          px: 2, py: 0.75, border: '1px solid',
+          borderColor: active === item.id ? '#1D9F9F' : '#e0e0e0',
+          borderRadius: 0.5, cursor: 'pointer',
+          bgcolor: active === item.id ? 'rgba(29,159,159,0.06)' : 'white',
+          color: active === item.id ? '#1D9F9F' : '#424242',
+          fontSize: 14, fontWeight: active === item.id ? 700 : 400,
+          userSelect: 'none', transition: 'all 0.15s ease',
+          '&:hover': { borderColor: '#1D9F9F', color: '#1D9F9F' },
+        }}>
+          {item.label}
+        </Box>
+      ))}
     </Box>
   )
 }

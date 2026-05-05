@@ -39,6 +39,7 @@ import CoverageTabContent from './tabs/CoverageTabContent'
 import NarrativeTabContent from './tabs/NarrativeTabContent'
 import SentimentTabContent from './tabs/SentimentTabContent'
 import AudienceTabContent from './tabs/AudienceTabContent'
+import OverviewTabContent from './tabs/OverviewTabContent'
 
 function ResultsView({ query, brandName, loading, resultCount = 107, onDashboardSave, onWidgetInsight, activeTab }) {
   const [exportModalOpen, setExportModalOpen] = useState(false)
@@ -234,8 +235,8 @@ function ResultsView({ query, brandName, loading, resultCount = 107, onDashboard
       </Box>
 
       {/* Right: AI Insight + chart */}
-      <Box sx={{ flex: 1, minWidth: 350, display: 'flex', flexDirection: 'column', gap: 1.5, overflow: 'auto', pt: 2, pb: 2, position: 'relative' }}>
-        <Typography sx={{ fontSize: 20, fontWeight: 700, color: '#212121', px: 0.5 }}>
+      <Box sx={{ flex: 1, minWidth: 350, display: 'flex', flexDirection: 'column', gap: 1.5, overflow: 'auto', pt: 0, pb: 2, position: 'relative' }}>
+        <Typography sx={{ fontSize: 20, fontWeight: 700, color: '#212121', px: 0.5, pt: 2 }}>
           {TABS[activeTab]?.description || TABS[0].description}
         </Typography>
         {/* Filtered mentions overlay panel */}
@@ -299,48 +300,14 @@ function ResultsView({ query, brandName, loading, resultCount = 107, onDashboard
             )}
           </Box>
         </Box>
-
-        {/* Mentions Trend card */}
-        <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2, height: 429 }}>
-          {loading ? (
-            <Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 2 }}>
-                <Typography sx={{ fontSize: 16, fontWeight: 700, color: '#212121' }}>Mentions Trend</Typography>
-                <InfoOutlinedIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
-              </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200 }}>
-                <CircularProgress size={36} thickness={2} sx={{ color: 'primary.main' }} />
-              </Box>
-            </Box>
-          ) : (
-            <MentionsTrendChart brandName={brandName} resultCount={resultCount} onDashboardSave={onDashboardSave} onDataPointClick={(filter) => { setFilteredMentions(filter); setSpikeAnalysis(null) }} onViewMoreInsights={(spike) => { setSpikeAnalysis(spike); setFilteredMentions(null) }} onWidgetInsight={onWidgetInsight} />
-          )}
-        </Paper>
-
-        {/* Topic Clusters card */}
         {!loading && (
-          <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2 }}>
-            <TopicClustersChart onDashboardSave={onDashboardSave} onDataPointClick={(filter) => { setFilteredMentions(filter); setSpikeAnalysis(null) }} onWidgetInsight={onWidgetInsight} />
-          </Paper>
-        )}
-
-        {/* Top Keywords and Entities card */}
-        {!loading && (
-          <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2 }}>
-            <TopKeywordsChart onDashboardSave={onDashboardSave} onDataPointClick={(filter) => { setFilteredMentions(filter); setSpikeAnalysis(null) }} onWidgetInsight={onWidgetInsight} />
-          </Paper>
-        )}
-
-        {/* Locations + Sentiment side by side */}
-        {!loading && (
-          <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
-            <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2, flex: 1, minWidth: 300 }}>
-              <LocationsChart onDashboardSave={onDashboardSave} onDataPointClick={(filter) => { setFilteredMentions(filter); setSpikeAnalysis(null) }} onWidgetInsight={onWidgetInsight} />
-            </Paper>
-            <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2, flex: 1, minWidth: 300 }}>
-              <SentimentChart onDashboardSave={onDashboardSave} onDataPointClick={(filter) => { setFilteredMentions(filter); setSpikeAnalysis(null) }} onWidgetInsight={onWidgetInsight} />
-            </Paper>
-          </Box>
+          <OverviewTabContent
+            loading={loading}
+            onDashboardSave={onDashboardSave}
+            onWidgetInsight={onWidgetInsight}
+            onFilteredMentions={(filter) => { setFilteredMentions(filter); setSpikeAnalysis(null) }}
+            onSpikeAnalysis={(spike) => { setSpikeAnalysis(spike); setFilteredMentions(null) }}
+          />
         )}
         </>)}
       </Box>
