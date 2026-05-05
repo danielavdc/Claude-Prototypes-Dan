@@ -41,8 +41,9 @@ import SentimentTabContent from './tabs/SentimentTabContent'
 import AudienceTabContent from './tabs/AudienceTabContent'
 import OverviewTabContent from './tabs/OverviewTabContent'
 import VisualAnalysisTabContent from './tabs/VisualAnalysisTabContent'
+import SocialMediaInsightsTabContent from './tabs/SocialMediaInsightsTabContent'
 
-function ResultsView({ query, brandName, loading, resultCount = 107, onDashboardSave, onWidgetInsight, activeTab }) {
+function ResultsView({ query, brandName, loading, resultCount = 107, onDashboardSave, onWidgetInsight, activeTab, activeTabLabel }) {
   const [exportModalOpen, setExportModalOpen] = useState(false)
   const [leftWidth, setLeftWidth] = useState(520)
   const [isDragging, setIsDragging] = useState(false)
@@ -238,15 +239,19 @@ function ResultsView({ query, brandName, loading, resultCount = 107, onDashboard
       {/* Right: AI Insight + chart */}
       <Box sx={{ flex: 1, minWidth: 350, display: 'flex', flexDirection: 'column', gap: 1.5, overflow: 'auto', pt: 0, pb: 2, position: 'relative' }}>
         <Typography sx={{ fontSize: 20, fontWeight: 700, color: '#212121', px: 0.5, pt: 2 }}>
-          {TABS[activeTab]?.description || TABS[0].description}
+          {activeTabLabel === 'Visual Analysis' ? "What's the Visual Story?"
+            : activeTabLabel === 'Social Media Insights' ? "What's Trending on Social?"
+            : TABS[activeTab]?.description || TABS[0].description}
         </Typography>
         {/* Filtered mentions overlay panel */}
         <FilteredMentionsPanel filter={filteredMentions} onClose={() => setFilteredMentions(null)} />
         <SpikeAnalysisPanel spike={spikeAnalysis} onClose={() => setSpikeAnalysis(null)} />
-        {activeTab === 6 ? (
-          <MediaContactsPanel onDashboardSave={onDashboardSave} />
-        ) : activeTab === 5 ? (
+        {activeTabLabel === 'Social Media Insights' ? (
+          <SocialMediaInsightsTabContent loading={loading} />
+        ) : activeTabLabel === 'Visual Analysis' ? (
           <VisualAnalysisTabContent loading={loading} />
+        ) : activeTab === 5 ? (
+          <MediaContactsPanel onDashboardSave={onDashboardSave} />
         ) : activeTab === 1 ? (
           <CoverageTabContent loading={loading} onDashboardSave={onDashboardSave} />
         ) : activeTab === 2 ? (

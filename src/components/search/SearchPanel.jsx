@@ -87,6 +87,7 @@ function SearchPanel({
   setEditorExpanded,
   activeTab,
   setActiveTab,
+  onTabLabelChange,
   onSearch,
   onOpenPanel,
   onDashboardSave,
@@ -104,8 +105,17 @@ function SearchPanel({
   const [tabMenuAnchor, setTabMenuAnchor] = useState(null)
   const [pinTabAnchor, setPinTabAnchor] = useState(null)
   const [tabMenuTabIndex, setTabMenuTabIndex] = useState(null)
-  const [tabs, setTabs] = useState(TABS)
+  const [tabs, setTabs] = useState(() =>
+    TABS.map(t => ({ label: t.label, description: t.description }))
+  )
   const [removedTabs, setRemovedTabs] = useState([])
+
+  useEffect(() => {
+    const tab = tabs[activeTab]
+    const label = typeof tab === 'string' ? tab : tab?.label ?? ''
+    onTabLabelChange?.(label)
+  }, [activeTab, tabs])
+
   const [renameModalOpen, setRenameModalOpen] = useState(false)
   const [renameLabel, setRenameLabel] = useState('')
   const [renameDescription, setRenameDescription] = useState('')
@@ -687,7 +697,8 @@ function SearchPanel({
         <Box sx={{ display: 'flex', height: '100%', alignItems: 'stretch' }}>
           {tabs.map((tab, i) => {
             const label = typeof tab === 'string' ? tab : tab.label
-            const description = typeof tab === 'string' ? null : tab.description
+            const baseDescription = TABS.find(t => t.label === label)?.description
+            const description = baseDescription ?? (typeof tab === 'string' ? null : tab.description)
             const isActive = activeTab === i
             const isDragOver = dragOverIndex === i
             return (
@@ -750,11 +761,12 @@ function SearchPanel({
             <Box sx={{ px: 2, pt: 1.5, pb: 0.5 }}>
               <Typography sx={{ fontSize: 14, fontWeight: 700, color: 'text.primary' }}>Pin a New Tab</Typography>
             </Box>
-            {['Visual analysis', 'Social media insights']
+            {['Visual Analysis', 'Social Media Insights']
               .filter(item => !tabs.some(t => (typeof t === 'string' ? t : t.label) === item))
               .map((item) => (
                 <MenuItem key={item} onClick={() => {
-                  setTabs(prev => [...prev, { label: item, description: '' }])
+                  const ON_DEMAND_DESC = { 'Visual Analysis': "What's the Visual Story?", 'Social Media Insights': "What's Trending on Social?" }
+                  setTabs(prev => [...prev, { label: item, description: ON_DEMAND_DESC[item] || '' }])
                   setPinTabAnchor(null)
                   triggerSave()
                 }} sx={{ px: 2, py: 1.25, fontSize: 15, color: 'text.primary' }}>

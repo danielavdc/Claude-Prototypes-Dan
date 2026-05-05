@@ -8,7 +8,6 @@ export const TABS = [
   { label: 'Narrative',        description: "What's the Story?" },
   { label: 'Sentiment',        description: "What's the Tone?" },
   { label: 'Audience',         description: "Who's Driving It?" },
-  { label: 'Visual Analysis',  description: "What Do Images Show?" },
 ]
 
 export const MIRA_MESSAGES = {

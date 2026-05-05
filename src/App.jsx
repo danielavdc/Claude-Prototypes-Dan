@@ -57,6 +57,7 @@ export default function App() {
   const [step, setStep] = useState(0)
   const [booleanQuery, setBooleanQuery] = useState('alibaba')
   const [activeTab, setActiveTab] = useState(0)
+  const [activeTabLabel, setActiveTabLabel] = useState('')
   const [editorExpanded, setEditorExpanded] = useState(true)
   const [resultsLoading, setResultsLoading] = useState(false)
   const [appliedQueryVersion, setAppliedQueryVersion] = useState(0)
@@ -263,6 +264,7 @@ export default function App() {
                   setEditorExpanded={setEditorExpanded}
                   activeTab={activeTab}
                   setActiveTab={setActiveTab}
+                  onTabLabelChange={setActiveTabLabel}
                   onSearch={(q) => handleSearch(q)}
                   onOpenPanel={openPanel}
                   onDashboardSave={(name) => setDashboardBanner(name)}
@@ -314,7 +316,7 @@ export default function App() {
                     )}
                     </Box>
                   ) : (
-                    <ResultsView query={booleanQuery} brandName={brandState.brandName} loading={resultsLoading} resultCount={resultCount} onDashboardSave={(name) => setDashboardBanner(name)} onWidgetInsight={openWidgetInsight} activeTab={activeTab} />
+                    <ResultsView query={booleanQuery} brandName={brandState.brandName} loading={resultsLoading} resultCount={resultCount} onDashboardSave={(name) => setDashboardBanner(name)} onWidgetInsight={openWidgetInsight} activeTab={activeTab} activeTabLabel={activeTabLabel} />
                   )}
                 </Box>
               </>
