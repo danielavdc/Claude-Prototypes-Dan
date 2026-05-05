@@ -9,10 +9,11 @@ import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined'
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
 
-const TEAL  = '#1D9F9F'
-const BLUE  = '#2196F3'
-const PINK  = '#CF2D8A'
+const TEAL   = '#1D9F9F'
+const BLUE   = '#2196F3'
+const PINK   = '#CF2D8A'
 const YELLOW = '#FFC107'
+const ORANGE = '#FF9800'
 
 // ── mock data ─────────────────────────────────────────────────────────────────
 
@@ -80,8 +81,6 @@ const HASHTAGS = [
   { text: '#Real Estate Ma...', size: 14 }, { text: '#Desks', size: 22 }, { text: '#Gaming', size: 22 },
   { text: '#Office Sp...', size: 20 }, { text: '#Computers', size: 24 }, { text: '#Woven Baskets', size: 16 },
 ]
-
-const ORANGE = '#FF9800'
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
