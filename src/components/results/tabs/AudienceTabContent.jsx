@@ -1,5 +1,12 @@
 import { Box, Typography, Chip, Avatar } from '@mui/material'
-import WidgetCard, { SectionHeader, HBar } from './WidgetCard'
+import WidgetCard, { SegmentNav, HBar } from './WidgetCard'
+
+const SECTIONS = [
+  { id: 'aud-demographics', label: 'Demographics' },
+  { id: 'aud-interests', label: 'Interests' },
+  { id: 'aud-authors', label: 'Top Authors' },
+  { id: 'aud-sources', label: 'Sources' },
+]
 
 const AGE_GROUPS = [
   { label: '18–24', pct: 18 },
@@ -76,9 +83,9 @@ export default function AudienceTabContent({ loading }) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
 
-      {/* DEMOGRAPHICS */}
-      <SectionHeader>Demographics</SectionHeader>
+      <SegmentNav items={SECTIONS} />
 
+      <Box id="aud-demographics" sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <Box sx={{ display: 'flex', gap: 1.5 }}>
         <WidgetCard title="Age Distribution">
           <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 1, height: 140, pt: 1, mb: 1 }}>
@@ -106,9 +113,9 @@ export default function AudienceTabContent({ loading }) {
         </WidgetCard>
       </Box>
 
-      {/* PROFESSIONS & INTERESTS */}
-      <SectionHeader>Interests and Professions</SectionHeader>
+      </Box>
 
+      <Box id="aud-interests" sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <Box sx={{ display: 'flex', gap: 1.5 }}>
         <WidgetCard title="Top Professions">
           {PROFESSIONS.map((p, i) => (
@@ -122,9 +129,9 @@ export default function AudienceTabContent({ loading }) {
         </WidgetCard>
       </Box>
 
-      {/* AUTHORS */}
-      <SectionHeader>Top Authors</SectionHeader>
+      </Box>
 
+      <Box id="aud-authors" sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <WidgetCard title="Top Authors by Mentions">
         <Box sx={{ display: 'flex', mb: 0.5 }}>
           <Typography sx={{ fontSize: 12, fontWeight: 700, color: 'text.secondary', flex: 1 }}>Author</Typography>
@@ -151,9 +158,9 @@ export default function AudienceTabContent({ loading }) {
         <Typography sx={{ fontSize: 13, color: '#1D9F9F', cursor: 'pointer', mt: 1 }}>1 – 5 of 40 Authors &gt;</Typography>
       </WidgetCard>
 
-      {/* SOURCES */}
-      <SectionHeader>Source Distribution</SectionHeader>
+      </Box>
 
+      <Box id="aud-sources" sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <WidgetCard title="Audience by Source">
         <Box sx={{ display: 'flex', gap: 3, alignItems: 'center' }}>
           <Box sx={{ flex: 1 }}>
@@ -170,6 +177,7 @@ export default function AudienceTabContent({ loading }) {
           </Box>
         </Box>
       </WidgetCard>
+      </Box>
 
     </Box>
   )

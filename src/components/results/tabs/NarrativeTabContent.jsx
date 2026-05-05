@@ -2,7 +2,12 @@ import { Box, Typography, Chip } from '@mui/material'
 import TrendingUpIcon from '@mui/icons-material/TrendingUp'
 import TrendingDownIcon from '@mui/icons-material/TrendingDown'
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
-import WidgetCard, { SectionHeader, HBar } from './WidgetCard'
+import WidgetCard, { SegmentNav, HBar } from './WidgetCard'
+
+const SECTIONS = [
+  { id: 'nar-topics', label: 'Topic Analysis' },
+  { id: 'nar-keywords', label: 'Keywords' },
+]
 
 const CLUSTERS = [
   { label: 'Business & Packaging — Discussing containers and business impacts, the press actively discusses and evaluates their economic outcomes and industry consequences.', mentions: '1.5k' },
@@ -83,9 +88,9 @@ export default function NarrativeTabContent({ loading }) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
 
-      {/* TOPIC ANALYSIS */}
-      <SectionHeader>Topic Analysis</SectionHeader>
+      <SegmentNav items={SECTIONS} />
 
+      <Box id="nar-topics" sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <WidgetCard title="AI-Powered Clusters">
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1.5 }}>
           <AutoAwesomeIcon sx={{ fontSize: 14, color: '#9C4DD6' }} />
@@ -137,9 +142,9 @@ export default function NarrativeTabContent({ loading }) {
         <Typography sx={{ fontSize: 13, color: '#1D9F9F', cursor: 'pointer', mt: 1 }}>1 – 10 of 30 Topics &gt;</Typography>
       </WidgetCard>
 
-      {/* KEYWORDS */}
-      <SectionHeader>Keywords</SectionHeader>
+      </Box>
 
+      <Box id="nar-keywords" sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <WidgetCard title="Top Keywords and Entities">
         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1 }}>
           {['Keywords', 'Hashtag', 'Organisation', 'People'].map(f => (
@@ -179,6 +184,7 @@ export default function NarrativeTabContent({ loading }) {
         </Box>
         <Typography sx={{ fontSize: 13, color: '#1D9F9F', cursor: 'pointer', mt: 1 }}>1 – 10 of 38 &gt;</Typography>
       </WidgetCard>
+      </Box>
 
     </Box>
   )

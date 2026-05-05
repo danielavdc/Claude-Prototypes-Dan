@@ -1,5 +1,13 @@
 import { Box, Typography, Chip } from '@mui/material'
-import WidgetCard, { SectionHeader, MetricBlock, MiniLineChart, HBar } from './WidgetCard'
+import WidgetCard, { SegmentNav, MetricBlock, MiniLineChart } from './WidgetCard'
+
+const SECTIONS = [
+  { id: 'sent-overview', label: 'Overview' },
+  { id: 'sent-source', label: 'By Source' },
+  { id: 'sent-emotions', label: 'Emotions' },
+  { id: 'sent-keywords', label: 'Keywords' },
+  { id: 'sent-mentions', label: 'Top Mentions' },
+]
 
 const SENTIMENT_DONUT = [
   { label: 'Positive', pct: 58, color: '#4CAF50' },
@@ -95,9 +103,9 @@ export default function SentimentTabContent({ loading }) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
 
-      {/* OVERVIEW */}
-      <SectionHeader>Sentiment Overview</SectionHeader>
+      <SegmentNav items={SECTIONS} />
 
+      <Box id="sent-overview" sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <WidgetCard title="Sentiment Distribution">
         <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -122,9 +130,9 @@ export default function SentimentTabContent({ loading }) {
         </Box>
       </WidgetCard>
 
-      {/* BY SOURCE */}
-      <SectionHeader>Sentiment by Source</SectionHeader>
+      </Box>
 
+      <Box id="sent-source" sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <WidgetCard title="Sentiment by Source Type">
         <Box sx={{ display: 'flex', gap: 2, mb: 1.5 }}>
           {[{ label: 'Positive', color: '#4CAF50' }, { label: 'Neutral', color: '#9E9E9E' }, { label: 'Negative', color: '#F44336' }].map(s => (
@@ -143,9 +151,9 @@ export default function SentimentTabContent({ loading }) {
         ))}
       </WidgetCard>
 
-      {/* EMOTIONS */}
-      <SectionHeader>Emotional Analysis</SectionHeader>
+      </Box>
 
+      <Box id="sent-emotions" sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <WidgetCard title="Emotional Comparison">
         <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 1.5, height: 160, pt: 1 }}>
           {EMOTIONS.map((e, i) => (
@@ -158,9 +166,9 @@ export default function SentimentTabContent({ loading }) {
         </Box>
       </WidgetCard>
 
-      {/* KEYWORDS */}
-      <SectionHeader>Sentiment by Keywords</SectionHeader>
+      </Box>
 
+      <Box id="sent-keywords" sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <WidgetCard title="Keyword Sentiment">
         <Box sx={{ display: 'flex', gap: 2, mb: 1.5 }}>
           {[{ label: 'Positive', color: '#4CAF50' }, { label: 'Neutral', color: '#9E9E9E' }, { label: 'Negative', color: '#F44336' }].map(s => (
@@ -179,9 +187,9 @@ export default function SentimentTabContent({ loading }) {
         </Box>
       </WidgetCard>
 
-      {/* TOP MENTIONS */}
-      <SectionHeader>Top Mentions</SectionHeader>
+      </Box>
 
+      <Box id="sent-mentions" sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <WidgetCard title="Top Mentions by Sentiment">
         {TOP_MENTIONS.map((m, i) => (
           <Box key={i} sx={{ py: 1, borderBottom: i < TOP_MENTIONS.length - 1 ? '1px solid #f5f5f5' : 'none' }}>
@@ -198,6 +206,7 @@ export default function SentimentTabContent({ loading }) {
         ))}
         <Typography sx={{ fontSize: 13, color: '#1D9F9F', cursor: 'pointer', mt: 1 }}>1 – 4 of 30 Mentions &gt;</Typography>
       </WidgetCard>
+      </Box>
 
     </Box>
   )

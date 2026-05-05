@@ -266,7 +266,7 @@ function SearchPanel({
       'Science & Health Writers', 'EU Policy Reporters', 'Automotive Press',
       'Entertainment Beat', 'Finance Columnists', 'Startup & VC Writers',
     ],
-    'Media Lists': [
+    'Custom categories': [
       'Top Tier US Print', 'Broadcast National', 'Tech Trade Publications',
       'EMEA Tier 1', 'Financial Analysts', 'Healthcare Beat Reporters',
       'Sustainability & ESG', 'Podcast Hosts – Business', 'AP & Wire Services',
@@ -419,7 +419,7 @@ function SearchPanel({
                         'Saved Searches': <ManageSearchIcon sx={{ fontSize: '14px !important', color: '#616161' }} />,
                         'Custom Categories': <CategoryOutlinedIcon sx={{ fontSize: '14px !important', color: '#616161' }} />,
                         'Author Lists': <PeopleOutlineIcon sx={{ fontSize: '14px !important', color: '#616161' }} />,
-                        'Media Lists': <FormatListBulletedIcon sx={{ fontSize: '14px !important', color: '#616161' }} />,
+                        'Custom categories': <FormatListBulletedIcon sx={{ fontSize: '14px !important', color: '#616161' }} />,
                         'Filter Sets': <FilterListIcon sx={{ fontSize: '14px !important', color: '#616161' }} />,
                       }
                       return (
@@ -642,7 +642,7 @@ function SearchPanel({
                 />
               ))}
               <Chip
-                label={selectedMediaLists.length > 0 ? `Media Lists: ${selectedMediaLists[0]}${selectedMediaLists.length > 1 ? ` +${selectedMediaLists.length - 1}` : ''}` : 'Media Lists'}
+                label={selectedMediaLists.length > 0 ? `Custom categories: ${selectedMediaLists[0]}${selectedMediaLists.length > 1 ? ` +${selectedMediaLists.length - 1}` : ''}` : 'Custom categories'}
                 size="small" variant="outlined"
                 deleteIcon={<KeyboardArrowDownIcon sx={{ fontSize: '14px !important' }} />}
                 onDelete={() => {}}
@@ -1207,7 +1207,7 @@ function SearchPanel({
         {/* Manage Media Lists link */}
         <Box sx={{ px: 2, py: 1, display: 'flex', alignItems: 'center', gap: 0.75, cursor: 'pointer', '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' } }}>
           <OpenInNewIcon sx={{ fontSize: 18, color: '#00827F' }} />
-          <Typography sx={{ fontSize: 14, fontWeight: 600, color: '#00827F' }}>Manage Media Lists</Typography>
+          <Typography sx={{ fontSize: 14, fontWeight: 600, color: '#00827F' }}>Manage Custom categories</Typography>
         </Box>
 
         {/* List items */}
@@ -1282,7 +1282,7 @@ function SearchPanel({
           { icon: <ManageSearchIcon sx={{ fontSize: 20, color: '#616161' }} />, label: 'Saved Searches' },
           { icon: <CategoryOutlinedIcon sx={{ fontSize: 20, color: '#616161' }} />, label: 'Custom Categories' },
           { icon: <PeopleOutlineIcon sx={{ fontSize: 20, color: '#616161' }} />, label: 'Author Lists' },
-          { icon: <FormatListBulletedIcon sx={{ fontSize: 20, color: '#616161' }} />, label: 'Media Lists' },
+          { icon: <FormatListBulletedIcon sx={{ fontSize: 20, color: '#616161' }} />, label: 'Custom categories' },
           { icon: <FilterListIcon sx={{ fontSize: 20, color: '#616161' }} />, label: 'Filter Sets' },
         ].map((item) => (
           <MenuItem key={item.label} onClick={() => { setAssetsAnchor(null); setAssetsModalType(item.label) }} sx={{ height: 36, px: 2 }}>
