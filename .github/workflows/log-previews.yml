@@ -1,7 +1,8 @@
 name: Log preview URL
 
 on:
-  deployment_status:
+  issue_comment:
+    types: [created, edited]
 
 permissions:
   contents: write
@@ -13,7 +14,9 @@ concurrency:
 
 jobs:
   log:
-    if: github.event.deployment_status.state == 'success' && github.event.deployment.environment != 'production'
+    if: |
+      github.event.issue.pull_request &&
+      github.event.comment.user.login == 'cloudflare-workers-and-pages[bot]'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout main
@@ -21,54 +24,55 @@ jobs:
         with:
           ref: main
 
-      - name: Find PR for this deployment
-        id: pr
+      - name: Parse comment and gather data
+        id: parse
         uses: actions/github-script@v7
         with:
           script: |
-            const ref = context.payload.deployment.ref;
-            const sha = context.payload.deployment.sha;
-            const url = context.payload.deployment_status.environment_url;
+            const body = context.payload.comment.body;
+
+            if (!body.includes('Deployment successful')) {
+              core.info('Comment is not a successful deployment, skipping');
+              core.setOutput('skip', 'true');
+              return;
+            }
+
+            const branchUrlMatch = body.match(/\[Branch Preview URL\]\((https:\/\/[^\)]+)\)/);
+            const commitUrlMatch = body.match(/\[Commit Preview URL\]\((https:\/\/[^\)]+)\)/);
+            const url = branchUrlMatch?.[1] || commitUrlMatch?.[1];
 
             if (!url) {
-              core.info('No environment_url on deployment_status, skipping');
+              core.info('No preview URL found in comment, skipping');
               core.setOutput('skip', 'true');
               return;
             }
 
-            const { data: prs } = await github.rest.pulls.list({
+            const prNumber = context.payload.issue.number;
+            const { data: pr } = await github.rest.pulls.get({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              head: `${context.repo.owner}:${ref}`,
-              state: 'open',
+              pull_number: prNumber,
             });
 
-            if (prs.length === 0) {
-              core.info(`No open PR for branch ${ref}, skipping log`);
-              core.setOutput('skip', 'true');
-              return;
-            }
-
-            const pr = prs[0];
             core.setOutput('skip', 'false');
-            core.setOutput('number', pr.number);
+            core.setOutput('number', prNumber);
             core.setOutput('title', pr.title);
             core.setOutput('author', pr.user.login);
-            core.setOutput('branch', ref);
-            core.setOutput('sha', sha.substring(0, 7));
+            core.setOutput('branch', pr.head.ref);
+            core.setOutput('sha', pr.head.sha.substring(0, 7));
             core.setOutput('url', url);
             core.setOutput('date', new Date().toISOString().slice(0, 10));
 
       - name: Append row to previews.md
-        if: steps.pr.outputs.skip != 'true'
+        if: steps.parse.outputs.skip != 'true'
         env:
-          DATE: ${{ steps.pr.outputs.date }}
-          PR_NUM: ${{ steps.pr.outputs.number }}
-          PR_TITLE: ${{ steps.pr.outputs.title }}
-          AUTHOR: ${{ steps.pr.outputs.author }}
-          BRANCH: ${{ steps.pr.outputs.branch }}
-          SHA: ${{ steps.pr.outputs.sha }}
-          URL: ${{ steps.pr.outputs.url }}
+          DATE: ${{ steps.parse.outputs.date }}
+          PR_NUM: ${{ steps.parse.outputs.number }}
+          PR_TITLE: ${{ steps.parse.outputs.title }}
+          AUTHOR: ${{ steps.parse.outputs.author }}
+          BRANCH: ${{ steps.parse.outputs.branch }}
+          SHA: ${{ steps.parse.outputs.sha }}
+          URL: ${{ steps.parse.outputs.url }}
           REPO: ${{ github.repository }}
         run: |
           FILE=previews.md
@@ -86,13 +90,18 @@ jobs:
           SAFE_TITLE="${PR_TITLE//|/\\|}"
           SAFE_TITLE="${SAFE_TITLE//$'\n'/ }"
 
+          if grep -qF "| \`${SHA}\` | ${URL} |" "$FILE"; then
+            echo "Row already exists for this commit + URL, skipping"
+            exit 0
+          fi
+
           printf '| %s | [#%s](https://github.com/%s/pull/%s) %s | @%s | `%s` | `%s` | %s |\n' \
             "$DATE" "$PR_NUM" "$REPO" "$PR_NUM" "$SAFE_TITLE" "$AUTHOR" "$BRANCH" "$SHA" "$URL" >> "$FILE"
 
       - name: Commit and push
-        if: steps.pr.outputs.skip != 'true'
+        if: steps.parse.outputs.skip != 'true'
         env:
-          PR_NUM: ${{ steps.pr.outputs.number }}
+          PR_NUM: ${{ steps.parse.outputs.number }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
