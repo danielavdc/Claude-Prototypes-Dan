@@ -37,15 +37,34 @@ jobs:
               return;
             }
 
-            const branchUrlMatch = body.match(/\[Branch Preview URL\]\((https:\/\/[^\)]+)\)/);
-            const commitUrlMatch = body.match(/\[Commit Preview URL\]\((https:\/\/[^\)]+)\)/);
-            const url = branchUrlMatch?.[1] || commitUrlMatch?.[1];
+            core.info(`Comment body (first 2000 chars):\n${body.substring(0, 2000)}`);
+
+            const tryMatch = (...patterns) => {
+              for (const re of patterns) {
+                const m = body.match(re);
+                if (m) return m[1];
+              }
+              return null;
+            };
+
+            const url =
+              tryMatch(
+                /\[Branch Preview URL\]\(([^)]+)\)/,
+                /<a\s+[^>]*href=["']([^"']+)["'][^>]*>\s*Branch Preview URL\s*<\/a>/i,
+              ) ||
+              tryMatch(
+                /\[Commit Preview URL\]\(([^)]+)\)/,
+                /<a\s+[^>]*href=["']([^"']+)["'][^>]*>\s*Commit Preview URL\s*<\/a>/i,
+              ) ||
+              tryMatch(/(https:\/\/[a-z0-9-]+(?:\.[a-z0-9-]+)+\.workers\.dev[^\s<"')]*)/i);
 
             if (!url) {
               core.info('No preview URL found in comment, skipping');
               core.setOutput('skip', 'true');
               return;
             }
+
+            core.info(`Extracted preview URL: ${url}`);
 
             const prNumber = context.payload.issue.number;
             const { data: pr } = await github.rest.pulls.get({
