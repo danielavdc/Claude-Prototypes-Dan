@@ -95,27 +95,45 @@ jobs:
           REPO: ${{ github.repository }}
         run: |
           FILE=previews.md
-          if [ ! -f "$FILE" ]; then
+
+          # Initialize / migrate to HTML table format
+          if [ ! -f "$FILE" ] || ! grep -q '<table>' "$FILE"; then
             {
               echo '# Preview deployments'
               echo ''
-              echo 'Auto-logged on every successful Cloudflare preview deploy.'
+              echo 'Auto-logged on every successful Cloudflare preview deploy. One row per PR (latest deploy wins).'
               echo ''
-              echo '| Date | PR | Author | Branch | Commit | URL |'
-              echo '|------|-----|--------|--------|--------|-----|'
+              echo '<table>'
+              echo '<thead>'
+              echo '<tr>'
+              echo '<th width="110">Date</th>'
+              echo '<th width="360">PR</th>'
+              echo '<th width="140">Author</th>'
+              echo '<th width="180">Branch</th>'
+              echo '<th width="100">Commit</th>'
+              echo '<th width="420">URL</th>'
+              echo '</tr>'
+              echo '</thead>'
+              echo '<tbody>'
+              echo '</tbody>'
+              echo '</table>'
             } > "$FILE"
           fi
 
-          SAFE_TITLE="${PR_TITLE//|/\\|}"
+          # HTML-escape title (& must be first)
+          SAFE_TITLE="${PR_TITLE//&/&amp;}"
+          SAFE_TITLE="${SAFE_TITLE//</&lt;}"
+          SAFE_TITLE="${SAFE_TITLE//>/&gt;}"
+          SAFE_TITLE="${SAFE_TITLE//\"/&quot;}"
           SAFE_TITLE="${SAFE_TITLE//$'\n'/ }"
 
-          if grep -qF "| \`${SHA}\` | ${URL} |" "$FILE"; then
-            echo "Row already exists for this commit + URL, skipping"
-            exit 0
-          fi
+          NEW_ROW="<tr><td>${DATE}</td><td><a href=\"https://github.com/${REPO}/pull/${PR_NUM}\">#${PR_NUM}</a> ${SAFE_TITLE}</td><td>@${AUTHOR}</td><td><code>${BRANCH}</code></td><td><code>${SHA}</code></td><td><a href=\"${URL}\">${URL}</a></td></tr>"
 
-          printf '| %s | [#%s](https://github.com/%s/pull/%s) %s | @%s | `%s` | `%s` | %s |\n' \
-            "$DATE" "$PR_NUM" "$REPO" "$PR_NUM" "$SAFE_TITLE" "$AUTHOR" "$BRANCH" "$SHA" "$URL" >> "$FILE"
+          # Remove any existing row for this PR (matched via the /pull/N" href)
+          grep -v "/pull/${PR_NUM}\"" "$FILE" > "$FILE.tmp" && mv "$FILE.tmp" "$FILE"
+
+          # Insert the new row right before </tbody>
+          awk -v new="$NEW_ROW" '/<\/tbody>/ && !done {print new; done=1} {print}' "$FILE" > "$FILE.tmp" && mv "$FILE.tmp" "$FILE"
 
       - name: Commit and push
         if: steps.parse.outputs.skip != 'true'
