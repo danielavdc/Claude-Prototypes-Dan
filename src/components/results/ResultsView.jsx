@@ -239,9 +239,7 @@ function ResultsView({ query, brandName, loading, resultCount = 107, onDashboard
       {/* Right: AI Insight + chart */}
       <Box sx={{ flex: 1, minWidth: 350, display: 'flex', flexDirection: 'column', gap: 1.5, overflow: 'auto', pt: 0, pb: 2, position: 'relative' }}>
         <Typography sx={{ fontSize: 20, fontWeight: 700, color: '#212121', px: 0.5, pt: 2 }}>
-          {activeTabLabel === 'Visual Analysis' ? "What's the Visual Story?"
-            : activeTabLabel === 'Social Media Insights' ? "What's Trending?"
-            : TABS[activeTab]?.description || TABS[0].description}
+          {activeTabLabel || TABS[activeTab]?.label || TABS[0].label}
         </Typography>
         {/* Filtered mentions overlay panel */}
         <FilteredMentionsPanel filter={filteredMentions} onClose={() => setFilteredMentions(null)} />
@@ -250,6 +248,8 @@ function ResultsView({ query, brandName, loading, resultCount = 107, onDashboard
           <SocialMediaInsightsTabContent loading={loading} />
         ) : activeTabLabel === 'Visual Analysis' ? (
           <VisualAnalysisTabContent loading={loading} />
+        ) : activeTabLabel === 'X Insight' ? (
+          <SocialMediaInsightsTabContent loading={loading} />
         ) : activeTab === 5 ? (
           <MediaContactsPanel onDashboardSave={onDashboardSave} />
         ) : activeTab === 1 ? (
