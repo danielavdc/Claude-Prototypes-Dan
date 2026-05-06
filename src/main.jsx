@@ -5,7 +5,7 @@ import App from './App'
 import { createDynamicTheme } from './createDynamicTheme'
 
 const theme = createDynamicTheme()
-// testting
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ThemeProvider theme={theme}>
