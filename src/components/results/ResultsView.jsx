@@ -250,6 +250,8 @@ function ResultsView({ query, brandName, loading, resultCount = 107, onDashboard
           <SocialMediaInsightsTabContent loading={loading} />
         ) : activeTabLabel === 'Visual Analysis' ? (
           <VisualAnalysisTabContent loading={loading} />
+        ) : activeTabLabel === 'X Insight' ? (
+          <SocialMediaInsightsTabContent loading={loading} />
         ) : activeTab === 5 ? (
           <MediaContactsPanel onDashboardSave={onDashboardSave} />
         ) : activeTab === 1 ? (
