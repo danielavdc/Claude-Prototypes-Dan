@@ -1,0 +1,106 @@
+name: Log preview URL
+
+on:
+  deployment_status:
+
+permissions:
+  contents: write
+  pull-requests: read
+
+concurrency:
+  group: previews-log
+  cancel-in-progress: false
+
+jobs:
+  log:
+    if: github.event.deployment_status.state == 'success' && github.event.deployment.environment != 'production'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Find PR for this deployment
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const ref = context.payload.deployment.ref;
+            const sha = context.payload.deployment.sha;
+            const url = context.payload.deployment_status.environment_url;
+
+            if (!url) {
+              core.info('No environment_url on deployment_status, skipping');
+              core.setOutput('skip', 'true');
+              return;
+            }
+
+            const { data: prs } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: `${context.repo.owner}:${ref}`,
+              state: 'open',
+            });
+
+            if (prs.length === 0) {
+              core.info(`No open PR for branch ${ref}, skipping log`);
+              core.setOutput('skip', 'true');
+              return;
+            }
+
+            const pr = prs[0];
+            core.setOutput('skip', 'false');
+            core.setOutput('number', pr.number);
+            core.setOutput('title', pr.title);
+            core.setOutput('author', pr.user.login);
+            core.setOutput('branch', ref);
+            core.setOutput('sha', sha.substring(0, 7));
+            core.setOutput('url', url);
+            core.setOutput('date', new Date().toISOString().slice(0, 10));
+
+      - name: Append row to previews.md
+        if: steps.pr.outputs.skip != 'true'
+        env:
+          DATE: ${{ steps.pr.outputs.date }}
+          PR_NUM: ${{ steps.pr.outputs.number }}
+          PR_TITLE: ${{ steps.pr.outputs.title }}
+          AUTHOR: ${{ steps.pr.outputs.author }}
+          BRANCH: ${{ steps.pr.outputs.branch }}
+          SHA: ${{ steps.pr.outputs.sha }}
+          URL: ${{ steps.pr.outputs.url }}
+          REPO: ${{ github.repository }}
+        run: |
+          FILE=previews.md
+          if [ ! -f "$FILE" ]; then
+            {
+              echo '# Preview deployments'
+              echo ''
+              echo 'Auto-logged on every successful Cloudflare preview deploy.'
+              echo ''
+              echo '| Date | PR | Author | Branch | Commit | URL |'
+              echo '|------|-----|--------|--------|--------|-----|'
+            } > "$FILE"
+          fi
+
+          SAFE_TITLE="${PR_TITLE//|/\\|}"
+          SAFE_TITLE="${SAFE_TITLE//$'\n'/ }"
+
+          printf '| %s | [#%s](https://github.com/%s/pull/%s) %s | @%s | `%s` | `%s` | %s |\n' \
+            "$DATE" "$PR_NUM" "$REPO" "$PR_NUM" "$SAFE_TITLE" "$AUTHOR" "$BRANCH" "$SHA" "$URL" >> "$FILE"
+
+      - name: Commit and push
+        if: steps.pr.outputs.skip != 'true'
+        env:
+          PR_NUM: ${{ steps.pr.outputs.number }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add previews.md
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "chore: log preview for PR #${PR_NUM} [skip ci]"
+          git pull --rebase origin main
+          git push origin main
