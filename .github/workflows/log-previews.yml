@@ -3,6 +3,8 @@ name: Log preview URL
 on:
   issue_comment:
     types: [created, edited]
+  pull_request:
+    types: [closed]
 
 permissions:
   contents: write
@@ -15,6 +17,7 @@ concurrency:
 jobs:
   log:
     if: |
+      github.event_name == 'issue_comment' &&
       github.event.issue.pull_request &&
       github.event.comment.user.login == 'cloudflare-workers-and-pages[bot]'
     runs-on: ubuntu-latest
@@ -148,5 +151,52 @@ jobs:
             exit 0
           fi
           git commit -m "chore: log preview for PR #${PR_NUM} [skip ci]"
+          git pull --rebase origin main
+          git push origin main
+
+  remove:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Remove row for closed PR
+        env:
+          PR_NUM: ${{ github.event.pull_request.number }}
+        run: |
+          FILE=previews.md
+          if [ ! -f "$FILE" ]; then
+            echo "previews.md does not exist, nothing to remove"
+            exit 0
+          fi
+
+          if ! grep -q "/pull/${PR_NUM}\"" "$FILE"; then
+            echo "No row for PR #${PR_NUM}, nothing to remove"
+            exit 0
+          fi
+
+          grep -v "/pull/${PR_NUM}\"" "$FILE" > "$FILE.tmp" && mv "$FILE.tmp" "$FILE"
+
+      - name: Commit and push
+        env:
+          PR_NUM: ${{ github.event.pull_request.number }}
+          MERGED: ${{ github.event.pull_request.merged }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add previews.md
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          if [ "$MERGED" = "true" ]; then
+            ACTION="merged"
+          else
+            ACTION="closed"
+          fi
+          git commit -m "chore: remove preview row for ${ACTION} PR #${PR_NUM} [skip ci]"
           git pull --rebase origin main
           git push origin main
