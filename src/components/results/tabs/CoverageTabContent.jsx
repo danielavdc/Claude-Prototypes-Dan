@@ -1,4 +1,4 @@
-import { Box, Typography, Paper, Divider, IconButton, ToggleButton, ToggleButtonGroup } from '@mui/material'
+import { Box, Typography, Paper, Divider, IconButton } from '@mui/material'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
@@ -10,7 +10,15 @@ import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt'
 import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder'
+import ShowChartIcon from '@mui/icons-material/ShowChart'
+import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined'
+import AnchorNav, { SectionTitle } from './AnchorNav'
 import { useState, useRef, useEffect } from 'react'
+
+const COV_NAV = [
+  { id: 'cov-mentions-engagement', label: 'Mentions & Engagement', Icon: ShowChartIcon },
+  { id: 'cov-locations-sources',   label: 'Locations & Sources',   Icon: LocationOnOutlinedIcon },
+]
 
 const TEAL   = '#1D9F9F'
 const PURPLE = '#9C4DD6'
@@ -19,11 +27,6 @@ const ORANGE = '#FF9800'
 const BLUE   = '#2196F3'
 const GREEN  = '#4CAF50'
 const RED    = '#F44336'
-
-const NAV_SECTIONS = [
-  { id: 'mentions-engagement', label: 'Mentions and Engagement' },
-  { id: 'locations-sources',   label: 'Locations and Sources' },
-]
 
 const X_LABELS = ['Aug 25', 'Aug 26', 'Aug 27', 'Aug 28', 'Aug 29', 'Aug 30', 'Aug 31']
 
@@ -270,65 +273,6 @@ function MiniSparkline({ data, up }) {
 
 // ── sticky segment nav ────────────────────────────────────────────────────────
 
-function StickySegmentNav({ items, value, onChange }) {
-  const [isSticky, setIsSticky] = useState(false)
-  const ref = useRef(null)
-
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    let parent = el.parentElement
-    while (parent && parent !== document.body) {
-      const s = window.getComputedStyle(parent)
-      if (s.overflow === 'auto' || s.overflowY === 'auto' || s.overflow === 'scroll' || s.overflowY === 'scroll') break
-      parent = parent.parentElement
-    }
-    if (!parent || parent === document.body) return
-    const check = () => {
-      const r = el.getBoundingClientRect()
-      const p = parent.getBoundingClientRect()
-      setIsSticky(r.top <= p.top + 1)
-    }
-    parent.addEventListener('scroll', check, { passive: true })
-    return () => parent.removeEventListener('scroll', check)
-  }, [])
-
-  return (
-    <Box ref={ref} sx={{
-      position: 'sticky', top: 0, zIndex: 10,
-      bgcolor: '#F5F5F5', py: 1.25,
-      boxShadow: isSticky ? '0 2px 8px rgba(0,0,0,0.10)' : 'none',
-      transition: 'box-shadow 0.2s ease',
-    }}>
-      <ToggleButtonGroup
-        value={value} exclusive
-        onChange={(_, val) => { if (val) onChange(val) }}
-        sx={{
-          '& .MuiToggleButton-root': {
-            py: 0.75, px: 2, fontSize: 14, fontWeight: 400,
-            textTransform: 'none', letterSpacing: 0,
-            color: '#212121', bgcolor: 'transparent', borderColor: '#9E9E9E', borderRadius: 0,
-            whiteSpace: 'nowrap',
-            '&:first-of-type': { borderRadius: '4px 0 0 4px' },
-            '&:last-of-type':  { borderRadius: '0 4px 4px 0' },
-            '&.Mui-selected': {
-              bgcolor: 'rgba(29,159,159,0.12)', color: '#212121', borderColor: '#00827F',
-              '&:hover': { bgcolor: 'rgba(29,159,159,0.18)' },
-            },
-            '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' },
-          },
-        }}
-      >
-        {items.map(item => (
-          <ToggleButton key={item.id} value={item.id} disableRipple={false}>
-            {item.label}
-          </ToggleButton>
-        ))}
-      </ToggleButtonGroup>
-    </Box>
-  )
-}
-
 // ── shared ai insight ─────────────────────────────────────────────────────────
 
 function AIInsightWidget() {
@@ -528,6 +472,53 @@ function LocationsContent() {
         <Typography sx={{ fontSize: 11, color: 'text.secondary', textAlign: 'center', mt: 0.5 }}>1 - 10 of Locations</Typography>
       </Paper>
 
+      {/* Top Language */}
+      {(() => {
+        const LANGS = [
+          { name: 'Spanish',  mentions: '132.4k', pct: 60, barColor: '#1D9F9F', delta: '4%',   up: false, zero: false },
+          { name: 'English',  mentions: '132.4k', pct: 60, barColor: '#80CBC4', delta: '180%', up: true,  zero: false },
+          { name: 'Arabic',   mentions: '132.4k', pct: 60, barColor: '#FFC107', delta: '0%',   up: false, zero: true  },
+          { name: 'French',   mentions: '132.4k', pct: 60, barColor: '#FF9800', delta: '180%', up: true,  zero: false },
+          { name: 'Thai',     mentions: '132.4k', pct: 60, barColor: '#CF2D8A', delta: '180%', up: true,  zero: false },
+          { name: 'Japanese', mentions: '150.2k', pct: 70, barColor: '#CF2D8A', delta: '200%', up: true,  zero: false },
+          { name: 'Italian',  mentions: '98.3k',  pct: 50, barColor: '#CF2D8A', delta: '175%', up: true,  zero: false },
+        ]
+        return (
+          <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2 }}>
+            <WidgetHeader title="Top Language" />
+            <Box sx={{ display: 'flex', pb: 0.75, borderBottom: '1px solid #e0e0e0', mb: 0.5 }}>
+              <Typography sx={{ fontSize: 12, fontWeight: 700, color: 'text.secondary', flex: 1 }}>Name</Typography>
+              <Typography sx={{ fontSize: 12, fontWeight: 700, color: 'text.secondary', width: 120 }}>Mentions</Typography>
+              <Typography sx={{ fontSize: 12, fontWeight: 700, color: 'text.secondary', width: 80, textAlign: 'right' }}>Trend</Typography>
+            </Box>
+            {LANGS.map((row, i) => (
+              <Box key={i} sx={{ display: 'flex', alignItems: 'center', py: 1, borderBottom: i < LANGS.length - 1 ? '1px solid #f5f5f5' : 'none' }}>
+                <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#212121', flex: 1 }}>{row.name}</Typography>
+                <Box sx={{ width: 120, display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                  <Typography sx={{ fontSize: 12, color: '#424242' }}>{row.mentions} ({row.pct}%)</Typography>
+                  <Box sx={{ flex: 1, height: 6, bgcolor: '#f0f0f0', borderRadius: 1, overflow: 'hidden', minWidth: 28 }}>
+                    <Box sx={{ width: `${row.pct}%`, height: '100%', bgcolor: row.barColor, borderRadius: 1 }} />
+                  </Box>
+                </Box>
+                <Box sx={{ width: 80, display: 'flex', justifyContent: 'flex-end' }}>
+                  {row.zero
+                    ? <Box sx={{ bgcolor: '#F5F5F5', color: '#757575', fontSize: 11, fontWeight: 700, px: 0.75, py: 0.25, borderRadius: 1 }}>→ 0%</Box>
+                    : <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.25, bgcolor: row.up ? '#E8F5E9' : '#FFEBEE', color: row.up ? '#2E7D32' : '#C62828', fontSize: 11, fontWeight: 700, px: 0.75, py: 0.25, borderRadius: 1 }}>
+                        {row.up ? '↑' : '↓'} {row.delta}
+                      </Box>
+                  }
+                </Box>
+              </Box>
+            ))}
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mt: 1, pt: 1, borderTop: '1px solid #f5f5f5' }}>
+              <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>1 - 5 of 30</Typography>
+              <Typography sx={{ fontSize: 12, color: '#bdbdbd', cursor: 'pointer' }}>{'<'}</Typography>
+              <Typography sx={{ fontSize: 12, color: TEAL, cursor: 'pointer' }}>{'>'}</Typography>
+            </Box>
+          </Paper>
+        )
+      })()}
+
       <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2 }}>
         <WidgetHeader title="Countries Trend" />
         <ChartLegend datasets={COUNTRIES_TREND} />
@@ -726,25 +717,36 @@ function TrendingContent() {
 // ── main export ───────────────────────────────────────────────────────────────
 
 export default function CoverageTabContent({ onDashboardSave, loading, targetSubTab, subTabTrigger }) {
-  const [activeTab, setActiveTab] = useState('mentions-engagement')
-  useEffect(() => { if (subTabTrigger > 0 && targetSubTab) setActiveTab(targetSubTab) }, [subTabTrigger])
+  useEffect(() => {
+    if (subTabTrigger > 0 && targetSubTab) {
+      document.getElementById(`cov-${targetSubTab}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [subTabTrigger])
+
   if (loading) return null
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-      <StickySegmentNav items={NAV_SECTIONS} value={activeTab} onChange={setActiveTab} />
-      {activeTab === 'mentions-engagement' && (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <MentionsContent />
-          <EngagementContent />
+    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+      <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 3 }}>
+
+        <Box id="cov-mentions-engagement">
+          <SectionTitle>Mentions &amp; Engagement</SectionTitle>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            <MentionsContent />
+            <EngagementContent />
+          </Box>
         </Box>
-      )}
-      {activeTab === 'locations-sources' && (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <AIInsightWidget />
-          <LocationsContent />
-          <TrendingContent />
+
+        <Box id="cov-locations-sources">
+          <SectionTitle>Locations &amp; Sources</SectionTitle>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            <AIInsightWidget />
+            <LocationsContent />
+            <TrendingContent />
+          </Box>
         </Box>
-      )}
+
+      </Box>
+      <AnchorNav items={COV_NAV} />
     </Box>
   )
 }

@@ -1,4 +1,8 @@
 import { Box, Typography, IconButton, Checkbox } from '@mui/material'
+import AnchorNav, { SectionTitle } from './AnchorNav'
+import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined'
+import ShowChartIcon from '@mui/icons-material/ShowChart'
+import NewspaperOutlinedIcon from '@mui/icons-material/NewspaperOutlined'
 import WidgetCard from './WidgetCard'
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt'
@@ -27,11 +31,11 @@ const GREEN  = '#4CAF50'
 const DARK   = '#212121'
 const YELLOW = '#FFC107'
 
-const NAV_TABS = [
-  { id: 'authors-list',  label: 'Authors List'  },
-  { id: 'journalists',   label: 'Journalists'   },
-  { id: 'x-authors',     label: 'X Authors'     },
-  { id: 'news-coverage', label: 'News Coverage' },
+const AUD_NAV = [
+  { id: 'aud-authors-list',  label: 'Authors List',  Icon: ArticleOutlinedIcon    },
+  { id: 'aud-journalists',   label: 'Journalists',   Icon: ArticleOutlinedIcon    },
+  { id: 'aud-x-authors',     label: 'X Authors',     Icon: ShowChartIcon          },
+  { id: 'aud-news-coverage', label: 'News Coverage', Icon: NewspaperOutlinedIcon  },
 ]
 
 // ── shared ui ─────────────────────────────────────────────────────────────────
@@ -164,49 +168,6 @@ function Pagination({ text }) {
   )
 }
 
-function StickySegmentNav({ value, onChange }) {
-  const [isSticky, setIsSticky] = useState(false)
-  const ref = useRef(null)
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    let parent = el.parentElement
-    while (parent && parent !== document.body) {
-      const s = window.getComputedStyle(parent)
-      if (s.overflow === 'auto' || s.overflowY === 'auto') break
-      parent = parent.parentElement
-    }
-    if (!parent) return
-    const check = () => setIsSticky(el.getBoundingClientRect().top <= parent.getBoundingClientRect().top + 1)
-    parent.addEventListener('scroll', check, { passive: true })
-    return () => parent.removeEventListener('scroll', check)
-  }, [])
-  return (
-    <Box ref={ref} sx={{ position: 'sticky', top: 0, zIndex: 10, bgcolor: '#F5F5F5', py: 1.25, boxShadow: isSticky ? '0 2px 8px rgba(0,0,0,0.10)' : 'none', transition: 'box-shadow 0.2s' }}>
-      <Box sx={{ display: 'flex', gap: 0 }}>
-        {NAV_TABS.map(tab => (
-          <Box
-            key={tab.id}
-            onClick={() => onChange(tab.id)}
-            sx={{
-              px: 2, py: 0.75, fontSize: 14, cursor: 'pointer', whiteSpace: 'nowrap',
-              border: '1px solid', userSelect: 'none',
-              borderColor: value === tab.id ? '#00827F' : '#9E9E9E',
-              bgcolor: value === tab.id ? 'rgba(29,159,159,0.12)' : 'transparent',
-              color: '#212121',
-              '&:first-of-type': { borderRadius: '4px 0 0 4px' },
-              '&:last-of-type':  { borderRadius: '0 4px 4px 0' },
-              '&:not(:first-of-type)': { borderLeft: 'none' },
-              '&:hover': { bgcolor: value === tab.id ? 'rgba(29,159,159,0.18)' : 'rgba(0,0,0,0.04)' },
-            }}
-          >
-            {tab.label}
-          </Box>
-        ))}
-      </Box>
-    </Box>
-  )
-}
 
 // ── NEWS COVERAGE ─────────────────────────────────────────────────────────────
 
@@ -1256,16 +1217,34 @@ function AuthorsListContent() {
 // ── main export ───────────────────────────────────────────────────────────────
 
 export default function AudienceTabContent({ loading, targetSubTab, subTabTrigger }) {
-  const [activeTab, setActiveTab] = useState('authors-list')
-  useEffect(() => { if (subTabTrigger > 0 && targetSubTab) setActiveTab(targetSubTab) }, [subTabTrigger])
+  useEffect(() => {
+    if (subTabTrigger > 0 && targetSubTab) {
+      document.getElementById(`aud-${targetSubTab}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [subTabTrigger])
+
   if (loading) return null
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-      <StickySegmentNav value={activeTab} onChange={setActiveTab} />
-      {activeTab === 'authors-list'  && <AuthorsListContent />}
-      {activeTab === 'journalists'   && <JournalistsContent />}
-      {activeTab === 'x-authors'     && <XAuthorsContent />}
-      {activeTab === 'news-coverage' && <NewsCoverageContent />}
+    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+      <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 3 }}>
+        <Box id="aud-authors-list">
+          <SectionTitle>Authors List</SectionTitle>
+          <AuthorsListContent />
+        </Box>
+        <Box id="aud-journalists">
+          <SectionTitle>Journalists</SectionTitle>
+          <JournalistsContent />
+        </Box>
+        <Box id="aud-x-authors">
+          <SectionTitle>X Authors</SectionTitle>
+          <XAuthorsContent />
+        </Box>
+        <Box id="aud-news-coverage">
+          <SectionTitle>News Coverage</SectionTitle>
+          <NewsCoverageContent />
+        </Box>
+      </Box>
+      <AnchorNav items={AUD_NAV} />
     </Box>
   )
 }
