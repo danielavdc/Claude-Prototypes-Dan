@@ -315,7 +315,7 @@ function AIWidget({ bullets }) {
 
 // ── X tab ─────────────────────────────────────────────────────────────────────
 
-function XContent() {
+function XContent({ title }) {
   const donutPostType = [
     { pct: 35.8, color: BLUE, label: 'Retweets',      count: '1.9k' },
     { pct: 25.5, color: YELLOW, label: 'Replies',     count: '1.4k' },
@@ -335,6 +335,7 @@ function XContent() {
         'Positive sentiment leads at 35.8% (1.9k) but Negative at 25.5% warrants monitoring — primarily concentrated around "apple store", "sanctions" and "samsung phones" keywords. 3, 4',
         'University of SC, technology and South Carolina are the top entities, suggesting strong regional and brand authority across X conversations during this period. 5…',
       ]} />
+      {title && <SectionTitle>{title}</SectionTitle>}
 
       {/* Row 1: Mentions + Authors */}
       <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
@@ -577,7 +578,7 @@ function XContent() {
 
 // ── Youtube tab ───────────────────────────────────────────────────────────────
 
-function YoutubeContent() {
+function YoutubeContent({ title }) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <AIWidget bullets={[
@@ -585,6 +586,7 @@ function YoutubeContent() {
         'Lisboa leads Mentions Trend by Searches at 55k peak (Aug 10-13), significantly outpacing Arctic Monkeys and IGIT — suggesting event-driven discovery moments worth targeting. 3, 4',
         'Share of Potential Audience shows Views correlating strongly with Mention spikes, particularly Apr 4-6 and Apr 6-7, indicating content virality and secondary amplification. 5…',
       ]} />
+      {title && <SectionTitle>{title}</SectionTitle>}
 
       <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
         {/* Total Mentions */}
@@ -721,7 +723,7 @@ function YoutubeContent() {
 
 // ── Weibo tab ─────────────────────────────────────────────────────────────────
 
-function WeiboContent() {
+function WeiboContent({ title }) {
   const wbSentimentDonut = [
     { pct: 25.8, color: GREEN, label: 'Positive', count: '1.5k' },
     { pct: 25.5, color: RED,   label: 'Negative', count: '1.4k' },
@@ -735,6 +737,7 @@ function WeiboContent() {
         'Verification Type shows Blue accounts (52.1%, 9.7k) dominating coverage — indicating mainstream media and verified public figures are the primary Weibo amplifiers for this topic. 3, 4',
         'Audience is most active Thursday 8–9 AM and Monday 7–8 AM — optimal windows for publishing content targeting maximum organic reach on Weibo. 5…',
       ]} />
+      {title && <SectionTitle>{title}</SectionTitle>}
 
       {/* Mentions Trend by Post Type */}
       <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2 }}>
@@ -990,18 +993,9 @@ export default function SocialMediaInsightsTabContent({ loading }) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
       <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 3 }}>
-        <Box id="smi-x">
-          <SectionTitle>X</SectionTitle>
-          <XContent />
-        </Box>
-        <Box id="smi-youtube">
-          <SectionTitle>Youtube</SectionTitle>
-          <YoutubeContent />
-        </Box>
-        <Box id="smi-weibo">
-          <SectionTitle>Weibo</SectionTitle>
-          <WeiboContent />
-        </Box>
+        <Box id="smi-x">      <XContent       title="X"       /></Box>
+        <Box id="smi-youtube"><YoutubeContent title="Youtube" /></Box>
+        <Box id="smi-weibo">  <WeiboContent   title="Weibo"   /></Box>
       </Box>
       <AnchorNav items={SMI_NAV} />
     </Box>

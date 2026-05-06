@@ -198,7 +198,7 @@ const SECHO_SOURCES = [
   { name: 'NPR',             fb: 200,  x: 100  },
 ]
 
-function NewsCoverageContent() {
+function NewsCoverageContent({ title }) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <AIInsight bullets={[
@@ -206,6 +206,7 @@ function NewsCoverageContent() {
         'Social Echo reached 52.1k total, driven primarily by Facebook (35.8%) and X (25.5%), suggesting high cross-platform amplification of key articles. 3, 4',
         'CNN and USA Today account for the largest social echo share by source, with combined reach exceeding 5.8k in the period — signaling strong mainstream amplification. 5, 6…',
       ]} />
+      {title && <SectionTitle>{title}</SectionTitle>}
 
       {/* 6 KPI cards 2x3 */}
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
@@ -579,7 +580,7 @@ const J_REACH_TREND = [
   { label: 'Alexandra Bird', color: PINK,  data: [8,  12, 18, 22, 14, 12, 14] },
 ]
 
-function JournalistsContent() {
+function JournalistsContent({ title }) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <AIInsight bullets={[
@@ -587,6 +588,7 @@ function JournalistsContent() {
         'Total Reach of 33.3k reflects a broad distribution of coverage, with top journalists averaging 8 Relevant Mentions each and strong social presence across X, LinkedIn and Instagram. 3, 4',
         'Matt Roush leads Reach Breakdown at 52.1k, followed by Lindsey Barr at 38.3k — together accounting for over 54% of total journalist-driven reach in the period. 5…',
       ]} />
+      {title && <SectionTitle>{title}</SectionTitle>}
 
       {/* 3 KPI sparkline cards */}
       <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
@@ -788,7 +790,7 @@ const XA_BIO_KW = [
 ]
 const BIO_COLORS = [TEAL, BLUE, '#9C4DD6', '#FF9800', '#CF2D8A']
 
-function XAuthorsContent() {
+function XAuthorsContent({ title }) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <AIInsight bullets={[
@@ -796,6 +798,7 @@ function XAuthorsContent() {
         'United States dominates location with 903 authors, followed by Canada (823) and Ivory Coast (522) — indicating significant international reach beyond North America. 3, 4',
         'Travel and Science are the top interests at 50% each, while English and Spanish are the leading languages — useful for tailoring content strategy across X campaigns. 5…',
       ]} />
+      {title && <SectionTitle>{title}</SectionTitle>}
 
       {/* Info banner */}
       <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2, display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -1029,7 +1032,7 @@ function SentimentBar({ positive = 70, negative = 10, neutral = 20 }) {
   )
 }
 
-function AuthorsListContent() {
+function AuthorsListContent({ title }) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <AIInsight bullets={[
@@ -1037,6 +1040,7 @@ function AuthorsListContent() {
         'Spanish and English are the leading languages, each at 60% share, suggesting strong bilingual reach. French and Arabic represent growth opportunities in underserved markets. 3, 4',
         'Reddit.com/r/apple and Sports Illustrated show the highest engagement growth at +85.4% and +21.9% respectively — signaling high-value communities for targeted amplification. 5…',
       ]} />
+      {title && <SectionTitle>{title}</SectionTitle>}
 
       {/* Author Gender + Author Demographic */}
       <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
@@ -1227,22 +1231,10 @@ export default function AudienceTabContent({ loading, targetSubTab, subTabTrigge
   return (
     <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
       <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 3 }}>
-        <Box id="aud-authors-list">
-          <SectionTitle>Authors List</SectionTitle>
-          <AuthorsListContent />
-        </Box>
-        <Box id="aud-journalists">
-          <SectionTitle>Journalists</SectionTitle>
-          <JournalistsContent />
-        </Box>
-        <Box id="aud-x-authors">
-          <SectionTitle>X Authors</SectionTitle>
-          <XAuthorsContent />
-        </Box>
-        <Box id="aud-news-coverage">
-          <SectionTitle>News Coverage</SectionTitle>
-          <NewsCoverageContent />
-        </Box>
+        <Box id="aud-authors-list"><AuthorsListContent  title="Authors List"  /></Box>
+        <Box id="aud-journalists"> <JournalistsContent  title="Journalists"   /></Box>
+        <Box id="aud-x-authors">  <XAuthorsContent     title="X Authors"     /></Box>
+        <Box id="aud-news-coverage"><NewsCoverageContent title="News Coverage" /></Box>
       </Box>
       <AnchorNav items={AUD_NAV} />
     </Box>

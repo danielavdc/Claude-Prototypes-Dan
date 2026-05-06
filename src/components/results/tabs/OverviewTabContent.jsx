@@ -390,7 +390,7 @@ export default function OverviewTabContent({ loading, onDashboardSave, onWidgetI
       <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2, height: 429 }}>
         <MentionsTrendChart
           showViewFullAnalysis
-          onViewFullAnalysis={() => nav(1, 'mentions-engagement')}
+          onViewFullAnalysis={() => nav(1, 'volume')}
           loading={loading}
           onDashboardSave={onDashboardSave}
           onDataPointClick={onFilteredMentions}
@@ -398,22 +398,22 @@ export default function OverviewTabContent({ loading, onDashboardSave, onWidgetI
           onWidgetInsight={onWidgetInsight}
         />
       </Paper>
-      <EngagementTrendChart  onVFA={() => nav(1, 'mentions-engagement')} />
+      <EngagementTrendChart  onVFA={() => nav(1, 'volume')} />
       <NewsBySearchesTable   onVFA={() => nav(4, 'news-coverage')} />
       <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2 }}>
         <TopKeywordsChart showViewFullAnalysis onViewFullAnalysis={() => nav(2)} onDashboardSave={onDashboardSave} onDataPointClick={onFilteredMentions} onWidgetInsight={onWidgetInsight} />
       </Paper>
       <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
         <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2, flex: 1, minWidth: 280 }}>
-          <LocationsChart showViewFullAnalysis onViewFullAnalysis={() => nav(1, 'locations-sources')} onDashboardSave={onDashboardSave} onDataPointClick={onFilteredMentions} onWidgetInsight={onWidgetInsight} />
+          <LocationsChart showViewFullAnalysis onViewFullAnalysis={() => nav(1, 'locations')} onDashboardSave={onDashboardSave} onDataPointClick={onFilteredMentions} onWidgetInsight={onWidgetInsight} />
         </Paper>
         <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2, flex: 1, minWidth: 280 }}>
           <SentimentChart showViewFullAnalysis onViewFullAnalysis={() => nav(3)} onDashboardSave={onDashboardSave} onDataPointClick={onFilteredMentions} onWidgetInsight={onWidgetInsight} />
         </Paper>
       </Box>
       <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
-        <SourceTypeDonut  onVFA={() => nav(1, 'locations-sources')} />
-        <TopLanguageTable onVFA={() => nav(1, 'locations-sources')} />
+        <SourceTypeDonut  onVFA={() => nav(1, 'sources')} />
+        <TopLanguageTable onVFA={() => nav(1, 'locations')} />
       </Box>
       <ReachTable title="News Sources by Reach" rows={NEWS_SOURCES_REACH} onVFA={() => nav(4, 'news-coverage')} />
       <ReachTable title="Journalists by Reach"  rows={JOURNALISTS_REACH}  onVFA={() => nav(4, 'journalists')} />

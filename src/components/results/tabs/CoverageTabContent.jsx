@@ -12,12 +12,14 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder'
 import ShowChartIcon from '@mui/icons-material/ShowChart'
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined'
+import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined'
 import AnchorNav, { SectionTitle } from './AnchorNav'
 import { useState, useRef, useEffect } from 'react'
 
 const COV_NAV = [
-  { id: 'cov-mentions-engagement', label: 'Mentions & Engagement', Icon: ShowChartIcon },
-  { id: 'cov-locations-sources',   label: 'Locations & Sources',   Icon: LocationOnOutlinedIcon },
+  { id: 'cov-volume',    label: 'Volume',    Icon: ShowChartIcon          },
+  { id: 'cov-locations', label: 'Locations', Icon: LocationOnOutlinedIcon },
+  { id: 'cov-sources',   label: 'Sources',   Icon: ArticleOutlinedIcon    },
 ]
 
 const TEAL   = '#1D9F9F'
@@ -313,8 +315,6 @@ function MentionsContent() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
 
-      <AIInsightWidget />
-
       <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2 }}>
         <WidgetHeader title="Mentions Trend" />
         <Box sx={{ display: 'flex', gap: 4, mb: 2 }}>
@@ -569,25 +569,87 @@ function TrendingContent() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
 
-      <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2 }}>
-        <WidgetHeader title="Top News Sources" />
-        {NEWS_SOURCES.map((row, i) => (
-          <Box key={i} sx={{ display: 'flex', alignItems: 'center', py: 1, borderBottom: i < NEWS_SOURCES.length - 1 ? '1px solid #f5f5f5' : 'none', '&:hover': { bgcolor: 'rgba(0,0,0,0.02)' } }}>
-            <Box sx={{ width: 32, height: 32, borderRadius: '50%', bgcolor: row.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, mr: 1.25 }}>
-              <Typography sx={{ fontSize: 9, fontWeight: 700, color: 'white' }}>{row.initials}</Typography>
+      <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+
+        {/* Source Type Breakdown */}
+        {(() => {
+          const STB = [
+            { label: 'X',           pct: 52.1, count: '9.7k', color: BLUE   },
+            { label: 'Online News', pct: 40.5, count: '5.7k', color: '#FFC107' },
+            { label: 'Blogs',       pct: 20.1, count: '1.2k', color: PINK   },
+            { label: 'WeChat',      pct: 12.0, count: '125',  color: TEAL   },
+          ]
+          const total = STB.reduce((s, r) => s + r.pct, 0)
+          const size = 180, cx = 90, cy = 90, r = 68, ir = 40
+          let cum = -90
+          const paths = STB.map(seg => {
+            const start = (cum * Math.PI) / 180
+            const sweep = (seg.pct / total) * 360; cum += sweep
+            const end = (cum * Math.PI) / 180, large = sweep > 180 ? 1 : 0
+            const d = `M ${cx + r * Math.cos(start)} ${cy + r * Math.sin(start)} A ${r} ${r} 0 ${large} 1 ${cx + r * Math.cos(end)} ${cy + r * Math.sin(end)} L ${cx + ir * Math.cos(end)} ${cy + ir * Math.sin(end)} A ${ir} ${ir} 0 ${large} 0 ${cx + ir * Math.cos(start)} ${cy + ir * Math.sin(start)} Z`
+            return { ...seg, d }
+          })
+          return (
+            <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2, flex: 1, minWidth: 240 }}>
+              <WidgetHeader title="Source Type Breakdown" />
+              <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+                <svg width={size} height={size} style={{ display: 'block' }}>
+                  {paths.map((p, i) => <path key={i} d={p.d} fill={p.color} stroke="white" strokeWidth="2" />)}
+                  <circle cx={cx} cy={cy} r={ir} fill="white" />
+                </svg>
+              </Box>
+              {STB.map((r, i) => (
+                <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.875 }}>
+                  <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: r.color, flexShrink: 0 }} />
+                  <Typography sx={{ fontSize: 13, flex: 1, color: '#212121' }}>{r.label}</Typography>
+                  <Typography sx={{ fontSize: 13, color: '#424242', width: 44, textAlign: 'right' }}>{r.pct}%</Typography>
+                  <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#212121', width: 36, textAlign: 'right' }}>{r.count}</Typography>
+                </Box>
+              ))}
+              <Box sx={{ mt: 1.5 }}>
+                <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, border: '1px solid #e0e0e0', borderRadius: 0.75, px: 1.25, py: 0.5, cursor: 'pointer', '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' } }}>
+                  <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#212121' }}>+4</Typography>
+                  <ArrowDownwardIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
+                </Box>
+              </Box>
+            </Paper>
+          )
+        })()}
+
+        {/* Top News Sources */}
+        <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2, flex: 2, minWidth: 300 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+              <Typography sx={{ fontSize: 16, fontWeight: 700, color: '#212121' }}>Top News Sources</Typography>
+              <InfoOutlinedIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
             </Box>
-            <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#212121', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.name}</Typography>
-              <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>{row.domain}</Typography>
-            </Box>
-            <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#212121', flexShrink: 0 }}>{row.mentions}</Typography>
+            <OpenInNewIcon sx={{ fontSize: 18, color: 'text.secondary', cursor: 'pointer' }} />
           </Box>
-        ))}
-        <Box sx={{ pt: 1, borderTop: '1px solid #e0e0e0', mt: 0.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>1-10 of 50 Sources</Typography>
-          <Typography sx={{ fontSize: 13, fontWeight: 600, color: TEAL, cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}>View all</Typography>
-        </Box>
-      </Paper>
+          <Box sx={{ display: 'flex', pb: 0.75, borderBottom: '1px solid #e0e0e0', mb: 0.5 }}>
+            <Typography sx={{ fontSize: 12, fontWeight: 700, color: 'text.secondary', flex: 1 }}>Publications</Typography>
+            <Typography sx={{ fontSize: 12, fontWeight: 700, color: 'text.secondary', width: 64, textAlign: 'right' }}>Mentions</Typography>
+          </Box>
+          {NEWS_SOURCES.map((row, i) => (
+            <Box key={i} sx={{ display: 'flex', alignItems: 'center', py: 1, borderBottom: i < NEWS_SOURCES.length - 1 ? '1px solid #f5f5f5' : 'none', '&:hover': { bgcolor: 'rgba(0,0,0,0.02)' } }}>
+              <Typography sx={{ fontSize: 12, color: 'text.secondary', width: 20, flexShrink: 0 }}>{i + 1}</Typography>
+              <Box sx={{ width: 36, height: 36, borderRadius: '50%', bgcolor: row.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, mr: 1.25 }}>
+                <Typography sx={{ fontSize: 9, fontWeight: 700, color: 'white' }}>{row.initials}</Typography>
+              </Box>
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#212121', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.name}</Typography>
+                <Typography sx={{ fontSize: 11, color: TEAL }}>News | US | https://mtnweekly.com</Typography>
+              </Box>
+              <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#212121', width: 48, textAlign: 'right', flexShrink: 0 }}>{row.mentions}</Typography>
+            </Box>
+          ))}
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mt: 1, pt: 1, borderTop: '1px solid #e0e0e0' }}>
+            <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>1 - 10 of 30 Sources</Typography>
+            <Typography sx={{ fontSize: 12, color: '#bdbdbd', cursor: 'pointer' }}>{'<'}</Typography>
+            <Typography sx={{ fontSize: 12, color: TEAL, cursor: 'pointer' }}>{'>'}</Typography>
+          </Box>
+        </Paper>
+
+      </Box>
 
       <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
         {[
@@ -728,19 +790,27 @@ export default function CoverageTabContent({ onDashboardSave, loading, targetSub
     <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
       <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 3 }}>
 
-        <Box id="cov-mentions-engagement">
-          <SectionTitle>Mentions &amp; Engagement</SectionTitle>
+        <Box id="cov-volume">
+          <AIInsightWidget />
+          <SectionTitle>Volume</SectionTitle>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
             <MentionsContent />
             <EngagementContent />
           </Box>
         </Box>
 
-        <Box id="cov-locations-sources">
-          <SectionTitle>Locations &amp; Sources</SectionTitle>
+        <Box id="cov-locations">
+          <AIInsightWidget />
+          <SectionTitle>Locations</SectionTitle>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-            <AIInsightWidget />
             <LocationsContent />
+          </Box>
+        </Box>
+
+        <Box id="cov-sources">
+          <AIInsightWidget />
+          <SectionTitle>Sources</SectionTitle>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
             <TrendingContent />
           </Box>
         </Box>
