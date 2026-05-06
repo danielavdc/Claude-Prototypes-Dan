@@ -110,12 +110,12 @@ function SearchPanel({
   const [tabMenuTabIndex, setTabMenuTabIndex] = useState(null)
   const [tabSetMode, setTabSetMode] = useState('focus')
   const CLASSIC_TABS = [
-    { label: 'Overview',        description: 'Overview'        },
-    { label: 'Analytics',       description: 'Analytics'       },
-    { label: 'Topic Analytics', description: 'Topic Analytics' },
-    { label: 'X Insight',       description: 'X Insight'       },
-    { label: 'Authors',         description: 'Authors'         },
-    { label: 'Media Relations', description: 'Media Relations' },
+    { label: 'Overview',        description: ''        },
+    { label: 'Analytics',       description: ''       },
+    { label: 'Topic Analytics', description: '' },
+    { label: 'X Insight',       description: ''       },
+    { label: 'Authors',         description: ''         },
+    { label: 'Media Relations', description: '' },
   ]
   const [tabs, setTabs] = useState(() =>
     TABS.map(t => ({ label: t.label, description: t.description }))
