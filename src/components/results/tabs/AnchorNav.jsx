@@ -5,7 +5,7 @@ const TEAL = '#1D9F9F'
 
 export function SectionTitle({ children }) {
   return (
-    <Typography sx={{ fontSize: 17, fontWeight: 700, color: '#212121', mb: 2, pb: 1.5, borderBottom: '2px solid #f0f0f0' }}>
+    <Typography sx={{ fontSize: 17, fontWeight: 700, color: '#212121', mt: 2, mb: 2, pb: 1.5, borderBottom: '2px solid #f0f0f0' }}>
       {children}
     </Typography>
   )
