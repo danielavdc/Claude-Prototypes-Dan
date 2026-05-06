@@ -739,7 +739,8 @@ function SearchPanel({
           {tabs.map((tab, i) => {
             const label = typeof tab === 'string' ? tab : tab.label
             const baseDescription = TABS.find(t => t.label === label)?.description
-            const description = baseDescription ?? (typeof tab === 'string' ? null : tab.description)
+            const tabDescription = typeof tab === 'string' ? undefined : tab.description
+            const description = tabDescription !== undefined ? tabDescription : baseDescription
             const isActive = activeTab === i
             const isDragOver = dragOverIndex === i
             return (
