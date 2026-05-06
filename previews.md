@@ -14,6 +14,6 @@ Auto-logged on every successful Cloudflare preview deploy. One row per PR (lates
 </tr>
 </thead>
 <tbody>
-<tr><td>2026-05-06</td><td><a href="https://github.com/danielavdc/Claude-Prototypes-Dan/pull/10">#10</a> feat: replace toggles with anchor navigation in Coverage, Audience, a…</td><td>@danielavdc</td><td><code>anchor-navigation</code></td><td><code>d822a8e</code></td><td><a href="https://anchor-navigation-claudeprototypes.daniela-vera.workers.dev">https://anchor-navigation-claudeprototypes.daniela-vera.workers.dev</a></td></tr>
+<tr><td>2026-05-06</td><td><a href="https://github.com/danielavdc/Claude-Prototypes-Dan/pull/10">#10</a> feat: replace toggles with anchor navigation in Coverage, Audience, a…</td><td>@danielavdc</td><td><code>anchor-navigation</code></td><td><code>4a1418b</code></td><td><a href="https://anchor-navigation-claudeprototypes.daniela-vera.workers.dev">https://anchor-navigation-claudeprototypes.daniela-vera.workers.dev</a></td></tr>
 </tbody>
 </table>
