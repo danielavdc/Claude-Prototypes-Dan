@@ -8,6 +8,8 @@ import LanguageIcon from '@mui/icons-material/Language'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp'
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh'
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
+import TuneIcon from '@mui/icons-material/Tune'
 import FilterListIcon from '@mui/icons-material/FilterAltOutlined'
 import LoyaltyIcon from '@mui/icons-material/Loyalty'
 import DomainIcon from '@mui/icons-material/Domain'
@@ -26,6 +28,7 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import SlideshowIcon from '@mui/icons-material/Slideshow'
 import AddToDriveIcon from '@mui/icons-material/AddToDrive'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import DashboardCustomizeOutlinedIcon from '@mui/icons-material/DashboardCustomizeOutlined'
 import CloseIcon from '@mui/icons-material/Close'
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
@@ -121,6 +124,26 @@ function SearchPanel({
   const [renameDescription, setRenameDescription] = useState('')
   const dragIndexRef = useRef(null)
   const [dragOverIndex, setDragOverIndex] = useState(null)
+  const [tabSetMenuAnchor, setTabSetMenuAnchor] = useState(null)
+  const tabsScrollRef = useRef(null)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(false)
+
+  const checkTabsOverflow = useCallback(() => {
+    const el = tabsScrollRef.current
+    if (!el) return
+    setCanScrollLeft(el.scrollLeft > 2)
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 2)
+  }, [])
+
+  useEffect(() => {
+    checkTabsOverflow()
+    const el = tabsScrollRef.current
+    if (!el) return
+    const ro = new ResizeObserver(checkTabsOverflow)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [tabs, checkTabsOverflow])
   const [savingView, setSavingView] = useState(false)
   const [savedSuccess, setSavedSuccess] = useState(false)
   const savingTimerRef = useRef(null)
@@ -694,7 +717,16 @@ function SearchPanel({
 
       {/* Tabs */}
       <Box sx={{ bgcolor: 'background.default', borderBottom: '1px solid #e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 52 }}>
-        <Box sx={{ display: 'flex', height: '100%', alignItems: 'stretch' }}>
+
+        {/* Scrollable tabs area */}
+        <Box sx={{ flex: 1, display: 'flex', alignItems: 'stretch', overflow: 'hidden', position: 'relative', height: '100%' }}>
+          {canScrollLeft && (
+            <Box onClick={() => { tabsScrollRef.current.scrollBy({ left: -180, behavior: 'smooth' }); setTimeout(checkTabsOverflow, 300) }}
+              sx={{ display: 'flex', alignItems: 'center', px: 0.5, cursor: 'pointer', bgcolor: 'background.default', borderRight: '1px solid #e0e0e0', zIndex: 1, flexShrink: 0, '&:hover': { bgcolor: alpha('#000', 0.04) } }}>
+              <ChevronLeftIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+            </Box>
+          )}
+          <Box ref={tabsScrollRef} onScroll={checkTabsOverflow} sx={{ display: 'flex', height: '100%', alignItems: 'stretch', overflowX: 'auto', scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }}>
           {tabs.map((tab, i) => {
             const label = typeof tab === 'string' ? tab : tab.label
             const baseDescription = TABS.find(t => t.label === label)?.description
@@ -721,6 +753,7 @@ function SearchPanel({
                   else if (activeTab < from && activeTab >= i) setActiveTab(activeTab + 1)
                   dragIndexRef.current = null
                   setDragOverIndex(null)
+                  triggerSave()
                 }}
                 onDragEnd={() => { dragIndexRef.current = null; setDragOverIndex(null) }}
               >
@@ -761,18 +794,37 @@ function SearchPanel({
             <Box sx={{ px: 2, pt: 1.5, pb: 0.5 }}>
               <Typography sx={{ fontSize: 14, fontWeight: 700, color: 'text.primary' }}>Pin a New Tab</Typography>
             </Box>
-            {['Visual Analysis', 'Social Media Insights']
-              .filter(item => !tabs.some(t => (typeof t === 'string' ? t : t.label) === item))
-              .map((item) => (
+            {(() => {
+              const available = ['Visual Analysis', 'Social Media Insights']
+                .filter(item => !tabs.some(t => (typeof t === 'string' ? t : t.label) === item))
+              if (available.length === 0) return (
+                <Box sx={{ px: 2, py: 2, textAlign: 'center' }}>
+                  <Typography sx={{ fontSize: 13, color: 'text.disabled', lineHeight: 1.5 }}>
+                    All available tabs are already in your set.
+                  </Typography>
+                </Box>
+              )
+              return available.map(item => (
                 <MenuItem key={item} onClick={() => {
-                  const ON_DEMAND_DESC = { 'Visual Analysis': "What's the Visual Story?", 'Social Media Insights': "What's Trending on Social?" }
+                  const ON_DEMAND_DESC = { 'Visual Analysis': "What's the Visual Story?", 'Social Media Insights': "What's Trending?" }
                   setTabs(prev => [...prev, { label: item, description: ON_DEMAND_DESC[item] || '' }])
                   setPinTabAnchor(null)
                   triggerSave()
                 }} sx={{ px: 2, py: 1.25, fontSize: 15, color: 'text.primary' }}>
                   {item}
                 </MenuItem>
-              ))}
+              ))
+            })()}
+            <Divider sx={{ my: 0.5 }} />
+            {[
+              { label: 'Create tab with AI',  Icon: AutoAwesomeIcon },
+              { label: 'Create custom tab',   Icon: TuneIcon        },
+            ].map(({ label, Icon }) => (
+              <Box key={label} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 2, py: 1.25, cursor: 'default' }}>
+                <Icon sx={{ fontSize: 18, color: '#616161', flexShrink: 0 }} />
+                <Typography sx={{ fontSize: 15, color: '#212121' }}>{label}</Typography>
+              </Box>
+            ))}
             {removedTabs.length > 0 && <Divider />}
             {removedTabs.map((tab, i) => {
               const label = typeof tab === 'string' ? tab : tab.label
@@ -788,8 +840,46 @@ function SearchPanel({
               )
             })}
           </Menu>
-        </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', pr: 1.5 }}>
+          </Box>{/* end tabsScrollRef */}
+          {canScrollRight && (
+            <Box onClick={() => { tabsScrollRef.current.scrollBy({ left: 180, behavior: 'smooth' }); setTimeout(checkTabsOverflow, 300) }}
+              sx={{ display: 'flex', alignItems: 'center', px: 0.5, cursor: 'pointer', bgcolor: 'background.default', borderLeft: '1px solid #e0e0e0', zIndex: 1, flexShrink: 0, '&:hover': { bgcolor: alpha('#000', 0.04) } }}>
+              <ChevronRightIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+            </Box>
+          )}
+        </Box>{/* end scrollable tabs area */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, pr: 1.5, flexShrink: 0 }}>
+          {/* Focus / Tab Set dropdown */}
+          <Box
+            onClick={(e) => setTabSetMenuAnchor(e.currentTarget)}
+            sx={{ display: 'flex', alignItems: 'center', gap: 0.5, px: 1.25, py: 0.5, borderRadius: 0.75, cursor: 'pointer', bgcolor: tabSetMenuAnchor ? alpha('#000', 0.04) : 'transparent', '&:hover': { bgcolor: alpha('#000', 0.04) } }}
+          >
+            <Typography sx={{ fontSize: 13, fontWeight: 600, color: 'text.primary', whiteSpace: 'nowrap' }}>Focus</Typography>
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M11 6.25V3.73C11 3.52 11.07 3.35 11.21 3.21C11.35 3.07 11.52 3 11.73 3H16.26C16.48 3 16.65 3.07 16.79 3.21C16.93 3.35 17 3.52 17 3.73V6.25C17 6.46 16.93 6.64 16.79 6.78C16.65 6.93 16.48 7 16.27 7H11.74C11.52 7 11.35 6.93 11.21 6.78C11.07 6.64 11 6.46 11 6.25ZM3 10.27V3.73C3 3.52 3.07 3.35 3.22 3.21C3.36 3.07 3.54 3 3.75 3H8.27C8.47 3 8.64 3.07 8.78 3.21C8.93 3.35 9 3.52 9 3.73V10.27C9 10.47 8.93 10.64 8.78 10.78C8.64 10.93 8.47 11 8.27 11H3.75C3.54 11 3.36 10.93 3.22 10.78C3.07 10.64 3 10.47 3 10.27ZM11 16.25V9.75C11 9.54 11.07 9.36 11.21 9.22C11.35 9.07 11.52 9 11.73 9H16.26C16.48 9 16.65 9.07 16.79 9.22C16.93 9.36 17 9.54 17 9.75V16.25C17 16.46 16.93 16.64 16.79 16.78C16.65 16.93 16.48 17 16.27 17H11.74C11.52 17 11.35 16.93 11.21 16.78C11.07 16.64 11 16.46 11 16.25ZM3 16.25V13.71C3 13.5 3.07 13.33 3.22 13.19C3.36 13.05 3.54 12.98 3.75 12.98H8.27C8.47 12.98 8.64 13.05 8.78 13.19C8.93 13.33 9 13.5 9 13.71V16.25C9 16.46 8.93 16.64 8.78 16.78C8.64 16.93 8.47 17 8.27 17H3.75C3.54 17 3.36 16.93 3.22 16.78C3.07 16.64 3 16.46 3 16.25ZM4.5 9.5H7.5V4.5H4.5V9.5ZM12.5 15.5H15.5V10.5H12.5V15.5ZM12.5 5.52H15.5V4.5H12.5V5.52ZM4.5 15.5H7.5V14.48H4.5V15.5Z" fill="#616161"/></svg>
+            <ArrowDropDownIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+          </Box>
+          <Menu
+            anchorEl={tabSetMenuAnchor}
+            open={Boolean(tabSetMenuAnchor)}
+            onClose={() => setTabSetMenuAnchor(null)}
+            PaperProps={{ elevation: 4, sx: { width: 350, borderRadius: 1, mt: 0.5 } }}
+            transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+          >
+            <Box sx={{ px: 2.5, pt: 2, pb: 1 }}>
+              <Typography sx={{ fontSize: 14, fontWeight: 700, color: 'text.primary' }}>Tab Set</Typography>
+            </Box>
+            {[
+              { label: 'Focus',   desc: 'Tabs for targeted insights and specific questions', selected: true  },
+              { label: 'Classic', desc: 'General analytic tabs that range in use cases',      selected: false },
+            ].map(opt => (
+              <Box key={opt.label} onClick={opt.selected ? () => setTabSetMenuAnchor(null) : undefined}
+                sx={{ px: 2.5, py: 1.5, cursor: 'pointer', bgcolor: opt.selected ? '#E5F7F7' : 'transparent', '&:hover': { bgcolor: opt.selected ? '#D6F0F0' : alpha('#000', 0.03) } }}>
+                <Typography sx={{ fontSize: 14, fontWeight: opt.selected ? 700 : 400, color: 'text.primary' }}>{opt.label}</Typography>
+                <Typography sx={{ fontSize: 14, color: 'text.secondary', mt: 0.25 }}>{opt.desc}</Typography>
+              </Box>
+            ))}
+          </Menu>
           <IconButton size="small">
             <Box component="img" src="/add-tab.svg" alt="Add Tab" sx={{ width: 36, height: 36 }} />
           </IconButton>

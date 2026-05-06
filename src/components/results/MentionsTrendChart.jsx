@@ -7,7 +7,7 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import WidgetMenu from './WidgetMenu'
 import SpikePopover from './SpikePopover'
 
-function MentionsTrendChart({ brandName, resultCount = 107, onDashboardSave, onDataPointClick, onViewMoreInsights, onWidgetInsight }) {
+function MentionsTrendChart({ brandName, resultCount = 107, onDashboardSave, onDataPointClick, onViewMoreInsights, onWidgetInsight, showViewFullAnalysis, onViewFullAnalysis }) {
   // Weekly data matching screenshot pattern (Aug 25–31, hourly-ish granularity)
   const baseData = [
     18,20,15,25,30,22,12,15,20,28,18,10,8,15,22,18,
@@ -90,7 +90,7 @@ function MentionsTrendChart({ brandName, resultCount = 107, onDashboardSave, onD
             sx={{ fontSize: 13, fontWeight: 700, color: '#212121', textTransform: 'none' }}>
             Weekly
           </Button>
-          <WidgetMenu onDashboardSave={onDashboardSave} widgetName="Mentions Trend" onWidgetInsight={onWidgetInsight} />
+          <WidgetMenu showViewFullAnalysis={showViewFullAnalysis} onViewFullAnalysis={onViewFullAnalysis} onDashboardSave={onDashboardSave} widgetName="Mentions Trend" onWidgetInsight={onWidgetInsight} />
         </Box>
       </Box>
 

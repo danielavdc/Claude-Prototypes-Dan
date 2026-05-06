@@ -48,7 +48,7 @@ const WORDS = [
   { text: 'South Carolina', size: 24, color: '#66BB6A', x: 38, y: 95 },
 ]
 
-function TopKeywordsChart({ onDashboardSave, onDataPointClick, onWidgetInsight }) {
+function TopKeywordsChart({ onDashboardSave, onDataPointClick, onWidgetInsight, showViewFullAnalysis, onViewFullAnalysis }) {
   return (
     <Box>
       {/* Header */}
@@ -57,7 +57,7 @@ function TopKeywordsChart({ onDashboardSave, onDataPointClick, onWidgetInsight }
           <Typography sx={{ fontSize: 16, fontWeight: 700, color: '#212121' }}>Top Keywords and Entities</Typography>
           <InfoOutlinedIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
         </Box>
-        <WidgetMenu onDashboardSave={onDashboardSave} widgetName="Top Keywords" onWidgetInsight={onWidgetInsight} />
+        <WidgetMenu showViewFullAnalysis={showViewFullAnalysis} onViewFullAnalysis={onViewFullAnalysis} onDashboardSave={onDashboardSave} widgetName="Top Keywords" onWidgetInsight={onWidgetInsight} />
       </Box>
 
       {/* Legend */}

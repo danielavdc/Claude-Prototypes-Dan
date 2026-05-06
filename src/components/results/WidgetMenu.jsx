@@ -9,7 +9,7 @@ import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined
 import RefreshIcon from '@mui/icons-material/Refresh'
 import AddToDashboardModal from '../core/AddToDashboardModal'
 
-function WidgetMenu({ onDashboardSave, showRegenerate, widgetName, onWidgetInsight }) {
+function WidgetMenu({ onDashboardSave, showRegenerate, widgetName, onWidgetInsight, showViewFullAnalysis, onViewFullAnalysis }) {
   const [anchorEl, setAnchorEl] = useState(null)
   const [dashboardModalOpen, setDashboardModalOpen] = useState(false)
 
@@ -17,7 +17,12 @@ function WidgetMenu({ onDashboardSave, showRegenerate, widgetName, onWidgetInsig
 
   return (
     <>
-      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
+        {showViewFullAnalysis && (
+          <Typography onClick={onViewFullAnalysis} sx={{ fontSize: 13, fontWeight: 600, color: '#1D9F9F', cursor: 'pointer', whiteSpace: 'nowrap', '&:hover': { textDecoration: 'underline' } }}>
+            View Full Analysis
+          </Typography>
+        )}
         {!showRegenerate && (
           <Tooltip title="Generate widget insight with Mira" arrow>
             <IconButton size="small" onClick={() => onWidgetInsight?.(widgetName)}>

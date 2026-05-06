@@ -14,6 +14,7 @@ import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd'
 import FilterListIcon from '@mui/icons-material/FilterList'
 import SortIcon from '@mui/icons-material/Sort'
 import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined'
+import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined'
 import { useState, useRef, useEffect } from 'react'
 
 // ── constants ─────────────────────────────────────────────────────────────────
@@ -341,6 +342,224 @@ function NewsCoverageContent() {
           ))}
         </Box>
       </Box>
+
+      {/* News Sources by Reach — full table */}
+      {(() => {
+        const NS_TABLE = [
+          { rank: 1,  init: 'CN', color: '#C62828', name: 'CNN',                url: 'US | https://mtnwe...', reach: '134k', reachPct: 100, articles: 23, format: 'Online',  focus: 'International', social: ['X', 'LI'] },
+          { rank: 2,  init: 'UT', color: '#1565C0', name: 'USA Today',           url: 'US | https://mtnwe...', reach: '112k', reachPct: 84,  articles: 10, format: 'Print',   focus: 'International', social: ['X', 'LI', 'IG', 'FB'] },
+          { rank: 3,  init: 'NY', color: '#212121', name: 'The New York Times',  url: 'US | https://mtnwe...', reach: '98k',  reachPct: 73,  articles: 5,  format: 'Online',  focus: 'Regional',      social: ['X', 'LI', 'YT'] },
+          { rank: 4,  init: 'TG', color: '#1B5E20', name: 'The Guardian',        url: 'US | https://mtnwe...', reach: '54k',  reachPct: 40,  articles: 23, format: 'Online',  focus: 'Local',         social: ['X', 'LI', 'IG', 'FB', 'YT'] },
+          { rank: 5,  init: 'MN', color: '#E65100', name: 'Mountain News',       url: 'US | https://mtnwe...', reach: '12k',  reachPct: 9,   articles: 8,  format: 'Online',  focus: 'Local',         social: ['X', 'LI', 'IG', 'FB'] },
+          { rank: 6,  init: 'MN', color: '#E65100', name: 'Mountain News',       url: 'US | https://mtnwe...', reach: '12k',  reachPct: 9,   articles: 8,  format: 'Online',  focus: 'Local',         social: ['X', 'LI', 'IG', 'FB'] },
+          { rank: 7,  init: 'MN', color: '#E65100', name: 'Mountain News',       url: 'US | https://mtnwe...', reach: '12k',  reachPct: 9,   articles: 8,  format: 'Online',  focus: 'Local',         social: ['X', 'LI', 'IG', 'FB'] },
+          { rank: 8,  init: 'MN', color: '#E65100', name: 'Mountain News',       url: 'US | https://mtnwe...', reach: '12k',  reachPct: 9,   articles: 8,  format: 'Online',  focus: 'Local',         social: ['X', 'LI', 'IG', 'FB'] },
+          { rank: 9,  init: 'MN', color: '#E65100', name: 'Mountain News',       url: 'US | https://mtnwe...', reach: '12k',  reachPct: 9,   articles: 8,  format: 'Online',  focus: 'Local',         social: ['X', 'LI', 'IG', 'FB'] },
+          { rank: 10, init: 'MN', color: '#E65100', name: 'Mountain News',       url: 'US | https://mtnwe...', reach: '12k',  reachPct: 9,   articles: 8,  format: 'Online',  focus: 'Local',         social: ['X', 'LI', 'IG', 'FB'] },
+        ]
+        const SOCIAL_COLOR = { X: '#212121', LI: '#0A66C2', IG: '#E1306C', FB: '#1877F2', YT: '#FF0000' }
+        return (
+          <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2, pt: 1.5, pb: 1 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                <Typography sx={{ fontSize: 16, fontWeight: 700, color: '#212121' }}>News Sources by Reach</Typography>
+                <InfoOutlinedIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+              </Box>
+              <Box sx={{ display: 'flex', gap: 0.5 }}>
+                <IconButton size="small"><FilterListIcon sx={{ fontSize: 18, color: 'text.secondary' }} /></IconButton>
+                <IconButton size="small"><SortIcon sx={{ fontSize: 18, color: 'text.secondary' }} /></IconButton>
+                <IconButton size="small"><MoreVertIcon sx={{ fontSize: 18, color: 'text.secondary' }} /></IconButton>
+              </Box>
+            </Box>
+            <Box sx={{ display: 'flex', px: 2, py: 0.75, borderTop: '1px solid #e0e0e0', borderBottom: '1px solid #e0e0e0', bgcolor: '#FAFAFA' }}>
+              <Box sx={{ width: 28 }} /><Box sx={{ width: 24 }} />
+              <Typography sx={{ fontSize: 11, fontWeight: 700, color: 'text.secondary', flex: 1 }}>Name</Typography>
+              <Typography sx={{ fontSize: 11, fontWeight: 700, color: 'text.secondary', width: 80 }}>Reach ↓</Typography>
+              <Typography sx={{ fontSize: 11, fontWeight: 700, color: 'text.secondary', width: 56, textAlign: 'center' }}>Articles</Typography>
+              <Typography sx={{ fontSize: 11, fontWeight: 700, color: 'text.secondary', width: 60 }}>Format</Typography>
+              <Typography sx={{ fontSize: 11, fontWeight: 700, color: 'text.secondary', width: 90 }}>Focus</Typography>
+              <Typography sx={{ fontSize: 11, fontWeight: 700, color: 'text.secondary', width: 100 }}>Social Profiles</Typography>
+              <Box sx={{ width: 60 }} />
+            </Box>
+            {NS_TABLE.map((row, i) => (
+              <Box key={i} sx={{ display: 'flex', alignItems: 'center', px: 2, py: 1, borderBottom: i < NS_TABLE.length - 1 ? '1px solid #f5f5f5' : 'none', '&:hover': { bgcolor: 'rgba(0,0,0,0.02)' } }}>
+                <Checkbox size="small" sx={{ p: 0, mr: 0.5, width: 28 }} />
+                <Typography sx={{ fontSize: 12, color: 'text.secondary', width: 24 }}>{row.rank}</Typography>
+                <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
+                  <Box sx={{ width: 32, height: 32, borderRadius: '50%', bgcolor: row.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Typography sx={{ fontSize: 9, fontWeight: 700, color: 'white' }}>{row.init}</Typography>
+                  </Box>
+                  <Box sx={{ minWidth: 0 }}>
+                    <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#212121', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.name}</Typography>
+                    <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>{row.url}</Typography>
+                  </Box>
+                </Box>
+                <Box sx={{ width: 80, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#212121' }}>{row.reach}</Typography>
+                  <Box sx={{ width: 20, height: 6, bgcolor: '#f0f0f0', borderRadius: 1, overflow: 'hidden' }}>
+                    <Box sx={{ width: `${row.reachPct}%`, height: '100%', bgcolor: BLUE, borderRadius: 1 }} />
+                  </Box>
+                </Box>
+                <Typography sx={{ fontSize: 13, color: '#424242', width: 56, textAlign: 'center' }}>{row.articles}</Typography>
+                <Typography sx={{ fontSize: 12, color: '#424242', width: 60 }}>{row.format}</Typography>
+                <Box sx={{ width: 90, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <LocationOnOutlinedIcon sx={{ fontSize: 13, color: 'text.secondary' }} />
+                  <Typography sx={{ fontSize: 12, color: '#424242' }}>{row.focus}</Typography>
+                </Box>
+                <Box sx={{ width: 100, display: 'flex', alignItems: 'center', gap: 0.25 }}>
+                  {row.social.slice(0, 4).map((s, si) => (
+                    s.startsWith('+')
+                      ? <Box key={si} sx={{ fontSize: 9, fontWeight: 700, bgcolor: '#f0f0f0', color: '#424242', px: 0.5, borderRadius: 0.5 }}>{s}</Box>
+                      : <Box key={si} sx={{ width: 18, height: 18, borderRadius: '50%', bgcolor: SOCIAL_COLOR[s] || '#9E9E9E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Typography sx={{ fontSize: 7, fontWeight: 700, color: 'white' }}>{s}</Typography>
+                        </Box>
+                  ))}
+                </Box>
+                <Box sx={{ width: 60, display: 'flex', gap: 0.5, justifyContent: 'flex-end' }}>
+                  <IconButton size="small" sx={{ p: 0.25 }}><PersonOutlineIcon sx={{ fontSize: 15, color: 'text.secondary' }} /></IconButton>
+                  <IconButton size="small" sx={{ p: 0.25 }}><PlaylistAddIcon sx={{ fontSize: 15, color: 'text.secondary' }} /></IconButton>
+                </Box>
+              </Box>
+            ))}
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1, px: 2, py: 1, borderTop: '1px solid #e0e0e0' }}>
+              <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>1 - 7 of 30</Typography>
+              <Typography sx={{ fontSize: 12, color: '#bdbdbd', cursor: 'pointer' }}>{'<'}</Typography>
+              <Typography sx={{ fontSize: 12, color: TEAL, cursor: 'pointer' }}>{'>'}</Typography>
+            </Box>
+          </Box>
+        )
+      })()}
+
+      {/* News Sources Breakdown by Reach + News Sources Reach Trend */}
+      {(() => {
+        const NS_BREAKDOWN = [
+          { name: 'CNN',            v: 52.1, color: BLUE   },
+          { name: 'USA Today',      v: 38.3, color: YELLOW },
+          { name: 'The New York...', v: 30.9, color: PINK  },
+          { name: 'The Guardian',   v: 13.1, color: GREEN  },
+          { name: 'Mountain Wee...', v: 13.1, color: ORANGE },
+        ]
+        const NS_TREND = [
+          { label: 'CNN',              color: BLUE,   data: [20, 55, 35, 42, 28, 32, 22] },
+          { label: 'USA Today',        color: YELLOW, data: [12, 40, 22, 28, 18, 20, 15] },
+          { label: 'The New York Times', color: PINK, data: [8,  18, 12, 15, 10, 12, 8]  },
+        ]
+        const maxV = 55.1
+        return (
+          <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+            <Box sx={{ flex: 1, minWidth: 240, border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2 }}>
+              <WHeader title="News Sources Breakdown by Reach" />
+              <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 1, height: 140, pt: 1 }}>
+                {NS_BREAKDOWN.map((b, i) => (
+                  <Box key={i} sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <Typography sx={{ fontSize: 10, fontWeight: 700, color: '#212121', mb: 0.25 }}>{b.v}k</Typography>
+                    <Box sx={{ width: '70%', height: `${(b.v / maxV) * 120}px`, bgcolor: b.color, borderRadius: '2px 2px 0 0' }} />
+                    <Typography sx={{ fontSize: 9, color: '#616161', mt: 0.25, textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', width: '100%' }}>{b.name}</Typography>
+                  </Box>
+                ))}
+              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
+                {['0', '10k', '20k', '30k', '40k', '50k', '60k'].map(l => <Typography key={l} sx={{ fontSize: 8, color: 'text.secondary' }}>{l}</Typography>)}
+              </Box>
+            </Box>
+            <Box sx={{ flex: 1, minWidth: 240, border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2 }}>
+              <WHeader title="News Sources Reach Trend" action={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25, border: '1px solid #e0e0e0', borderRadius: 0.5, px: 1, py: 0.25, cursor: 'pointer' }}>
+                  <Typography sx={{ fontSize: 12 }}>+1</Typography>
+                  <ArrowDropDownIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
+                </Box>
+              } />
+              <Box sx={{ display: 'flex', gap: 1.5, mb: 1, flexWrap: 'wrap' }}>
+                {NS_TREND.map((l, i) => (
+                  <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: l.color }} />
+                    <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>{l.label}</Typography>
+                  </Box>
+                ))}
+              </Box>
+              {(() => {
+                const w = 600, h = 120, padL = 36, padB = 24, padT = 8, cW = w - padL - 8, cH = h - padB - padT
+                const maxVal = 60
+                const xL = ['Aug 25', 'Aug 27', 'Aug 29', 'Aug 31']
+                return (
+                  <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="xMidYMid meet" style={{ display: 'block' }}>
+                    {[0, 20000, 40000, 60000].map(v => {
+                      const y = padT + (1 - v / 60000) * cH
+                      return <g key={v}><line x1={padL} y1={y} x2={w} y2={y} stroke="#f0f0f0" strokeWidth="1" /><text x={padL - 4} y={y + 3} textAnchor="end" fontSize="8" fill="#9E9E9E">{v === 0 ? '0' : `${v / 1000}k`}</text></g>
+                    })}
+                    {NS_TREND.map((ds, di) => {
+                      const pts = ds.data.map((v, i) => `${padL + (i / (ds.data.length - 1)) * cW},${padT + (1 - v / maxVal) * cH}`).join(' ')
+                      return <polyline key={di} points={pts} fill="none" stroke={ds.color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+                    })}
+                    {xL.map((d, i) => <text key={i} x={padL + (i / (xL.length - 1)) * cW} y={h - 6} textAnchor="middle" fontSize="8" fill="#9E9E9E">{d}</text>)}
+                  </svg>
+                )
+              })()}
+            </Box>
+          </Box>
+        )
+      })()}
+
+      {/* Press Release + News Sources Keywords & Entities */}
+      {(() => {
+        const KW_NC = [
+          { text: 'Boston Red Sox', type: 'org', size: 14 }, { text: 'Richland County', type: 'kw', size: 15 },
+          { text: 'IKEA', type: 'org', size: 13 }, { text: 'Answer Engine', type: 'kw', size: 13 },
+          { text: 'MLB', type: 'org', size: 13 }, { text: 'fans', type: 'kw', size: 12 },
+          { text: '#policeprofessionalism', type: 'ht', size: 12 }, { text: 'LLMs', type: 'kw', size: 16 },
+          { text: 'Real Estate Agence', type: 'kw', size: 13 }, { text: 'coaching to ensure', type: 'kw', size: 12 },
+          { text: 'Facebook', type: 'org', size: 13 }, { text: 'GPT-4', type: 'kw', size: 18 },
+          { text: 'Clemson University', type: 'org', size: 14 }, { text: 'Dallas', type: 'kw', size: 13 },
+          { text: 'South Carolina', type: 'kw', size: 22 }, { text: 'United States', type: 'kw', size: 14 },
+          { text: 'Don White', type: 'people', size: 12 }, { text: 'United States', type: 'kw', size: 13 },
+          { text: 'Leon Lott', type: 'people', size: 12 }, { text: '#entirecounty', type: 'ht', size: 12 },
+          { text: 'technology', type: 'kw', size: 18 }, { text: 'public safety activities', type: 'kw', size: 13 },
+          { text: 'Anthony Tassone', type: 'people', size: 13 }, { text: 'Richland County Sheriff\'s Department', type: 'org', size: 11 },
+        ]
+        const KW_COLORS = { kw: PINK, ht: ORANGE, org: '#1565C0', people: '#3F51B5' }
+        return (
+          <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+            <Box sx={{ flex: 1, minWidth: 220, border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2 }}>
+              <WHeader title="Press Release" />
+              <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1.5 }}>
+                <DonutChart size={150} segments={[{ pct: 35.8, color: BLUE }, { pct: 25.5, color: YELLOW }, { pct: 38.7, color: '#E0E0E0' }]} />
+              </Box>
+              {[{ label: 'Press Release', color: BLUE, pct: '35.8%', count: '1.9k' }, { label: 'Other News', color: YELLOW, pct: '25.5%', count: '1.4k' }].map((r, i) => (
+                <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.75 }}>
+                  <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: r.color, flexShrink: 0 }} />
+                  <Typography sx={{ fontSize: 13, flex: 1, color: '#424242' }}>{r.label}</Typography>
+                  <Typography sx={{ fontSize: 13, color: '#212121' }}>{r.pct}</Typography>
+                  <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#212121', width: 36, textAlign: 'right' }}>{r.count}</Typography>
+                </Box>
+              ))}
+            </Box>
+            <Box sx={{ flex: 2, minWidth: 280, border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2 }}>
+              <WHeader title="News Sources Keywords & Entities" action={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25, border: '1px solid #e0e0e0', borderRadius: 0.5, px: 1, py: 0.25, cursor: 'pointer' }}>
+                  <Typography sx={{ fontSize: 12 }}>+3</Typography>
+                  <ArrowDropDownIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
+                </Box>
+              } />
+              <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', mb: 1.25 }}>
+                {[{ label: 'Keyword', color: PINK }, { label: 'Hashtag', color: ORANGE }, { label: 'Organization', color: '#1565C0' }, { label: 'People', color: '#3F51B5' }].map(f => (
+                  <Box key={f.label} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: f.color }} />
+                    <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>{f.label}</Typography>
+                  </Box>
+                ))}
+              </Box>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, lineHeight: 2 }}>
+                {KW_NC.map((kw, i) => (
+                  <Typography key={i} sx={{ fontSize: kw.size, fontWeight: kw.size >= 16 ? 700 : 400, color: KW_COLORS[kw.type], cursor: 'pointer', '&:hover': { opacity: 0.75 } }}>
+                    {kw.text}
+                  </Typography>
+                ))}
+              </Box>
+            </Box>
+          </Box>
+        )
+      })()}
+
     </Box>
   )
 }
@@ -1036,8 +1255,9 @@ function AuthorsListContent() {
 
 // ── main export ───────────────────────────────────────────────────────────────
 
-export default function AudienceTabContent({ loading }) {
+export default function AudienceTabContent({ loading, targetSubTab, subTabTrigger }) {
   const [activeTab, setActiveTab] = useState('authors-list')
+  useEffect(() => { if (subTabTrigger > 0 && targetSubTab) setActiveTab(targetSubTab) }, [subTabTrigger])
   if (loading) return null
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>

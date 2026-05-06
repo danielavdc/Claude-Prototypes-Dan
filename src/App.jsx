@@ -58,6 +58,13 @@ export default function App() {
   const [booleanQuery, setBooleanQuery] = useState('alibaba')
   const [activeTab, setActiveTab] = useState(0)
   const [activeTabLabel, setActiveTabLabel] = useState('')
+  const [targetSubTab, setTargetSubTab] = useState(null)
+  const [subTabTrigger, setSubTabTrigger] = useState(0)
+
+  const navigateToTab = (tabIndex, subTab = null) => {
+    setActiveTab(tabIndex)
+    if (subTab) { setTargetSubTab(subTab); setSubTabTrigger(t => t + 1) }
+  }
   const [editorExpanded, setEditorExpanded] = useState(true)
   const [resultsLoading, setResultsLoading] = useState(false)
   const [appliedQueryVersion, setAppliedQueryVersion] = useState(0)
@@ -316,7 +323,7 @@ export default function App() {
                     )}
                     </Box>
                   ) : (
-                    <ResultsView query={booleanQuery} brandName={brandState.brandName} loading={resultsLoading} resultCount={resultCount} onDashboardSave={(name) => setDashboardBanner(name)} onWidgetInsight={openWidgetInsight} activeTab={activeTab} activeTabLabel={activeTabLabel} />
+                    <ResultsView query={booleanQuery} brandName={brandState.brandName} loading={resultsLoading} resultCount={resultCount} onDashboardSave={(name) => setDashboardBanner(name)} onWidgetInsight={openWidgetInsight} activeTab={activeTab} activeTabLabel={activeTabLabel} navigateToTab={navigateToTab} targetSubTab={targetSubTab} subTabTrigger={subTabTrigger} />
                   )}
                 </Box>
               </>

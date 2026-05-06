@@ -19,7 +19,7 @@ const LOCATIONS = [
 
 const MAX_COUNT = 903
 
-function LocationsChart({ onDashboardSave, onDataPointClick, onWidgetInsight }) {
+function LocationsChart({ onDashboardSave, onDataPointClick, onWidgetInsight, showViewFullAnalysis, onViewFullAnalysis }) {
   return (
     <Box>
       {/* Header */}
@@ -28,7 +28,7 @@ function LocationsChart({ onDashboardSave, onDataPointClick, onWidgetInsight }) 
           <Typography sx={{ fontSize: 16, fontWeight: 700, color: '#212121' }}>Locations</Typography>
           <InfoOutlinedIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
         </Box>
-        <WidgetMenu onDashboardSave={onDashboardSave} widgetName="Locations" onWidgetInsight={onWidgetInsight} />
+        <WidgetMenu showViewFullAnalysis={showViewFullAnalysis} onViewFullAnalysis={onViewFullAnalysis} onDashboardSave={onDashboardSave} widgetName="Locations" onWidgetInsight={onWidgetInsight} />
       </Box>
 
       {/* Bars */}

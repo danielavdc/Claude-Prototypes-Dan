@@ -725,8 +725,9 @@ function TrendingContent() {
 
 // ── main export ───────────────────────────────────────────────────────────────
 
-export default function CoverageTabContent({ onDashboardSave, loading }) {
+export default function CoverageTabContent({ onDashboardSave, loading, targetSubTab, subTabTrigger }) {
   const [activeTab, setActiveTab] = useState('mentions-engagement')
+  useEffect(() => { if (subTabTrigger > 0 && targetSubTab) setActiveTab(targetSubTab) }, [subTabTrigger])
   if (loading) return null
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>

@@ -12,14 +12,23 @@ import SentimentChart from '../SentimentChart'
 
 // ── shared helpers ──────────────────────────────────────────────────────────
 
-function WidgetHeader({ title, info = true }) {
+const VFA = ({ onClick }) => (
+  <Typography onClick={onClick} sx={{ fontSize: 13, fontWeight: 600, color: '#1D9F9F', cursor: 'pointer', whiteSpace: 'nowrap', '&:hover': { textDecoration: 'underline' } }}>
+    View Full Analysis
+  </Typography>
+)
+
+function WidgetHeader({ title, info = true, onVFA }) {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
         <Typography sx={{ fontSize: 16, fontWeight: 700, color: '#212121' }}>{title}</Typography>
         {info && <InfoOutlinedIcon sx={{ fontSize: 16, color: 'text.secondary' }} />}
       </Box>
-      <IconButton size="small"><MoreVertIcon sx={{ fontSize: 18, color: 'text.secondary' }} /></IconButton>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+        <VFA onClick={onVFA} />
+        <IconButton size="small"><MoreVertIcon sx={{ fontSize: 18, color: 'text.secondary' }} /></IconButton>
+      </Box>
     </Box>
   )
 }
@@ -130,7 +139,7 @@ const JOURNALISTS_REACH = [
 
 // ── sub-components ───────────────────────────────────────────────────────────
 
-function NewsKpiCards() {
+function NewsKpiCards({ onVFA }) {
   const cards = [
     { title: 'Total Reach',  value: '1.27T', delta: 12, data: SPARKLINE_REACH, color: '#1D9F9F' },
     { title: 'News Volume',  value: '234k',  delta: -3, data: SPARKLINE_NEWS,  color: '#9C4DD6' },
@@ -140,7 +149,10 @@ function NewsKpiCards() {
     <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2, pt: 1.5, pb: 1 }}>
         <Typography sx={{ fontSize: 16, fontWeight: 700, color: '#212121' }}>News KPIs</Typography>
-        <IconButton size="small"><MoreVertIcon sx={{ fontSize: 18, color: 'text.secondary' }} /></IconButton>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <VFA onClick={onVFA} />
+          <IconButton size="small"><MoreVertIcon sx={{ fontSize: 18, color: 'text.secondary' }} /></IconButton>
+        </Box>
       </Box>
       <Divider />
       <Box sx={{ display: 'flex', width: '100%' }}>
@@ -159,7 +171,7 @@ function NewsKpiCards() {
   )
 }
 
-function EngagementTrendChart() {
+function EngagementTrendChart({ onVFA }) {
   const data = ENGAGEMENT_DATA
   const max = Math.max(...data)
   const min = Math.min(...data)
@@ -170,7 +182,7 @@ function EngagementTrendChart() {
 
   return (
     <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2 }}>
-      <WidgetHeader title="Engagement Trend" />
+      <WidgetHeader title="Engagement Trend" onVFA={onVFA} />
       <Box sx={{ display: 'flex', gap: 3, mb: 2 }}>
         <Box>
           <Typography sx={{ fontSize: 11, color: 'text.secondary', mb: 0.25 }}>Total Engagement</Typography>
@@ -203,7 +215,7 @@ function EngagementTrendChart() {
   )
 }
 
-function NewsBySearchesTable() {
+function NewsBySearchesTable({ onVFA }) {
   return (
     <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, overflow: 'hidden' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2, pt: 1.5, pb: 1 }}>
@@ -211,7 +223,10 @@ function NewsBySearchesTable() {
           <Typography sx={{ fontSize: 16, fontWeight: 700, color: '#212121' }}>News Sources by Searches</Typography>
           <InfoOutlinedIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
         </Box>
-        <IconButton size="small"><MoreVertIcon sx={{ fontSize: 18, color: 'text.secondary' }} /></IconButton>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <VFA onClick={onVFA} />
+          <IconButton size="small"><MoreVertIcon sx={{ fontSize: 18, color: 'text.secondary' }} /></IconButton>
+        </Box>
       </Box>
       <Box sx={{ display: 'flex', px: 2, py: 1, borderBottom: '1px solid #e0e0e0', borderTop: '1px solid #e0e0e0' }}>
         <Typography sx={{ fontSize: 12, fontWeight: 700, color: 'text.secondary', width: 36 }}>Rank</Typography>
@@ -238,7 +253,7 @@ function NewsBySearchesTable() {
   )
 }
 
-function SourceTypeDonut() {
+function SourceTypeDonut({ onVFA }) {
   const cx = 84, cy = 84, r = 64, inner = 40
   let angle = -Math.PI / 2
   const slices = SOURCE_TYPES.map(s => {
@@ -258,7 +273,7 @@ function SourceTypeDonut() {
 
   return (
     <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2, flex: 1 }}>
-      <WidgetHeader title="Source Type Breakdown" />
+      <WidgetHeader title="Source Type Breakdown" onVFA={onVFA} />
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         <svg width={168} height={168} style={{ flexShrink: 0 }}>
           {slices.map((s, i) => (
@@ -282,10 +297,10 @@ function SourceTypeDonut() {
   )
 }
 
-function TopLanguageTable() {
+function TopLanguageTable({ onVFA }) {
   return (
     <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2, flex: 1 }}>
-      <WidgetHeader title="Top Language" />
+      <WidgetHeader title="Top Language" onVFA={onVFA} />
       <Box sx={{ display: 'flex', pb: 1, borderBottom: '1px solid #e0e0e0', mb: 0.5 }}>
         <Typography sx={{ fontSize: 12, fontWeight: 700, color: 'text.secondary', flex: 1 }}>Language</Typography>
         <Typography sx={{ fontSize: 12, fontWeight: 700, color: 'text.secondary', width: 80, textAlign: 'right' }}>Mentions</Typography>
@@ -313,7 +328,7 @@ function TopLanguageTable() {
   )
 }
 
-function ReachTable({ title, rows }) {
+function ReachTable({ title, rows, onVFA }) {
   const hasDelta = rows[0]?.delta !== undefined
   return (
     <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5 }}>
@@ -322,7 +337,10 @@ function ReachTable({ title, rows }) {
           <Typography sx={{ fontSize: 16, fontWeight: 700, color: '#212121' }}>{title}</Typography>
           <InfoOutlinedIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
         </Box>
-        <IconButton size="small"><MoreVertIcon sx={{ fontSize: 18, color: 'text.secondary' }} /></IconButton>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <VFA onClick={onVFA} />
+          <IconButton size="small"><MoreVertIcon sx={{ fontSize: 18, color: 'text.secondary' }} /></IconButton>
+        </Box>
       </Box>
       <Box sx={{ display: 'flex', px: 2, py: 1, borderBottom: '1px solid #e0e0e0', borderTop: '1px solid #e0e0e0' }}>
         <Box sx={{ flex: 1, minWidth: 0 }}><Typography sx={{ fontSize: 12, fontWeight: 700, color: 'text.secondary' }}>Name</Typography></Box>
@@ -364,12 +382,15 @@ function ReachTable({ title, rows }) {
 
 // ── main export ──────────────────────────────────────────────────────────────
 
-export default function OverviewTabContent({ loading, onDashboardSave, onWidgetInsight, onFilteredMentions, onSpikeAnalysis }) {
+export default function OverviewTabContent({ loading, onDashboardSave, onWidgetInsight, onFilteredMentions, onSpikeAnalysis, navigateToTab }) {
+  const nav = (tab, sub = null) => navigateToTab?.(tab, sub)
   return (
     <>
-      <NewsKpiCards />
+      <NewsKpiCards         onVFA={() => nav(4, 'news-coverage')} />
       <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2, height: 429 }}>
         <MentionsTrendChart
+          showViewFullAnalysis
+          onViewFullAnalysis={() => nav(1, 'mentions-engagement')}
           loading={loading}
           onDashboardSave={onDashboardSave}
           onDataPointClick={onFilteredMentions}
@@ -377,25 +398,25 @@ export default function OverviewTabContent({ loading, onDashboardSave, onWidgetI
           onWidgetInsight={onWidgetInsight}
         />
       </Paper>
-      <EngagementTrendChart />
-      <NewsBySearchesTable />
+      <EngagementTrendChart  onVFA={() => nav(1, 'mentions-engagement')} />
+      <NewsBySearchesTable   onVFA={() => nav(4, 'news-coverage')} />
       <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2 }}>
-        <TopKeywordsChart onDashboardSave={onDashboardSave} onDataPointClick={onFilteredMentions} onWidgetInsight={onWidgetInsight} />
+        <TopKeywordsChart showViewFullAnalysis onViewFullAnalysis={() => nav(2)} onDashboardSave={onDashboardSave} onDataPointClick={onFilteredMentions} onWidgetInsight={onWidgetInsight} />
       </Paper>
       <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
         <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2, flex: 1, minWidth: 280 }}>
-          <LocationsChart onDashboardSave={onDashboardSave} onDataPointClick={onFilteredMentions} onWidgetInsight={onWidgetInsight} />
+          <LocationsChart showViewFullAnalysis onViewFullAnalysis={() => nav(1, 'locations-sources')} onDashboardSave={onDashboardSave} onDataPointClick={onFilteredMentions} onWidgetInsight={onWidgetInsight} />
         </Paper>
         <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2, flex: 1, minWidth: 280 }}>
-          <SentimentChart onDashboardSave={onDashboardSave} onDataPointClick={onFilteredMentions} onWidgetInsight={onWidgetInsight} />
+          <SentimentChart showViewFullAnalysis onViewFullAnalysis={() => nav(3)} onDashboardSave={onDashboardSave} onDataPointClick={onFilteredMentions} onWidgetInsight={onWidgetInsight} />
         </Paper>
       </Box>
       <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
-        <SourceTypeDonut />
-        <TopLanguageTable />
+        <SourceTypeDonut  onVFA={() => nav(1, 'locations-sources')} />
+        <TopLanguageTable onVFA={() => nav(1, 'locations-sources')} />
       </Box>
-      <ReachTable title="News Sources by Reach" rows={NEWS_SOURCES_REACH} />
-      <ReachTable title="Journalists by Reach" rows={JOURNALISTS_REACH} />
+      <ReachTable title="News Sources by Reach" rows={NEWS_SOURCES_REACH} onVFA={() => nav(4, 'news-coverage')} />
+      <ReachTable title="Journalists by Reach"  rows={JOURNALISTS_REACH}  onVFA={() => nav(4, 'journalists')} />
     </>
   )
 }

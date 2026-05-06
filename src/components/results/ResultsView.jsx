@@ -43,7 +43,7 @@ import OverviewTabContent from './tabs/OverviewTabContent'
 import VisualAnalysisTabContent from './tabs/VisualAnalysisTabContent'
 import SocialMediaInsightsTabContent from './tabs/SocialMediaInsightsTabContent'
 
-function ResultsView({ query, brandName, loading, resultCount = 107, onDashboardSave, onWidgetInsight, activeTab, activeTabLabel }) {
+function ResultsView({ query, brandName, loading, resultCount = 107, onDashboardSave, onWidgetInsight, activeTab, activeTabLabel, navigateToTab, targetSubTab, subTabTrigger }) {
   const [exportModalOpen, setExportModalOpen] = useState(false)
   const [leftWidth, setLeftWidth] = useState(520)
   const [isDragging, setIsDragging] = useState(false)
@@ -240,7 +240,7 @@ function ResultsView({ query, brandName, loading, resultCount = 107, onDashboard
       <Box sx={{ flex: 1, minWidth: 350, display: 'flex', flexDirection: 'column', gap: 1.5, overflow: 'auto', pt: 0, pb: 2, position: 'relative' }}>
         <Typography sx={{ fontSize: 20, fontWeight: 700, color: '#212121', px: 0.5, pt: 2 }}>
           {activeTabLabel === 'Visual Analysis' ? "What's the Visual Story?"
-            : activeTabLabel === 'Social Media Insights' ? "What's Trending on Social?"
+            : activeTabLabel === 'Social Media Insights' ? "What's Trending?"
             : TABS[activeTab]?.description || TABS[0].description}
         </Typography>
         {/* Filtered mentions overlay panel */}
@@ -253,13 +253,13 @@ function ResultsView({ query, brandName, loading, resultCount = 107, onDashboard
         ) : activeTab === 5 ? (
           <MediaContactsPanel onDashboardSave={onDashboardSave} />
         ) : activeTab === 1 ? (
-          <CoverageTabContent loading={loading} onDashboardSave={onDashboardSave} />
+          <CoverageTabContent loading={loading} onDashboardSave={onDashboardSave} targetSubTab={targetSubTab} subTabTrigger={subTabTrigger} />
         ) : activeTab === 2 ? (
           <NarrativeTabContent loading={loading} />
         ) : activeTab === 3 ? (
           <SentimentTabContent loading={loading} />
         ) : activeTab === 4 ? (
-          <AudienceTabContent loading={loading} />
+          <AudienceTabContent loading={loading} targetSubTab={targetSubTab} subTabTrigger={subTabTrigger} />
         ) : (<>
         {/* AI Insight card */}
         <Box sx={{ p: '1.5px', borderRadius: 2, background: 'linear-gradient(135deg, #9C4DD6 0%, #CF2D8A 40%, #1D9F9F 100%)' }}>
@@ -315,6 +315,7 @@ function ResultsView({ query, brandName, loading, resultCount = 107, onDashboard
             onWidgetInsight={onWidgetInsight}
             onFilteredMentions={(filter) => { setFilteredMentions(filter); setSpikeAnalysis(null) }}
             onSpikeAnalysis={(spike) => { setSpikeAnalysis(spike); setFilteredMentions(null) }}
+            navigateToTab={navigateToTab}
           />
         )}
         </>)}

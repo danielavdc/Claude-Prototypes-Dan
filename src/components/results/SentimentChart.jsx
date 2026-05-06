@@ -9,7 +9,7 @@ const SEGMENTS = [
   { label: 'Not Rated', color: '#E0E0E0', pct: 20.1, count: '1k' },
 ]
 
-function SentimentChart({ onDashboardSave, onDataPointClick, onWidgetInsight }) {
+function SentimentChart({ onDashboardSave, onDataPointClick, onWidgetInsight, showViewFullAnalysis, onViewFullAnalysis }) {
   // Build donut chart with SVG
   const size = 180
   const stroke = 36
@@ -35,7 +35,7 @@ function SentimentChart({ onDashboardSave, onDataPointClick, onWidgetInsight }) 
           <Typography sx={{ fontSize: 16, fontWeight: 700, color: '#212121' }}>Sentiment</Typography>
           <InfoOutlinedIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
         </Box>
-        <WidgetMenu onDashboardSave={onDashboardSave} widgetName="Sentiment" onWidgetInsight={onWidgetInsight} />
+        <WidgetMenu showViewFullAnalysis={showViewFullAnalysis} onViewFullAnalysis={onViewFullAnalysis} onDashboardSave={onDashboardSave} widgetName="Sentiment" onWidgetInsight={onWidgetInsight} />
       </Box>
 
       {/* Donut + Legend */}
