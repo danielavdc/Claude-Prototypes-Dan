@@ -780,7 +780,7 @@ function SearchPanel({
                 >
                   <Box>
                     <Typography sx={{ fontSize: 13, fontWeight: 700, color: 'text.primary', lineHeight: 1.3, whiteSpace: 'nowrap' }}>{label}</Typography>
-                    {description && <Typography sx={{ fontSize: 11, color: 'text.secondary', lineHeight: 1.3, whiteSpace: 'nowrap' }}>{description}</Typography>}
+                    {description && tabSetMode !== 'classic' && <Typography sx={{ fontSize: 11, color: 'text.secondary', lineHeight: 1.3, whiteSpace: 'nowrap' }}>{description}</Typography>}
                   </Box>
                   <ArrowDropDownIcon sx={{ fontSize: 16, color: 'text.secondary', flexShrink: 0 }} />
                 </Box>
