@@ -171,27 +171,19 @@ const FORUMS = [
 ]
 
 const EMERGING_ACCOUNTS = [
-  { handle: '@Lingtree', size: 16, color: TEAL },
-  { handle: '#NaturalLandscape', size: 20, color: BLUE },
-  { handle: '@HomeInteriors', size: 18, color: PURPLE },
-  { handle: '#Chars', size: 13, color: PINK },
-  { handle: '@theNaturallandscape', size: 22, color: ORANGE },
-  { handle: '#HomeInteriors', size: 17, color: TEAL },
-  { handle: '@Computers', size: 14, color: BLUE },
-  { handle: '#LingtreeNaturallandscape', size: 24, color: PURPLE },
-  { handle: '@theNaturalLandscape', size: 15, color: GREEN },
-  { handle: '#Computers', size: 13, color: RED },
+  { rank: 1, name: 'Home Interior',    handle: '@home_interiors', mentions: '132.4k', pct: 60, trend: -4,  platform: 'x'  },
+  { rank: 2, name: 'Office',           handle: '@Office1',        mentions: '132.4k', pct: 60, trend: 180, platform: 'fb' },
+  { rank: 3, name: 'Home',             handle: '@Home2',          mentions: '150.2k', pct: 75, trend: 200, platform: 'ig' },
+  { rank: 4, name: 'Remote',           handle: '@Remote3',        mentions: '95.5k',  pct: 45, trend: 160, platform: 'ig' },
+  { rank: 5, name: 'Co-Working Space', handle: '@CoWorking4',     mentions: '115.8k', pct: 55, trend: 175, platform: 'fb' },
 ]
 
 const TOP_ACCOUNTS = [
-  { handle: '@Lingtree', size: 20, color: TEAL },
-  { handle: '#NaturalLandscape', size: 18, color: BLUE },
-  { handle: '@HomeInteriors', size: 22, color: PURPLE },
-  { handle: '@theNatural landscape', size: 24, color: PINK },
-  { handle: '#Chars', size: 15, color: ORANGE },
-  { handle: '@Computers', size: 16, color: TEAL },
-  { handle: '#HomeInteriors', size: 19, color: BLUE },
-  { handle: '@LingtreeNatural', size: 14, color: GREEN },
+  { rank: 2, name: 'Outdoor Spaces',      handle: '@outdoor_designs',    mentions: '98.7k',  pct: 45, trend: -3, platform: 'x'  },
+  { rank: 3, name: 'Kitchen Innovations', handle: '@kitchen_ideas',      mentions: '156.3k', pct: 70, trend: 6,  platform: 'fb' },
+  { rank: 4, name: 'Modern Furniture',    handle: '@modern_furnishings', mentions: '210.5k', pct: 80, trend: 5,  platform: 'ig' },
+  { rank: 5, name: 'Sustainable Living',  handle: '@eco_living',         mentions: '75.2k',  pct: 50, trend: 2,  platform: 'x'  },
+  { rank: 6, name: 'Lighting Solutions',  handle: '@light_designs',      mentions: '45.8k',  pct: 30, trend: 1,  platform: 'fb' },
 ]
 
 const HEATMAP_DATA = Array.from({ length: 7 }, (_, r) =>
@@ -869,60 +861,54 @@ function TrendingContent() {
         </Paper>
       </Box>
 
-      <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2 }}>
-        <WidgetHeader title="Emerging Mentioned Accounts" />
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 0.5, minHeight: 80 }}>
-          {EMERGING_ACCOUNTS.map((a, i) => (
-            <Typography key={i} sx={{ fontSize: a.size, fontWeight: a.size >= 18 ? 700 : 500, color: a.color, cursor: 'pointer', lineHeight: 1.4, '&:hover': { opacity: 0.75 } }}>
-              {a.handle}
-            </Typography>
-          ))}
-        </Box>
-      </Paper>
-
-      <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2 }}>
-        <WidgetHeader title="Top Mentioned Accounts" />
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 0.5, minHeight: 80 }}>
-          {TOP_ACCOUNTS.map((a, i) => (
-            <Typography key={i} sx={{ fontSize: a.size, fontWeight: a.size >= 18 ? 700 : 500, color: a.color, cursor: 'pointer', lineHeight: 1.4, '&:hover': { opacity: 0.75 } }}>
-              {a.handle}
-            </Typography>
-          ))}
-        </Box>
-      </Paper>
-
-      <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, overflow: 'hidden' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2, pt: 1.5, pb: 1 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-            <Typography sx={{ fontSize: 16, fontWeight: 700, color: '#212121' }}>Mentions Average Activity</Typography>
-            <InfoOutlinedIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
-          </Box>
-          <IconButton size="small"><MoreVertIcon sx={{ fontSize: 18, color: 'text.secondary' }} /></IconButton>
-        </Box>
-        <Box sx={{ px: 2, pb: 2 }}>
-          <Box sx={{ display: 'flex', mt: 0.5 }}>
-            <Box sx={{ width: 32, flexShrink: 0 }} />
-            {Array.from({ length: 24 }, (_, h) => (
-              <Box key={h} sx={{ flex: 1, textAlign: 'center' }}>
-                {h % 6 === 0 && <Typography sx={{ fontSize: 9, color: 'text.secondary' }}>{h}h</Typography>}
+      <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+        {[{ title: 'Emerging Mentioned Accounts', rows: EMERGING_ACCOUNTS }, { title: 'Top Mentioned Accounts', rows: TOP_ACCOUNTS }].map(({ title, rows }) => (
+          <Paper key={title} elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2, flex: 1, minWidth: 280 }}>
+            <WidgetHeader title={title} />
+            <Box sx={{ display: 'flex', pb: 0.75, borderBottom: '1px solid #e0e0e0', mb: 0.25 }}>
+              <Typography sx={{ fontSize: 12, fontWeight: 700, color: 'text.secondary', flex: 1 }}>Name</Typography>
+              <Typography sx={{ fontSize: 12, fontWeight: 700, color: 'text.secondary', width: 110, textAlign: 'right' }}>Mentions</Typography>
+              <Typography sx={{ fontSize: 12, fontWeight: 700, color: 'text.secondary', width: 70, textAlign: 'right' }}>Trend</Typography>
+            </Box>
+            {rows.map((row, i) => (
+              <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 1, borderBottom: i < rows.length - 1 ? '1px solid #f5f5f5' : 'none' }}>
+                <Typography sx={{ fontSize: 13, color: 'text.secondary', width: 16, flexShrink: 0 }}>{row.rank}</Typography>
+                <Box sx={{ position: 'relative', flexShrink: 0 }}>
+                  <Box sx={{ width: 40, height: 40, borderRadius: '50%', bgcolor: '#E0E0E0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Typography sx={{ fontSize: 12, color: '#757575' }}>👤</Typography>
+                  </Box>
+                  <Box sx={{
+                    position: 'absolute', bottom: -2, right: -2, width: 18, height: 18, borderRadius: '50%', border: '1.5px solid white',
+                    bgcolor: row.platform === 'x' ? '#000' : row.platform === 'fb' ? '#1877F2' : '#E1306C',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <Typography sx={{ fontSize: 8, fontWeight: 900, color: 'white', lineHeight: 1 }}>
+                      {row.platform === 'x' ? '𝕏' : row.platform === 'fb' ? 'f' : '◎'}
+                    </Typography>
+                  </Box>
+                </Box>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#212121', lineHeight: 1.2 }}>{row.name}</Typography>
+                  <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>{row.handle}</Typography>
+                </Box>
+                <Typography sx={{ fontSize: 12, color: '#424242', width: 110, textAlign: 'right', flexShrink: 0 }}>
+                  {row.mentions} ({row.pct}%)
+                </Typography>
+                <Box sx={{ width: 70, display: 'flex', justifyContent: 'flex-end', flexShrink: 0 }}>
+                  <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.25, bgcolor: row.trend > 0 ? '#E8F5E9' : '#FFEBEE', color: row.trend > 0 ? '#2E7D32' : '#C62828', fontSize: 11, fontWeight: 700, px: 0.75, py: 0.25, borderRadius: 1 }}>
+                    {row.trend > 0 ? '↑' : '↓'} {Math.abs(row.trend)}%
+                  </Box>
+                </Box>
               </Box>
             ))}
-          </Box>
-          {HEATMAP_DATA.map((row, ri) => (
-            <Box key={ri} sx={{ display: 'flex', alignItems: 'center', mb: 0.25 }}>
-              <Typography sx={{ fontSize: 10, color: 'text.secondary', width: 32, flexShrink: 0 }}>{DAYS[ri]}</Typography>
-              {row.map((val, ci) => (
-                <Box key={ci} sx={{ flex: 1, height: 16, bgcolor: `rgba(29,159,159,${val / 100})`, borderRadius: '2px', mx: '1px' }} />
-              ))}
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mt: 1, pt: 1, borderTop: '1px solid #f5f5f5' }}>
+              <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>1 - 5 of 30</Typography>
+              <IconButton size="small" disabled><ChevronLeftIcon sx={{ fontSize: 18 }} /></IconButton>
+              <IconButton size="small"><ChevronRightIcon sx={{ fontSize: 18, color: '#212121' }} /></IconButton>
             </Box>
-          ))}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1, justifyContent: 'flex-end' }}>
-            <Typography sx={{ fontSize: 10, color: 'text.secondary' }}>Low</Typography>
-            {[0.1, 0.3, 0.5, 0.7, 0.9].map(o => <Box key={o} sx={{ width: 14, height: 14, bgcolor: `rgba(29,159,159,${o})`, borderRadius: '2px' }} />)}
-            <Typography sx={{ fontSize: 10, color: 'text.secondary' }}>High</Typography>
-          </Box>
-        </Box>
-      </Paper>
+          </Paper>
+        ))}
+      </Box>
 
     </Box>
   )
