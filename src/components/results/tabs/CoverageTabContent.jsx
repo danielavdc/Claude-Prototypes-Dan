@@ -365,6 +365,36 @@ function AIInsightWidget() {
   )
 }
 
+// ── heatmap data ──────────────────────────────────────────────────────────────
+
+const ACTIVITY_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+const ACTIVITY_HOURS = Array.from({ length: 24 }, (_, i) => {
+  if (i === 0) return '12am'
+  if (i < 12) return `${i}am`
+  if (i === 12) return '12pm'
+  return `${i - 12}pm`
+})
+const ACTIVITY_DATA = Array.from({ length: 7 }, (_, d) =>
+  Array.from({ length: 24 }, (_, h) => {
+    const peak = h >= 6 && h <= 10 ? Math.random() * 90 + 60 : Math.random() * 60 + 10
+    return Math.round(peak * (d === 2 || d === 3 || d === 4 ? 1.3 : 0.85))
+  })
+)
+const HEAT_RANGES = [
+  { label: '26–50',   color: '#BBDEFB' },
+  { label: '51–100',  color: '#90CAF9' },
+  { label: '101–125', color: '#64B5F6' },
+  { label: '126–150', color: '#2196F3' },
+  { label: '151+',    color: '#1565C0' },
+]
+function heatColor(v) {
+  if (v <= 50)  return '#BBDEFB'
+  if (v <= 100) return '#90CAF9'
+  if (v <= 125) return '#64B5F6'
+  if (v <= 150) return '#2196F3'
+  return '#1565C0'
+}
+
 // ── mentions tab ──────────────────────────────────────────────────────────────
 
 function MentionsContent() {
@@ -386,14 +416,44 @@ function MentionsContent() {
 
       <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2 }}>
         <WidgetHeader title="Mentions Trend by Source Type" />
-        <Box sx={{ display: 'flex', gap: 4, mb: 2 }}>
-          <MetricKpi label="Total Mentions" value="358.2k" delta={5.6} />
-          <Divider orientation="vertical" flexItem />
-          <MetricKpi label="Daily Average" value="1.46k" delta={7.8} />
-        </Box>
         <ChartLegend datasets={MENTION_SOURCES} />
         <MultiLineChart datasets={MENTION_SOURCES} height={160} />
         <XLabels />
+      </Paper>
+
+      {/* Mentions Average Activity heatmap */}
+      <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2 }}>
+        <WidgetHeader title="Mentions Average Activity" />
+        <Box sx={{ overflowX: 'auto' }}>
+          <Box sx={{ minWidth: 600 }}>
+            {/* Hour labels */}
+            <Box sx={{ display: 'flex', ml: '40px', mb: 0.5 }}>
+              {ACTIVITY_HOURS.map((h, i) => (
+                <Box key={i} sx={{ flex: 1, textAlign: 'center' }}>
+                  <Typography sx={{ fontSize: 10, color: 'text.secondary', whiteSpace: 'nowrap' }}>{h}</Typography>
+                </Box>
+              ))}
+            </Box>
+            {/* Grid rows */}
+            {ACTIVITY_DATA.map((row, ri) => (
+              <Box key={ri} sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                <Typography sx={{ fontSize: 12, color: 'text.secondary', width: 40, flexShrink: 0 }}>{ACTIVITY_DAYS[ri]}</Typography>
+                {row.map((val, ci) => (
+                  <Box key={ci} sx={{ flex: 1, mx: '2px', height: 28, bgcolor: heatColor(val), borderRadius: '6px' }} />
+                ))}
+              </Box>
+            ))}
+            {/* Legend */}
+            <Box sx={{ display: 'flex', gap: 2, mt: 2, ml: '40px' }}>
+              {HEAT_RANGES.map((r, i) => (
+                <Box key={i} sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
+                  <Box sx={{ width: '100%', height: 16, bgcolor: r.color, borderRadius: '4px' }} />
+                  <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>{r.label}</Typography>
+                </Box>
+              ))}
+            </Box>
+          </Box>
+        </Box>
       </Paper>
 
     </Box>
