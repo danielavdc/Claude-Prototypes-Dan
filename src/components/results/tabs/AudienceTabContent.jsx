@@ -1272,7 +1272,7 @@ export default function AudienceTabContent({ loading, targetSubTab, subTabTrigge
 
   if (loading) return null
   return (
-    <Box ref={boxRef} sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+    <Box ref={boxRef} sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, flexShrink: 0 }}>
       <StickySegmentNav value={activeTab} onChange={(val) => { setActiveTab(val); scrollToTop() }} />
       {activeTab === 'authors-list'  && <AuthorsListContent />}
       {activeTab === 'journalists'   && <JournalistsContent />}
