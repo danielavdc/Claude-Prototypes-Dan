@@ -12,6 +12,9 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined'
+import LocationOnIcon from '@mui/icons-material/LocationOn'
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import { useState, useRef, useEffect } from 'react'
 
 const TEAL   = '#1D9F9F'
@@ -64,6 +67,25 @@ const TOP_CITIES = [
   { city: 'Bangkok',   flag: '🇹🇭', mentions: '132.4k', pct: 60, delta: '-5.3%', down: true },
   { city: 'London',    flag: '🇬🇧', mentions: '132.4k', pct: 60, delta: '-5.3%', down: true },
   { city: 'Paris',     flag: '🇫🇷', mentions: '132.4k', pct: 60, delta: '-5.3%', down: true },
+]
+
+const TOP_CITIES_TABLE = [
+  { name: 'Singapore, Singapore',  value: 134, max: 134 },
+  { name: 'Hong Kong, Hong Kong',  value: 98,  max: 134 },
+  { name: 'Cape Town, South Africa', value: 88, max: 134 },
+  { name: 'Delhi, India',          value: 54,  max: 134 },
+  { name: 'Kuala Lumpur, Malaysia', value: 44, max: 134 },
+  { name: 'London, England',       value: 34,  max: 134 },
+  { name: 'Sydney, Australia',     value: 28,  max: 134 },
+]
+const TOP_COUNTRIES_TABLE = [
+  { name: 'Singapore, Singapore',  value: 134, max: 134 },
+  { name: 'Hong Kong, Hong Kong',  value: 98,  max: 134 },
+  { name: 'Cape Town, South Africa', value: 88, max: 134 },
+  { name: 'Delhi, India',          value: 54,  max: 134 },
+  { name: 'Kuala Lumpur, Malaysia', value: 44, max: 134 },
+  { name: 'London, England',       value: 34,  max: 134 },
+  { name: 'Sydney, Australia',     value: 28,  max: 134 },
 ]
 
 const TOP_LOCATIONS = [
@@ -514,6 +536,13 @@ function LocationsContent() {
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
 
       <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2 }}>
+        <WidgetHeader title="Countries Trend" />
+        <ChartLegend datasets={COUNTRIES_TREND} />
+        <MultiLineChart datasets={COUNTRIES_TREND} height={160} />
+        <XLabels />
+      </Paper>
+
+      <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2 }}>
         <WidgetHeader title="Countries by Mentions" />
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
           <Box sx={{ flex: 2, minWidth: 200, height: 190, bgcolor: '#E3F2FD', borderRadius: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
@@ -618,13 +647,6 @@ function LocationsContent() {
         )
       })()}
 
-      <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2 }}>
-        <WidgetHeader title="Countries Trend" />
-        <ChartLegend datasets={COUNTRIES_TREND} />
-        <MultiLineChart datasets={COUNTRIES_TREND} height={160} />
-        <XLabels />
-      </Paper>
-
       <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
 
         {[{ title: 'Top Regions', data: TOP_REGIONS, barColor: TEAL }, { title: 'Top States', data: TOP_STATES, barColor: BLUE }].map(({ title, data, barColor }) => (
@@ -656,6 +678,37 @@ function LocationsContent() {
           </Paper>
         ))}
 
+      </Box>
+
+      {/* Top Cities + Top Countries */}
+      <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+        {[{ title: 'Top Cities', rows: TOP_CITIES_TABLE }, { title: 'Top Countries', rows: TOP_COUNTRIES_TABLE }].map(({ title, rows }) => (
+          <Paper key={title} elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2, flex: 1, minWidth: 260 }}>
+            <WidgetHeader title={title} />
+            <Box sx={{ display: 'flex', pb: 0.75, borderBottom: '1px solid #e0e0e0', mb: 0.25 }}>
+              <Typography sx={{ fontSize: 12, fontWeight: 700, color: 'text.secondary', flex: 1 }}>Top Cities</Typography>
+              <Typography sx={{ fontSize: 12, fontWeight: 700, color: 'text.secondary' }}>Mentions</Typography>
+            </Box>
+            {rows.map((row, i) => (
+              <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.875, borderBottom: i < rows.length - 1 ? '1px solid #f5f5f5' : 'none' }}>
+                <Typography sx={{ fontSize: 13, color: 'text.secondary', width: 16, flexShrink: 0 }}>{i + 1}</Typography>
+                <Box sx={{ width: 28, height: 28, borderRadius: '50%', bgcolor: '#E3F2FD', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <LocationOnIcon sx={{ fontSize: 16, color: '#2196F3' }} />
+                </Box>
+                <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#212121', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.name}</Typography>
+                <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#212121', flexShrink: 0, mr: 1 }}>{row.value}k</Typography>
+                <Box sx={{ width: 80, height: 10, bgcolor: '#f0f0f0', borderRadius: 1, overflow: 'hidden', flexShrink: 0 }}>
+                  <Box sx={{ width: `${Math.round((row.value / row.max) * 100)}%`, height: '100%', bgcolor: '#2196F3', borderRadius: 1 }} />
+                </Box>
+              </Box>
+            ))}
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1, mt: 1, pt: 1, borderTop: '1px solid #f5f5f5' }}>
+              <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>1 - 10 of 30</Typography>
+              <IconButton size="small" disabled><ChevronLeftIcon sx={{ fontSize: 18 }} /></IconButton>
+              <IconButton size="small"><ChevronRightIcon sx={{ fontSize: 18, color: '#212121' }} /></IconButton>
+            </Box>
+          </Paper>
+        ))}
       </Box>
 
     </Box>
