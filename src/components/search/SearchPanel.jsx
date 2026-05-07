@@ -117,10 +117,14 @@ function SearchPanel({
     { label: 'Authors',         description: 'Who Is Writing?'      },
     { label: 'Media Relations', description: 'Who Should You Call?' },
   ]
+  const ALL_PINNABLE_TABS = [
+    ...TABS.map(t => ({ label: t.label, description: t.description })),
+    { label: 'Visual Analysis',      description: 'What Are People Seeing?'    },
+    { label: 'Social Media Insights', description: "What's Buzzing on Social?" },
+  ]
   const [tabs, setTabs] = useState(() =>
     TABS.map(t => ({ label: t.label, description: t.description }))
   )
-  const [removedTabs, setRemovedTabs] = useState([])
 
   useEffect(() => {
     const tab = tabs[activeTab]
@@ -805,8 +809,9 @@ function SearchPanel({
               <Typography sx={{ fontSize: 14, fontWeight: 700, color: 'text.primary' }}>Pin a New Tab</Typography>
             </Box>
             {(() => {
-              const available = ['Visual Analysis', 'Social Media Insights']
-                .filter(item => !tabs.some(t => (typeof t === 'string' ? t : t.label) === item))
+              const available = ALL_PINNABLE_TABS.filter(
+                t => !tabs.some(tab => (typeof tab === 'string' ? tab : tab.label) === t.label)
+              )
               if (available.length === 0) return (
                 <Box sx={{ px: 2, py: 2, textAlign: 'center' }}>
                   <Typography sx={{ fontSize: 13, color: 'text.disabled', lineHeight: 1.5 }}>
@@ -815,13 +820,13 @@ function SearchPanel({
                 </Box>
               )
               return available.map(item => (
-                <MenuItem key={item} onClick={() => {
-                  const ON_DEMAND_DESC = { 'Visual Analysis': 'What Are People Seeing?', 'Social Media Insights': "What's Buzzing on Social?" }
-                  setTabs(prev => [...prev, { label: item, description: ON_DEMAND_DESC[item] || '' }])
+                <MenuItem key={item.label} onClick={() => {
+                  setTabs(prev => [...prev, { label: item.label, description: item.description }])
                   setPinTabAnchor(null)
                   triggerSave()
-                }} sx={{ px: 2, py: 1.25, fontSize: 15, color: 'text.primary' }}>
-                  {item}
+                }} sx={{ px: 2, py: 1.25, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                  <Typography sx={{ fontSize: 15, color: 'text.primary', fontWeight: 400, lineHeight: 1.3 }}>{item.label}</Typography>
+                  {item.description && <Typography sx={{ fontSize: 12, color: 'text.secondary', lineHeight: 1.3 }}>{item.description}</Typography>}
                 </MenuItem>
               ))
             })()}
@@ -835,20 +840,6 @@ function SearchPanel({
                 <Typography sx={{ fontSize: 15, color: '#212121' }}>{label}</Typography>
               </Box>
             ))}
-            {removedTabs.length > 0 && <Divider />}
-            {removedTabs.map((tab, i) => {
-              const label = typeof tab === 'string' ? tab : tab.label
-              return (
-                <MenuItem key={label + i} onClick={() => {
-                  setTabs(prev => [...prev, tab])
-                  setRemovedTabs(prev => prev.filter((_, j) => j !== i))
-                  setPinTabAnchor(null)
-                  triggerSave()
-                }} sx={{ px: 2, py: 1.25, fontSize: 15, color: 'text.primary' }}>
-                  {label}
-                </MenuItem>
-              )
-            })}
           </Menu>
           </Box>{/* end tabsScrollRef */}
           {canScrollRight && (
@@ -889,7 +880,6 @@ function SearchPanel({
                 if (isActive) { setTabSetMenuAnchor(null); return }
                 setTabSetMode(opt.mode)
                 setActiveTab(0)
-                setRemovedTabs([])
                 if (opt.mode === 'classic') {
                   setTabs(CLASSIC_TABS)
                 } else {
@@ -1255,7 +1245,6 @@ function SearchPanel({
               const idx = tabMenuTabIndex
               const removed = tabs[idx]
               setTabMenuAnchor(null)
-              setRemovedTabs(prev => [...prev, removed])
               setTabs(prev => prev.filter((_, i) => i !== idx))
               if (activeTab >= idx) setActiveTab(Math.max(0, activeTab - 1))
               triggerSave()
@@ -1271,16 +1260,26 @@ function SearchPanel({
       <Dialog open={renameModalOpen} onClose={() => setRenameModalOpen(false)} PaperProps={{ sx: { width: 400, borderRadius: 1 } }}>
         <DialogTitle sx={{ fontSize: 16, fontWeight: 700, pb: 1 }}>Rename Tab</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '8px !important' }}>
-          <TextField
-            label="Name" fullWidth size="small" value={renameLabel}
-            onChange={e => setRenameLabel(e.target.value)}
-            inputProps={{ maxLength: 40 }}
-          />
-          <TextField
-            label="Description" fullWidth size="small" value={renameDescription}
-            onChange={e => setRenameDescription(e.target.value)}
-            inputProps={{ maxLength: 60 }}
-          />
+          <Box>
+            <TextField
+              label="Tab Name" fullWidth size="small" value={renameLabel}
+              onChange={e => setRenameLabel(e.target.value.slice(0, 15))}
+              inputProps={{ maxLength: 15 }}
+            />
+            <Typography sx={{ fontSize: 12, color: 'text.secondary', textAlign: 'right', mt: 0.5 }}>
+              {renameLabel.length}/15
+            </Typography>
+          </Box>
+          <Box>
+            <TextField
+              label="Description" fullWidth size="small" value={renameDescription}
+              onChange={e => setRenameDescription(e.target.value.slice(0, 25))}
+              inputProps={{ maxLength: 25 }}
+            />
+            <Typography sx={{ fontSize: 12, color: 'text.secondary', textAlign: 'right', mt: 0.5 }}>
+              {renameDescription.length}/25
+            </Typography>
+          </Box>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
           <Button onClick={() => setRenameModalOpen(false)} sx={{ textTransform: 'none', color: 'text.secondary' }}>Cancel</Button>
