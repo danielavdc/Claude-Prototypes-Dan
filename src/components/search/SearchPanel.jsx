@@ -110,12 +110,12 @@ function SearchPanel({
   const [tabMenuTabIndex, setTabMenuTabIndex] = useState(null)
   const [tabSetMode, setTabSetMode] = useState('focus')
   const CLASSIC_TABS = [
-    { label: 'Overview',        description: '' },
-    { label: 'Analytics',       description: '' },
-    { label: 'Topic Analytics', description: '' },
-    { label: 'X Insight',       description: '' },
-    { label: 'Authors',         description: '' },
-    { label: 'Media Relations', description: '' },
+    { label: 'Overview',        description: "What's Happening?"    },
+    { label: 'Analytics',       description: 'How Much and Where?'  },
+    { label: 'Topic Analytics', description: "What's the Story?"    },
+    { label: 'X Insight',       description: "What's on X?"         },
+    { label: 'Authors',         description: 'Who Is Writing?'      },
+    { label: 'Media Relations', description: 'Who Should You Call?' },
   ]
   const [tabs, setTabs] = useState(() =>
     TABS.map(t => ({ label: t.label, description: t.description }))
@@ -816,7 +816,7 @@ function SearchPanel({
               )
               return available.map(item => (
                 <MenuItem key={item} onClick={() => {
-                  const ON_DEMAND_DESC = { 'Visual Analysis': "What's the Visual Story?", 'Social Media Insights': "What's Trending?" }
+                  const ON_DEMAND_DESC = { 'Visual Analysis': 'What Are People Seeing?', 'Social Media Insights': "What's Buzzing on Social?" }
                   setTabs(prev => [...prev, { label: item, description: ON_DEMAND_DESC[item] || '' }])
                   setPinTabAnchor(null)
                   triggerSave()
