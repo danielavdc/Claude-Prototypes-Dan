@@ -274,7 +274,8 @@ function MiniSparkline({ data, up }) {
 // ── sticky segment nav ────────────────────────────────────────────────────────
 
 function StickySegmentNav({ items, value, onChange }) {
-  const [isSticky, setIsSticky] = useState(false)
+  const [isScrolling, setIsScrolling] = useState(false)
+  const scrollTimerRef = useRef(null)
   const ref = useRef(null)
 
   useEffect(() => {
@@ -287,22 +288,18 @@ function StickySegmentNav({ items, value, onChange }) {
       parent = parent.parentElement
     }
     if (!parent || parent === document.body) return
-    const check = () => {
-      const r = el.getBoundingClientRect()
-      const p = parent.getBoundingClientRect()
-      setIsSticky(r.top <= p.top + 1)
+    const onScroll = () => {
+      setIsScrolling(true)
+      clearTimeout(scrollTimerRef.current)
+      scrollTimerRef.current = setTimeout(() => setIsScrolling(false), 200)
     }
-    parent.addEventListener('scroll', check, { passive: true })
-    return () => parent.removeEventListener('scroll', check)
+    parent.addEventListener('scroll', onScroll, { passive: true })
+    return () => { parent.removeEventListener('scroll', onScroll); clearTimeout(scrollTimerRef.current) }
   }, [])
 
   return (
-    <Box ref={ref} sx={{
-      position: 'sticky', top: 0, zIndex: 10,
-      bgcolor: '#F5F5F5', py: 1.25,
-      boxShadow: isSticky ? '0 2px 8px rgba(0,0,0,0.10)' : 'none',
-      transition: 'box-shadow 0.2s ease',
-    }}>
+    <Box ref={ref} sx={{ position: 'sticky', top: 0, zIndex: 10, bgcolor: 'transparent', py: 1.25, pl: 2 }}>
+      <Box sx={{ display: 'inline-flex', boxShadow: isScrolling ? '0 4px 16px rgba(0,0,0,0.10)' : 'none', borderRadius: '4px', transition: 'box-shadow 0.2s ease' }}>
       <ToggleButtonGroup
         value={value} exclusive
         onChange={(_, val) => { if (val) onChange(val) }}
@@ -310,15 +307,16 @@ function StickySegmentNav({ items, value, onChange }) {
           '& .MuiToggleButton-root': {
             py: 0.75, px: 2, fontSize: 14, fontWeight: 400,
             textTransform: 'none', letterSpacing: 0,
-            color: '#212121', bgcolor: 'transparent', borderColor: '#9E9E9E', borderRadius: 0,
+            color: '#212121', bgcolor: '#F0F0F0', borderColor: '#9E9E9E', borderRadius: 0,
             whiteSpace: 'nowrap',
             '&:first-of-type': { borderRadius: '4px 0 0 4px' },
             '&:last-of-type':  { borderRadius: '0 4px 4px 0' },
             '&.Mui-selected': {
-              bgcolor: 'rgba(29,159,159,0.12)', color: '#212121', borderColor: '#00827F',
-              '&:hover': { bgcolor: 'rgba(29,159,159,0.18)' },
+              background: 'linear-gradient(rgba(29,159,159,0.18),rgba(29,159,159,0.18)) #F0F0F0',
+              color: '#212121', borderColor: '#00827F',
+              '&:hover': { background: 'linear-gradient(rgba(29,159,159,0.25),rgba(29,159,159,0.25)) #F0F0F0' },
             },
-            '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' },
+            '&:hover': { bgcolor: '#E0E0E0' },
           },
         }}
       >
@@ -328,6 +326,7 @@ function StickySegmentNav({ items, value, onChange }) {
           </ToggleButton>
         ))}
       </ToggleButtonGroup>
+      </Box>
     </Box>
   )
 }
@@ -839,11 +838,22 @@ function TrendingContent() {
 
 export default function CoverageTabContent({ onDashboardSave, loading, targetSubTab, subTabTrigger }) {
   const [activeTab, setActiveTab] = useState('volume')
+  const boxRef = useRef(null)
   useEffect(() => { if (subTabTrigger > 0 && targetSubTab) setActiveTab(targetSubTab) }, [subTabTrigger])
+
+  const scrollToTop = () => {
+    let el = boxRef.current?.parentElement
+    while (el && el !== document.body) {
+      const s = window.getComputedStyle(el)
+      if (s.overflow === 'auto' || s.overflowY === 'auto') { el.scrollTo({ top: 0, behavior: 'smooth' }); break }
+      el = el?.parentElement
+    }
+  }
+
   if (loading) return null
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-      <StickySegmentNav items={NAV_SECTIONS} value={activeTab} onChange={setActiveTab} />
+    <Box ref={boxRef} sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+      <StickySegmentNav items={NAV_SECTIONS} value={activeTab} onChange={(val) => { setActiveTab(val); scrollToTop() }} />
       {activeTab === 'volume' && (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
           <MentionsContent />

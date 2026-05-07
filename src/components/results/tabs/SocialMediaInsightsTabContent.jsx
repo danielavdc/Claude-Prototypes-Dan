@@ -310,7 +310,8 @@ function AIWidget({ bullets }) {
 }
 
 function StickySegmentNav({ value, onChange }) {
-  const [isSticky, setIsSticky] = useState(false)
+  const [isScrolling, setIsScrolling] = useState(false)
+  const scrollTimerRef = useRef(null)
   const ref = useRef(null)
   useEffect(() => {
     const el = ref.current
@@ -322,22 +323,22 @@ function StickySegmentNav({ value, onChange }) {
       parent = parent.parentElement
     }
     if (!parent) return
-    const check = () => setIsSticky(el.getBoundingClientRect().top <= parent.getBoundingClientRect().top + 1)
-    parent.addEventListener('scroll', check, { passive: true })
-    return () => parent.removeEventListener('scroll', check)
+    const onScroll = () => { setIsScrolling(true); clearTimeout(scrollTimerRef.current); scrollTimerRef.current = setTimeout(() => setIsScrolling(false), 200) }
+    parent.addEventListener('scroll', onScroll, { passive: true })
+    return () => { parent.removeEventListener('scroll', onScroll); clearTimeout(scrollTimerRef.current) }
   }, [])
   return (
-    <Box ref={ref} sx={{ position: 'sticky', top: 0, zIndex: 10, bgcolor: '#F5F5F5', py: 1.25, boxShadow: isSticky ? '0 2px 8px rgba(0,0,0,0.10)' : 'none', transition: 'box-shadow 0.2s' }}>
-      <Box sx={{ display: 'flex' }}>
+    <Box ref={ref} sx={{ position: 'sticky', top: 0, zIndex: 10, bgcolor: 'transparent', pl: 2, py: 1.25 }}>
+      <Box sx={{ display: 'flex', boxShadow: isScrolling ? '0 4px 16px rgba(0,0,0,0.10)' : 'none', borderRadius: '4px', transition: 'box-shadow 0.2s' }}>
         {SOCIAL_TABS.map(tab => (
           <Box key={tab.id} onClick={() => onChange(tab.id)} sx={{
             px: 2, py: 0.75, fontSize: 14, cursor: 'pointer', whiteSpace: 'nowrap', userSelect: 'none',
             border: '1px solid', borderColor: value === tab.id ? '#00827F' : '#9E9E9E',
-            bgcolor: value === tab.id ? 'rgba(29,159,159,0.12)' : 'transparent', color: '#212121',
+            background: value === tab.id ? 'linear-gradient(rgba(29,159,159,0.18),rgba(29,159,159,0.18)) #F0F0F0' : '#F0F0F0', color: '#212121',
             '&:first-of-type': { borderRadius: '4px 0 0 4px' },
             '&:last-of-type': { borderRadius: '0 4px 4px 0' },
             '&:not(:first-of-type)': { borderLeft: 'none' },
-            '&:hover': { bgcolor: value === tab.id ? 'rgba(29,159,159,0.18)' : 'rgba(0,0,0,0.04)' },
+            '&:hover': { background: value === tab.id ? 'linear-gradient(rgba(29,159,159,0.25),rgba(29,159,159,0.25)) #E0E0E0' : '#E0E0E0' },
           }}>
             {tab.label}
           </Box>
@@ -1021,10 +1022,21 @@ function WeiboContent() {
 
 export default function SocialMediaInsightsTabContent({ loading }) {
   const [activeTab, setActiveTab] = useState('x')
+  const boxRef = useRef(null)
+
+  const scrollToTop = () => {
+    let el = boxRef.current?.parentElement
+    while (el && el !== document.body) {
+      const s = window.getComputedStyle(el)
+      if (s.overflow === 'auto' || s.overflowY === 'auto') { el.scrollTo({ top: 0, behavior: 'smooth' }); break }
+      el = el?.parentElement
+    }
+  }
+
   if (loading) return null
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-      <StickySegmentNav value={activeTab} onChange={setActiveTab} />
+    <Box ref={boxRef} sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+      <StickySegmentNav value={activeTab} onChange={(val) => { setActiveTab(val); scrollToTop() }} />
       {activeTab === 'x'       && <XContent />}
       {activeTab === 'youtube' && <YoutubeContent />}
       {activeTab === 'weibo'   && <WeiboContent />}

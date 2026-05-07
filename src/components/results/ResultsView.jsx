@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { Box, Typography, Paper, Divider, IconButton, Button, Avatar, Chip, Skeleton, CircularProgress, Tooltip, Menu, MenuItem, ListItemIcon, ListItemText } from '@mui/material'
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh'
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined'
@@ -52,7 +52,12 @@ function ResultsView({ query, brandName, loading, resultCount = 107, onDashboard
   const [headerMenuAnchor, setHeaderMenuAnchor] = useState(null)
   const [spikeAnalysis, setSpikeAnalysis] = useState(null)
   const containerRef = useRef(null)
+  const rightPanelRef = useRef(null)
   const totalMentions = Math.round(BASE_DATA_SUM * resultCount / 107)
+
+  useEffect(() => {
+    rightPanelRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [activeTab, subTabTrigger])
 
   const handleMouseDown = useCallback((e) => {
     e.preventDefault()
@@ -237,12 +242,7 @@ function ResultsView({ query, brandName, loading, resultCount = 107, onDashboard
       </Box>
 
       {/* Right: AI Insight + chart */}
-      <Box sx={{ flex: 1, minWidth: 350, display: 'flex', flexDirection: 'column', gap: 1.5, overflow: 'auto', pt: 0, pb: 2, position: 'relative' }}>
-        <Typography sx={{ fontSize: 20, fontWeight: 700, color: '#212121', px: 0.5, pt: 2 }}>
-          {activeTabLabel === 'Visual Analysis' ? "What's the Visual Story?"
-            : activeTabLabel === 'Social Media Insights' ? "What's Trending?"
-            : TABS[activeTab]?.description || TABS[0].description}
-        </Typography>
+      <Box ref={rightPanelRef} sx={{ flex: 1, minWidth: 350, display: 'flex', flexDirection: 'column', gap: 1.5, overflow: 'auto', pt: 0, pb: 2, position: 'relative' }}>
         {/* Filtered mentions overlay panel */}
         <FilteredMentionsPanel filter={filteredMentions} onClose={() => setFilteredMentions(null)} />
         <SpikeAnalysisPanel spike={spikeAnalysis} onClose={() => setSpikeAnalysis(null)} />
@@ -264,7 +264,7 @@ function ResultsView({ query, brandName, loading, resultCount = 107, onDashboard
           <AudienceTabContent loading={loading} targetSubTab={targetSubTab} subTabTrigger={subTabTrigger} />
         ) : (<>
         {/* AI Insight card */}
-        <Box sx={{ p: '1.5px', borderRadius: 2, background: 'linear-gradient(135deg, #9C4DD6 0%, #CF2D8A 40%, #1D9F9F 100%)' }}>
+        <Box sx={{ p: '1.5px', borderRadius: 2, background: 'linear-gradient(135deg, #9C4DD6 0%, #CF2D8A 40%, #1D9F9F 100%)', mt: 2 }}>
           <Box sx={{ bgcolor: 'background.paper', borderRadius: '6px', p: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
