@@ -467,25 +467,6 @@ function EngagementContent() {
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
 
       <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2 }}>
-        <WidgetHeader
-          title="Engagement Trend"
-          action={
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, border: '1px solid #e0e0e0', borderRadius: 0.5, px: 1, py: 0.5, cursor: 'pointer' }}>
-              <Typography sx={{ fontSize: 12, color: '#424242' }}>Engagement type</Typography>
-              <ArrowDownwardIcon sx={{ fontSize: 12, color: 'text.secondary' }} />
-            </Box>
-          }
-        />
-        <Box sx={{ display: 'flex', gap: 4, mb: 2 }}>
-          <MetricKpi label="Total Engagement" value="17.6k" delta={7.8} />
-          <Divider orientation="vertical" flexItem />
-          <MetricKpi label="Daily Average" value="2.52k" delta={7.8} />
-        </Box>
-        <LineChart data={ENGAGEMENT_TREND} color={TEAL} height={160} />
-        <XLabels />
-      </Paper>
-
-      <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2 }}>
         <WidgetHeader title="Engagement Trend by Source Type" />
         <ChartLegend datasets={ENGAGEMENT_SOURCES} />
         <MultiLineChart datasets={ENGAGEMENT_SOURCES} height={160} />
