@@ -1046,17 +1046,35 @@ const AL_AUTHORS = [
 const AL_OCC_KW = [
   { text: 'Living rooms', s: 18 }, { text: 'Backyards', s: 14 }, { text: 'Real Estate', s: 14 },
   { text: 'Microsoft', s: 13 }, { text: 'Rugs', s: 13 }, { text: 'Natural landscapes', s: 20 },
-  { text: 'Nationwide Advisory...', s: 12 }, { text: 'Real Estate Ma...', s: 13 }, { text: 'Rugs', s: 12 },
-  { text: 'value', s: 13 }, { text: 'Chairs', s: 24 }, { text: 'Interiors', s: 13 },
-  { text: 'Nature', s: 13 }, { text: 'Joshua Slack', s: 13 }, { text: 'Tables Desks', s: 22 },
-  { text: 'Trees and leaves', s: 14 }, { text: 'Lego', s: 12 }, { text: 'Knoll', s: 12 },
-  { text: 'Logitech', s: 12 }, { text: 'Figma', s: 12 }, { text: 'Home Interiors', s: 26 },
-  { text: 'PR Newswire', s: 12 }, { text: 'aesthetic contrast', s: 12 }, { text: 'entire line', s: 12 },
-  { text: 'FilzFelt', s: 13 }, { text: 'Hanssem', s: 13 }, { text: 'Office spaces', s: 18 },
-  { text: 'Game rooms', s: 16 }, { text: 'Woven Baskets', s: 13 }, { text: 'Books stacked', s: 13 },
-  { text: 'Amazon Ebay', s: 13 }, { text: 'The Verge', s: 12 }, { text: 'Wood finishes', s: 13 },
-  { text: 'Leather goods', s: 13 }, { text: 'Computers', s: 24 }, { text: 'Microsoft', s: 18 },
-  { text: 'Nationwide', s: 14 },
+]
+
+const AL_TOP_LOCATIONS = [
+  { name: 'United States',       flag: '🇺🇸', value: 903 },
+  { name: 'Canada',              flag: '🇨🇦', value: 823 },
+  { name: 'Ivory Coast',         flag: '🇨🇮', value: 522 },
+  { name: 'Mexico',              flag: '🇲🇽', value: 487 },
+  { name: 'Mainland China',      flag: '🇨🇳', value: 333 },
+  { name: 'Germany',             flag: '🇩🇪', value: 288 },
+  { name: 'Malaysia',            flag: '🇲🇾', value: 153 },
+  { name: 'New Zealand',         flag: '🇳🇿', value: 102 },
+  { name: 'Hong Kong SAR China', flag: '🇭🇰', value: 67  },
+  { name: 'United Kingdom',      flag: '🇬🇧', value: 58  },
+]
+
+const AL_OCC_SEGS = [
+  { label: 'Marketing',    pct: 28, color: '#2196F3' },
+  { label: 'Technology',   pct: 22, color: '#FFC107' },
+  { label: 'Media / PR',   pct: 16, color: '#CF2D8A' },
+  { label: 'Healthcare',   pct: 12, color: '#1D9F9F' },
+  { label: 'Education',    pct: 10, color: '#FF9800' },
+  { label: 'Finance',      pct: 8,  color: '#9C4DD6' },
+  { label: 'Other',        pct: 4,  color: '#78909C' },
+]
+
+const AL_AUTHORITY = [
+  { label: 'Low (0-3)',    value: 52.1, color: '#2196F3' },
+  { label: 'Medium (4-6)', value: 38.3, color: '#FFC107' },
+  { label: 'High (7-9)',   value: 30.9, color: '#CF2D8A' },
 ]
 
 function SentimentBar({ positive = 70, negative = 10, neutral = 20 }) {
@@ -1181,15 +1199,26 @@ function AuthorsListContent() {
         </Box>
       </Box>
 
-      {/* Author Occupation + Top Language */}
+      {/* Top Locations + Top Language */}
       <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
         <Box sx={{ flex: 1, minWidth: 220, border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2 }}>
-          <WHeader title="Author Occupation" />
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, lineHeight: 1.8 }}>
-            {AL_OCC_KW.map((kw, i) => (
-              <Typography key={i} sx={{ fontSize: kw.s, fontWeight: kw.s >= 20 ? 700 : 400, color: BIO_COLORS[i % BIO_COLORS.length], cursor: 'pointer' }}>{kw.text}</Typography>
-            ))}
-          </Box>
+          <WHeader title="Top Locations" download action={
+            <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, px: 1, py: 0.4, display: 'flex', alignItems: 'center', gap: 0.5, cursor: 'pointer' }}>
+              <Typography sx={{ fontSize: 12, color: '#424242' }}>Country</Typography>
+              <ArrowDownwardIcon sx={{ fontSize: 12, color: 'text.secondary' }} />
+            </Box>
+          } />
+          {AL_TOP_LOCATIONS.map((row, i) => (
+            <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.75 }}>
+              <Typography sx={{ fontSize: 13, color: '#424242', width: 130, flexShrink: 0, textAlign: 'right' }}>{row.name}</Typography>
+              <Typography sx={{ fontSize: 15, flexShrink: 0 }}>{row.flag}</Typography>
+              <Box sx={{ flex: 1, height: 14, bgcolor: '#f0f0f0', borderRadius: 1, overflow: 'hidden' }}>
+                <Box sx={{ width: `${(row.value / 903) * 100}%`, height: '100%', bgcolor: YELLOW, borderRadius: 1 }} />
+              </Box>
+              <Typography sx={{ fontSize: 12, fontWeight: 700, color: '#212121', width: 32, textAlign: 'right', flexShrink: 0 }}>{row.value}</Typography>
+            </Box>
+          ))}
+          <Pagination text="1 - 10 of 30 Locations" />
         </Box>
         <Box sx={{ flex: 1, minWidth: 220, border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2 }}>
           <WHeader title="Top Language" />
@@ -1219,6 +1248,77 @@ function AuthorsListContent() {
           ))}
           <Pagination text="1 - 5 of 30" />
         </Box>
+      </Box>
+
+      {/* Top Occupations + Authors By Authority Level */}
+      <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+
+        {/* Top Occupations donut */}
+        <Box sx={{ flex: 1, minWidth: 220, border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2 }}>
+          <WHeader title="Top Occupations" download />
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+            {(() => {
+              const size = 160, cx = 80, cy = 80, r = 65, ir = 38
+              let cum = -90
+              const paths = AL_OCC_SEGS.map(seg => {
+                const s = (cum * Math.PI) / 180
+                const sweep = (seg.pct / 100) * 360; cum += sweep
+                const e = (cum * Math.PI) / 180
+                const large = sweep > 180 ? 1 : 0
+                const d = `M ${cx + r * Math.cos(s)} ${cy + r * Math.sin(s)} A ${r} ${r} 0 ${large} 1 ${cx + r * Math.cos(e)} ${cy + r * Math.sin(e)} L ${cx + ir * Math.cos(e)} ${cy + ir * Math.sin(e)} A ${ir} ${ir} 0 ${large} 0 ${cx + ir * Math.cos(s)} ${cy + ir * Math.sin(s)} Z`
+                return { ...seg, d }
+              })
+              return (
+                <svg width={size} height={size} style={{ flexShrink: 0, display: 'block' }}>
+                  {paths.map((p, i) => <path key={i} d={p.d} fill={p.color} stroke="white" strokeWidth="1.5" />)}
+                  <circle cx={cx} cy={cy} r={ir} fill="white" />
+                </svg>
+              )
+            })()}
+            <Box sx={{ flex: 1 }}>
+              {AL_OCC_SEGS.map((s, i) => (
+                <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.625 }}>
+                  <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: s.color, flexShrink: 0 }} />
+                  <Typography sx={{ fontSize: 12, flex: 1, color: '#424242' }}>{s.label}</Typography>
+                  <Typography sx={{ fontSize: 12, fontWeight: 700, color: '#212121' }}>{s.pct}%</Typography>
+                </Box>
+              ))}
+            </Box>
+          </Box>
+        </Box>
+
+        {/* Authors By Authority Level bar chart */}
+        <Box sx={{ flex: 1, minWidth: 220, border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2 }}>
+          <WHeader title="Authors By Authority Level" />
+          {(() => {
+            const w = 300, h = 200, padL = 36, padB = 32, padT = 20, padR = 8
+            const cW = w - padL - padR, cH = h - padB - padT
+            const maxV = 60, yTicks = [0, 10, 20, 30, 40, 50, 60]
+            const barW = 52, barGap = (cW - AL_AUTHORITY.length * barW) / (AL_AUTHORITY.length + 1)
+            return (
+              <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="xMidYMid meet" style={{ display: 'block' }}>
+                {yTicks.map(v => {
+                  const y = padT + (1 - v / maxV) * cH
+                  return <g key={v}>
+                    <line x1={padL} y1={y} x2={w - padR} y2={y} stroke="#f0f0f0" strokeWidth="1" />
+                    <text x={padL - 4} y={y + 3} textAnchor="end" fontSize="9" fill="#9E9E9E">{v ? `${v}k` : '0'}</text>
+                  </g>
+                })}
+                {AL_AUTHORITY.map((bar, i) => {
+                  const x = padL + barGap + i * (barW + barGap)
+                  const barH = (bar.value / maxV) * cH
+                  const y = padT + cH - barH
+                  return <g key={i}>
+                    <rect x={x} y={y} width={barW} height={barH} fill={bar.color} rx="2" />
+                    <text x={x + barW / 2} y={y - 5} textAnchor="middle" fontSize="9" fontWeight="600" fill="#212121">{bar.value}k</text>
+                    <text x={x + barW / 2} y={h - 6} textAnchor="middle" fontSize="9" fill="#9E9E9E">{bar.label}</text>
+                  </g>
+                })}
+              </svg>
+            )
+          })()}
+        </Box>
+
       </Box>
 
       {/* Sources (Top 1000) table */}
