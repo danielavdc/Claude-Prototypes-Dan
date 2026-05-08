@@ -466,25 +466,6 @@ function XContent() {
         </Box>
       </Box>
 
-      {/* Authors By Authority Level */}
-      <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2 }}>
-        <WH title="Authors By Authority Level" />
-        {(() => {
-          const bars = [{ label: 'Low (0-3)', v: 52.1, color: BLUE }, { label: 'Medium (4-6)', v: 38.3, color: YELLOW }, { label: 'High (7-9)', v: 30.9, color: PINK }]
-          return (
-            <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 2, height: 130, pt: 1 }}>
-              {bars.map((b, i) => (
-                <Box key={i} sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <Typography sx={{ fontSize: 12, fontWeight: 700, color: '#212121', mb: 0.25 }}>{b.v}k</Typography>
-                  <Box sx={{ width: '60%', height: `${(b.v / 55) * 100}px`, bgcolor: b.color, borderRadius: '2px 2px 0 0' }} />
-                  <Typography sx={{ fontSize: 11, color: '#616161', mt: 0.25, textAlign: 'center' }}>{b.label}</Typography>
-                </Box>
-              ))}
-            </Box>
-          )
-        })()}
-      </Box>
-
       {/* Most Reposted Content */}
       <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2 }}>
         <WH title="Most Reposted Content" />
