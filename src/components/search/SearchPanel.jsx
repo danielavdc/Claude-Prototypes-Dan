@@ -119,8 +119,8 @@ function SearchPanel({
   ]
   const ALL_PINNABLE_TABS = [
     ...TABS.map(t => ({ label: t.label, description: t.description })),
-    { label: 'Visual Analysis',      description: 'What Are People Seeing?'    },
-    { label: 'Social Media Insights', description: "What's Buzzing on Social?" },
+    { label: 'Visual Analysis',      description: "How's the Visual Story?"    },
+    { label: 'Social Media Insights', description: "What's Buzzing?" },
   ]
   const [tabs, setTabs] = useState(() =>
     TABS.map(t => ({ label: t.label, description: t.description }))
