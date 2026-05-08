@@ -329,7 +329,7 @@ function StickySegmentNav({ value, onChange }) {
   }, [])
   return (
     <Box ref={ref} sx={{ position: 'sticky', top: 0, zIndex: 10, bgcolor: 'transparent', pl: 2, py: 1.25 }}>
-      <Box sx={{ display: 'flex', boxShadow: isScrolling ? '0 4px 16px rgba(0,0,0,0.10)' : 'none', borderRadius: '4px', transition: 'box-shadow 0.2s' }}>
+      <Box sx={{ display: 'inline-flex', boxShadow: isScrolling ? '0 4px 16px rgba(0,0,0,0.10)' : 'none', borderRadius: '4px', transition: 'box-shadow 0.2s' }}>
         {SOCIAL_TABS.map(tab => (
           <Box key={tab.id} onClick={() => onChange(tab.id)} sx={{
             px: 2, py: 0.75, fontSize: 14, cursor: 'pointer', whiteSpace: 'nowrap', userSelect: 'none',

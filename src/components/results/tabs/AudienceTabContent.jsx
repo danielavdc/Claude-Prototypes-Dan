@@ -184,7 +184,7 @@ function StickySegmentNav({ value, onChange }) {
   }, [])
   return (
     <Box ref={ref} sx={{ position: 'sticky', top: 0, zIndex: 10, bgcolor: 'transparent', pl: 2, py: 1.25 }}>
-      <Box sx={{ display: 'flex', gap: 0, boxShadow: isScrolling ? '0 4px 16px rgba(0,0,0,0.10)' : 'none', borderRadius: '4px', transition: 'box-shadow 0.2s' }}>
+      <Box sx={{ display: 'inline-flex', gap: 0, boxShadow: isScrolling ? '0 4px 16px rgba(0,0,0,0.10)' : 'none', borderRadius: '4px', transition: 'box-shadow 0.2s' }}>
         {NAV_TABS.map(tab => (
           <Box
             key={tab.id}
