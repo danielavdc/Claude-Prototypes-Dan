@@ -1321,41 +1321,70 @@ function AuthorsListContent() {
 
       </Box>
 
-      {/* Sources (Top 1000) table */}
-      <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white' }}>
-        <Box sx={{ display: 'flex', px: 2, py: 1, borderBottom: '1px solid #e0e0e0' }}>
-          <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#212121' }}>Sources (Top 1000)</Typography>
-        </Box>
-        <Box sx={{ display: 'flex', px: 2, py: 0.75, borderBottom: '1px solid #e0e0e0', bgcolor: '#FAFAFA' }}>
-          <Box sx={{ width: 28 }} />
-          <Typography sx={{ fontSize: 11, fontWeight: 700, color: 'text.secondary', flex: 1 }}>Name</Typography>
-          <Typography sx={{ fontSize: 11, fontWeight: 700, color: 'text.secondary', width: 70, textAlign: 'right' }}>Subscribers</Typography>
-          <Typography sx={{ fontSize: 11, fontWeight: 700, color: 'text.secondary', width: 70, textAlign: 'right' }}>Mentions</Typography>
-          <Typography sx={{ fontSize: 11, fontWeight: 700, color: 'text.secondary', width: 100, textAlign: 'right' }}>Engagement ↓</Typography>
-          <Typography sx={{ fontSize: 11, fontWeight: 700, color: 'text.secondary', width: 100, textAlign: 'right' }}>Est. reach</Typography>
-          <Typography sx={{ fontSize: 11, fontWeight: 700, color: 'text.secondary', width: 60, textAlign: 'center' }}>Sentiment</Typography>
-        </Box>
-        {AL_SOURCES.map((row, i) => (
-          <Box key={i} sx={{ display: 'flex', alignItems: 'center', px: 2, py: 0.875, borderBottom: i < AL_SOURCES.length - 1 ? '1px solid #f5f5f5' : 'none', '&:hover': { bgcolor: 'rgba(0,0,0,0.02)' } }}>
-            <Box sx={{ width: 28, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>#{row.rank}</Typography>
-            </Box>
-            <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', gap: 0.75, minWidth: 0 }}>
-              <Box sx={{ width: 28, height: 28, borderRadius: '50%', bgcolor: row.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <Typography sx={{ fontSize: 8, fontWeight: 700, color: 'white' }}>{row.init}</Typography>
-              </Box>
-              <Box sx={{ minWidth: 0 }}>
-                <Typography sx={{ fontSize: 12, fontWeight: 600, color: '#212121', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.name}</Typography>
-                <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>{row.loc}</Typography>
-              </Box>
-            </Box>
-            <Typography sx={{ fontSize: 12, color: '#424242', width: 70, textAlign: 'right' }}>{row.subs}</Typography>
-            <Typography sx={{ fontSize: 12, color: '#424242', width: 70, textAlign: 'right' }}>{row.mentions}</Typography>
-            <Typography sx={{ fontSize: 11, color: '#424242', width: 100, textAlign: 'right' }}>{row.eng}</Typography>
-            <Typography sx={{ fontSize: 11, color: '#424242', width: 100, textAlign: 'right' }}>{row.reach}</Typography>
-            <Box sx={{ width: 60, display: 'flex', justifyContent: 'center' }}><SentimentBar /></Box>
+      {/* Top Interests + Top Bio Keywords */}
+      <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+
+        {/* Top Interests */}
+        <Box sx={{ flex: 1, minWidth: 280, border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2 }}>
+          <WHeader title="Top Interests" download />
+          <Box sx={{ display: 'flex', pb: 0.75, borderBottom: '1px solid #e0e0e0', mb: 0.25 }}>
+            <Typography sx={{ fontSize: 12, fontWeight: 700, color: 'text.secondary', flex: 1 }}>Interests</Typography>
+            <Typography sx={{ fontSize: 12, fontWeight: 700, color: 'text.secondary' }}>Percentage</Typography>
           </Box>
-        ))}
+          {[
+            { name: 'Travel',                 pct: 50 },
+            { name: 'Science',                pct: 50 },
+            { name: 'Sports',                 pct: 40 },
+            { name: 'Law, govt and politics', pct: 20 },
+            { name: 'Society',                pct: 20 },
+            { name: 'News',                   pct: 10 },
+            { name: 'Movie and TV',           pct: 1  },
+          ].map((row, i, arr) => (
+            <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 0.875, borderBottom: i < arr.length - 1 ? '1px solid #f5f5f5' : 'none' }}>
+              <Typography sx={{ fontSize: 13, color: 'text.secondary', width: 16, flexShrink: 0 }}>{i + 1}</Typography>
+              <Box sx={{ width: 34, height: 34, borderRadius: '50%', bgcolor: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <svg width="18" height="18" viewBox="0 0 18 18">
+                  <path d="M4 4 L8 4 L8 8 L4 8 Z" fill="#93C5FD" rx="1" />
+                  <circle cx="13" cy="6" r="2.5" fill="#3B82F6" />
+                  <path d="M4 10 L6 14 L8 10 Z" fill="#60A5FA" />
+                  <rect x="10.5" y="10" width="5" height="4" rx="1" fill="#BFDBFE" />
+                </svg>
+              </Box>
+              <Typography sx={{ fontSize: 14, fontWeight: 700, color: '#212121', flex: 1 }}>{row.name}</Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Typography sx={{ fontSize: 13, color: '#424242', width: 36, textAlign: 'right' }}>{row.pct}%</Typography>
+                <Box sx={{ width: 100, height: 10, bgcolor: '#f0f0f0', borderRadius: 1, overflow: 'hidden' }}>
+                  <Box sx={{ width: `${row.pct}%`, height: '100%', bgcolor: '#3B82F6', borderRadius: 1 }} />
+                </Box>
+              </Box>
+            </Box>
+          ))}
+          <Pagination text="1 - 10 of 30 Interest" />
+        </Box>
+
+        {/* Top Bio Keywords */}
+        <Box sx={{ flex: 1, minWidth: 280, border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2 }}>
+          <WHeader title="Top Bio Keywords" download />
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, lineHeight: 2, mt: 1 }}>
+            {AL_OCC_KW.concat([
+              { text: 'Backyards', s: 20 }, { text: 'Interiors', s: 14 }, { text: 'Rugs', s: 12 },
+              { text: 'Joshua Slack', s: 13 }, { text: 'Lego', s: 12 }, { text: 'Knoll', s: 12 },
+              { text: 'Ebay', s: 13 }, { text: 'Amazon', s: 14 }, { text: 'The Verge', s: 12 },
+              { text: 'Wood finishes', s: 12 }, { text: 'Books stacked', s: 13 },
+            ]).map((kw, i) => (
+              <Typography key={i} sx={{
+                fontSize: kw.s,
+                fontWeight: kw.s >= 22 ? 700 : kw.s >= 17 ? 600 : 400,
+                color: `rgba(109,40,217,${0.35 + ((i * 7) % 13) * 0.05})`,
+                cursor: 'pointer',
+                '&:hover': { opacity: 0.75 },
+              }}>
+                {kw.text}
+              </Typography>
+            ))}
+          </Box>
+        </Box>
+
       </Box>
 
       {/* Authors (Top 1000) table */}
