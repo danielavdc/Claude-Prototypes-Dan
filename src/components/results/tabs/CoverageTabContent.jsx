@@ -26,9 +26,10 @@ const GREEN  = '#4CAF50'
 const RED    = '#F44336'
 
 const NAV_SECTIONS = [
-  { id: 'volume',    label: 'Volume'    },
-  { id: 'locations', label: 'Locations' },
-  { id: 'sources',   label: 'Sources'   },
+  { id: 'volume',        label: 'Volume'        },
+  { id: 'locations',     label: 'Locations'     },
+  { id: 'sources',       label: 'Sources'       },
+  { id: 'news-coverage', label: 'News Coverage' },
 ]
 
 const X_LABELS = ['Aug 25', 'Aug 26', 'Aug 27', 'Aug 28', 'Aug 29', 'Aug 30', 'Aug 31']
@@ -914,6 +915,218 @@ function TrendingContent() {
   )
 }
 
+// ── news coverage tab ─────────────────────────────────────────────────────────
+
+const NC_DATA     = [8, 46, 22, 18, 36, 12, 32]
+const NC_PREV     = [12, 24, 18, 22, 28, 22, 18]
+const NC_AVE_DATA = [10, 52, 28, 14, 40, 8, 28]
+const NC_X_TICKS  = ['Aug 25', 'Aug 27', 'Aug 29', 'Aug 31']
+const NC_ECHO_ALL = [20, 55, 10, 5, 10, 25, 30]
+const NC_ECHO_FB  = [14, 20, 8, 5, 8, 14, 18]
+const NC_ECHO_X   = [5, 8, 4, 3, 4, 5, 8]
+const NC_SOURCES  = [
+  { name: 'CNN',            fb: 3100, x: 200  },
+  { name: 'USA Today',      fb: 2000, x: 1500 },
+  { name: 'New York Times', fb: 1500, x: 1200 },
+  { name: 'The Guardian',   fb: 500,  x: 300  },
+  { name: 'Mountain Weekly',fb: 480,  x: 0    },
+  { name: 'Dallas Mavericks',fb: 280, x: 0    },
+  { name: 'Associate Press',fb: 180,  x: 0    },
+  { name: 'NPR',            fb: 100,  x: 80   },
+]
+
+function NCLineChart({ data, prevData, height = 160 }) {
+  const w = 400, h = height, padL = 36, padB = 22, padT = 8, padR = 8
+  const cW = w - padL - padR, cH = h - padB - padT, maxV = 60
+  const pt = (v, i) => `${padL + (i / (data.length - 1)) * cW},${padT + (1 - v / maxV) * cH}`
+  const pts = data.map(pt).join(' ')
+  const prev = prevData.map(pt).join(' ')
+  const fill = `${padL},${padT + cH} ${pts} ${padL + cW},${padT + cH}`
+  return (
+    <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" style={{ display: 'block' }}>
+      {[0, 20, 40, 60].map(v => {
+        const y = padT + (1 - v / 60) * cH
+        return <g key={v}>
+          <line x1={padL} y1={y} x2={w - padR} y2={y} stroke="#f0f0f0" strokeWidth="1" />
+          <text x={padL - 4} y={y + 3} textAnchor="end" fontSize="9" fill="#9E9E9E">{v ? `${v}k` : '0'}</text>
+        </g>
+      })}
+      <polygon points={fill} fill="#2196F3" fillOpacity="0.08" />
+      <polyline points={prev} fill="none" stroke="#BDBDBD" strokeWidth="1.5" strokeDasharray="4 2" strokeLinejoin="round" />
+      <polyline points={pts} fill="none" stroke="#2196F3" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+      {NC_X_TICKS.map((label, i) => {
+        const idx = i * 2
+        const x = padL + (idx / (data.length - 1)) * cW
+        return <text key={i} x={x} y={h - 4} textAnchor="middle" fontSize="9" fill="#9E9E9E">{label}</text>
+      })}
+    </svg>
+  )
+}
+
+function NCTrendWidget({ title, metricLabel, value, data = NC_DATA }) {
+  return (
+    <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2, flex: 1, minWidth: 240 }}>
+      <WidgetHeader title={title} />
+      <Typography sx={{ fontSize: 12, color: 'text.secondary', mb: 0.25 }}>{metricLabel}</Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.25 }}>
+        <Typography sx={{ fontSize: 28, fontWeight: 700, color: '#212121', lineHeight: 1.1 }}>{value}</Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25, bgcolor: '#E8F5E9', color: '#2E7D32', fontSize: 11, fontWeight: 700, px: 0.75, py: 0.25, borderRadius: 1 }}>
+          <ArrowUpwardIcon sx={{ fontSize: 11 }} />37%
+        </Box>
+      </Box>
+      <Typography sx={{ fontSize: 11, color: 'text.secondary', mb: 1.25 }}>Previously 2.97M</Typography>
+      <Box sx={{ display: 'flex', gap: 2, mb: 1 }}>
+        {[{ label: 'All', color: '#2196F3' }, { label: 'Previous Period', color: '#BDBDBD' }].map(l => (
+          <Box key={l.label} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: l.color }} />
+            <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>{l.label}</Typography>
+          </Box>
+        ))}
+      </Box>
+      <NCLineChart data={data} prevData={NC_PREV} />
+    </Paper>
+  )
+}
+
+function NewsCoverageContent() {
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+
+      <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+        <NCTrendWidget title="Mentions Trend"   metricLabel="Total Mentions"   value="35.2k" />
+        <NCTrendWidget title="Engagement Trend" metricLabel="Total Engagement" value="35.2k" />
+      </Box>
+
+      <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+        <NCTrendWidget title="Reach Trend" metricLabel="Total Reach" value="35.2k" />
+        <NCTrendWidget title="Views Trend" metricLabel="Total Views" value="35.2k" />
+      </Box>
+
+      <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+        <NCTrendWidget title="AVE Trend"         metricLabel="Total AVE"         value="52.1k" data={NC_AVE_DATA} />
+        <NCTrendWidget title="Social Echo Trend" metricLabel="Total Social Echo" value="52.1k" data={NC_AVE_DATA} />
+      </Box>
+
+      {/* Social Echo Breakdown Trend */}
+      <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2 }}>
+        <WidgetHeader title="Social Echo Breakdown Trend" />
+        <Box sx={{ display: 'flex', gap: 2, mb: 1.25 }}>
+          {[{ label: 'All', color: '#E91E63', val: '10.7k' }, { label: 'Facebook', color: '#2196F3', val: '10.7k' }, { label: 'X', color: '#212121', val: '10.7k' }].map(l => (
+            <Box key={l.label} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: l.color }} />
+              <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>{l.label}</Typography>
+              <Typography sx={{ fontSize: 11, fontWeight: 700, color: '#212121' }}>{l.val}</Typography>
+            </Box>
+          ))}
+        </Box>
+        {(() => {
+          const w = 800, h = 200, padL = 40, padB = 22, padT = 8, padR = 8
+          const cW = w - padL - padR, cH = h - padB - padT, maxV = 60
+          const pt = (arr) => arr.map((v, i) => `${padL + (i / (arr.length - 1)) * cW},${padT + (1 - v / maxV) * cH}`).join(' ')
+          const fillPts = `${padL},${padT + cH} ${pt(NC_ECHO_ALL)} ${padL + cW},${padT + cH}`
+          return (
+            <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" style={{ display: 'block' }}>
+              {[0, 20, 40, 60].map(v => {
+                const y = padT + (1 - v / 60) * cH
+                return <g key={v}>
+                  <line x1={padL} y1={y} x2={w - padR} y2={y} stroke="#f0f0f0" strokeWidth="1" />
+                  <text x={padL - 4} y={y + 3} textAnchor="end" fontSize="10" fill="#9E9E9E">{v ? `${v}k` : '0'}</text>
+                </g>
+              })}
+              <polygon points={fillPts} fill="#E91E63" fillOpacity="0.06" />
+              <polyline points={pt(NC_ECHO_ALL)} fill="none" stroke="#E91E63" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+              <polyline points={pt(NC_ECHO_FB)} fill="none" stroke="#2196F3" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+              <polyline points={pt(NC_ECHO_X)} fill="none" stroke="#212121" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+              {NC_X_TICKS.map((label, i) => {
+                const x = padL + (i * 2 / (NC_ECHO_ALL.length - 1)) * cW
+                return <text key={i} x={x} y={h - 4} textAnchor="middle" fontSize="10" fill="#9E9E9E">{label}</text>
+              })}
+            </svg>
+          )
+        })()}
+      </Paper>
+
+      {/* Social Echo by News Source + Social Echo Breakdown */}
+      <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+
+        <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2, flex: 2, minWidth: 300 }}>
+          <WidgetHeader title="Social Echo by News Source" />
+          <Box sx={{ display: 'flex', gap: 2, mb: 1.25 }}>
+            {[{ label: 'Facebook', color: '#2196F3' }, { label: 'X', color: '#212121' }].map(l => (
+              <Box key={l.label} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: l.color }} />
+                <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>{l.label}</Typography>
+              </Box>
+            ))}
+          </Box>
+          {(() => {
+            const maxVal = 3200, barH = 16, gap = 6, padL = 110, padR = 40
+            return (
+              <Box>
+                {NC_SOURCES.map((src, i) => (
+                  <Box key={i} sx={{ display: 'flex', alignItems: 'center', mb: `${gap}px` }}>
+                    <Typography sx={{ fontSize: 12, color: '#424242', width: padL, flexShrink: 0, textAlign: 'right', pr: 1.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{src.name}</Typography>
+                    <Box sx={{ flex: 1 }}>
+                      <Box sx={{ height: barH, bgcolor: '#2196F3', borderRadius: '0 2px 2px 0', width: `${(src.fb / maxVal) * 100}%`, mb: '2px' }} />
+                      <Box sx={{ height: barH, bgcolor: '#212121', borderRadius: '0 2px 2px 0', width: `${(src.x / maxVal) * 100}%` }} />
+                    </Box>
+                  </Box>
+                ))}
+                <Box sx={{ display: 'flex', pl: `${padL}px`, mt: 0.5 }}>
+                  {[0, 1000, 2000, 3000].map(v => (
+                    <Box key={v} sx={{ flex: v === 0 ? 0 : 1, textAlign: v === 0 ? 'left' : 'center' }}>
+                      <Typography sx={{ fontSize: 10, color: 'text.secondary' }}>{v === 0 ? '0' : `${v / 1000}k`}</Typography>
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+            )
+          })()}
+        </Paper>
+
+        <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2, flex: 1, minWidth: 220 }}>
+          <WidgetHeader title="Social Echo Breakdown" />
+          {(() => {
+            const size = 180, cx = 90, cy = 90, r = 72, ir = 44
+            const segs = [
+              { pct: 58.3, color: '#2196F3', label: 'Facebook', disp: '35.8%', count: '1.9k' },
+              { pct: 41.7, color: '#212121', label: 'X',        disp: '25.5%', count: '1.4k' },
+            ]
+            let cum = -90
+            const paths = segs.map(seg => {
+              const s = (cum * Math.PI) / 180
+              cum += (seg.pct / 100) * 360
+              const e = (cum * Math.PI) / 180
+              const large = seg.pct > 50 ? 1 : 0
+              const d = `M ${cx + r * Math.cos(s)} ${cy + r * Math.sin(s)} A ${r} ${r} 0 ${large} 1 ${cx + r * Math.cos(e)} ${cy + r * Math.sin(e)} L ${cx + ir * Math.cos(e)} ${cy + ir * Math.sin(e)} A ${ir} ${ir} 0 ${large} 0 ${cx + ir * Math.cos(s)} ${cy + ir * Math.sin(s)} Z`
+              return { ...seg, d }
+            })
+            return (
+              <Box>
+                <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1.5 }}>
+                  <svg width={size} height={size} style={{ display: 'block' }}>
+                    {paths.map((p, i) => <path key={i} d={p.d} fill={p.color} stroke="white" strokeWidth="2" />)}
+                    <circle cx={cx} cy={cy} r={ir} fill="white" />
+                  </svg>
+                </Box>
+                {segs.map((s, i) => (
+                  <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.75 }}>
+                    <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: s.color, flexShrink: 0 }} />
+                    <Typography sx={{ fontSize: 13, flex: 1, color: '#212121' }}>{s.label}</Typography>
+                    <Typography sx={{ fontSize: 13, color: '#424242' }}>{s.disp}</Typography>
+                    <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#212121', width: 36, textAlign: 'right' }}>{s.count}</Typography>
+                  </Box>
+                ))}
+              </Box>
+            )
+          })()}
+        </Paper>
+
+      </Box>
+    </Box>
+  )
+}
+
 // ── main export ───────────────────────────────────────────────────────────────
 
 export default function CoverageTabContent({ onDashboardSave, loading, targetSubTab, subTabTrigger }) {
@@ -952,6 +1165,7 @@ export default function CoverageTabContent({ onDashboardSave, loading, targetSub
           <TrendingContent />
         </Box>
       )}
+      {activeTab === 'news-coverage' && <NewsCoverageContent />}
     </Box>
   )
 }
