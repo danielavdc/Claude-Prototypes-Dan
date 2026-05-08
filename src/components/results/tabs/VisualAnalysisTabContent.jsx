@@ -170,7 +170,7 @@ export default function VisualAnalysisTabContent({ loading }) {
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
 
       {/* AI Insight */}
-      <Box sx={{ p: '1.5px', borderRadius: 2, background: 'linear-gradient(135deg, #9C4DD6 0%, #CF2D8A 40%, #1D9F9F 100%)' }}>
+      <Box sx={{ p: '1.5px', borderRadius: 2, background: 'linear-gradient(135deg, #9C4DD6 0%, #CF2D8A 40%, #1D9F9F 100%)', mt: 2 }}>
         <Box sx={{ bgcolor: 'background.paper', borderRadius: '6px', p: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>

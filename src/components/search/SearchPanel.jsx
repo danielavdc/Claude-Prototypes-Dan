@@ -821,7 +821,11 @@ function SearchPanel({
               )
               return available.map(item => (
                 <MenuItem key={item.label} onClick={() => {
-                  setTabs(prev => [...prev, { label: item.label, description: item.description }])
+                  setTabs(prev => {
+                    const next = [...prev, { label: item.label, description: item.description }]
+                    setActiveTab(next.length - 1)
+                    return next
+                  })
                   setPinTabAnchor(null)
                   triggerSave()
                 }} sx={{ px: 2, py: 1.25, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
