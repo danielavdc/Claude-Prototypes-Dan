@@ -1078,6 +1078,49 @@ function AuthorsListContent() {
         'Reddit.com/r/apple and Sports Illustrated show the highest engagement growth at +85.4% and +21.9% respectively — signaling high-value communities for targeted amplification. 5…',
       ]} />
 
+      {/* X Author Segment banner */}
+      <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ width: 44, height: 44, borderRadius: '50%', bgcolor: 'rgba(29,159,159,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="2.5" fill="#1D9F9F" />
+            <circle cx="4"  cy="6"  r="1.5" fill="#1D9F9F" opacity="0.7" />
+            <circle cx="20" cy="6"  r="1.5" fill="#1D9F9F" opacity="0.7" />
+            <circle cx="4"  cy="18" r="1.5" fill="#1D9F9F" opacity="0.7" />
+            <circle cx="20" cy="18" r="1.5" fill="#1D9F9F" opacity="0.7" />
+            <line x1="12" y1="12" x2="4"  y2="6"  stroke="#1D9F9F" strokeWidth="1.2" opacity="0.6" />
+            <line x1="12" y1="12" x2="20" y2="6"  stroke="#1D9F9F" strokeWidth="1.2" opacity="0.6" />
+            <line x1="12" y1="12" x2="4"  y2="18" stroke="#1D9F9F" strokeWidth="1.2" opacity="0.6" />
+            <line x1="12" y1="12" x2="20" y2="18" stroke="#1D9F9F" strokeWidth="1.2" opacity="0.6" />
+          </svg>
+        </Box>
+        <Box>
+          <Typography sx={{ fontSize: 14, color: '#212121', mb: 0.5 }}>Find and understand relevant X communities and authors.</Typography>
+          <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#1D9F9F', cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}>Create Author Segment Dashboard</Typography>
+        </Box>
+      </Box>
+
+      {/* Unique X Authors + X Verification */}
+      <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+        <Box sx={{ flex: 1, minWidth: 220, border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2 }}>
+          <WHeader title="Unique X Authors" download />
+          <Box sx={{ mt: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+              <Typography sx={{ fontSize: 36, fontWeight: 700, color: '#212121', lineHeight: 1.1 }}>33.3k</Typography>
+              <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.25, bgcolor: '#E8F5E9', color: '#2E7D32', fontSize: 12, fontWeight: 700, px: 0.75, py: 0.25, borderRadius: 1 }}>
+                <ArrowUpwardIcon sx={{ fontSize: 12 }} />18%
+              </Box>
+            </Box>
+            <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>Previously <strong>2.97M</strong></Typography>
+          </Box>
+        </Box>
+        <Box sx={{ flex: 1, minWidth: 220, border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2 }}>
+          <WHeader title="X Verification" download />
+          <Box sx={{ mt: 2 }}>
+            <Typography sx={{ fontSize: 36, fontWeight: 700, color: '#212121', lineHeight: 1.1 }}>33.3k</Typography>
+          </Box>
+        </Box>
+      </Box>
+
       {/* Author Gender + Author Demographic */}
       <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
         <Box sx={{ flex: 1, minWidth: 220, border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2 }}>
