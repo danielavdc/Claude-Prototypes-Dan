@@ -14,6 +14,8 @@ import ShowChartIcon from '@mui/icons-material/ShowChart'
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined'
 import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined'
 import AnchorNav, { SectionTitle } from './AnchorNav'
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
+import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined'
 import { useState, useRef, useEffect } from 'react'
 
 const COV_NAV = [
@@ -609,7 +611,7 @@ function TrendingContent() {
               <Box sx={{ mt: 1.5 }}>
                 <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, border: '1px solid #e0e0e0', borderRadius: 0.75, px: 1.25, py: 0.5, cursor: 'pointer', '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' } }}>
                   <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#212121' }}>+4</Typography>
-                  <ArrowDownwardIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
+                  <ArrowDropDownIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
                 </Box>
               </Box>
             </Paper>
@@ -623,7 +625,7 @@ function TrendingContent() {
               <Typography sx={{ fontSize: 16, fontWeight: 700, color: '#212121' }}>Top News Sources</Typography>
               <InfoOutlinedIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
             </Box>
-            <OpenInNewIcon sx={{ fontSize: 18, color: 'text.secondary', cursor: 'pointer' }} />
+            <DownloadOutlinedIcon sx={{ fontSize: 18, color: 'text.secondary', cursor: 'pointer' }} />
           </Box>
           <Box sx={{ display: 'flex', pb: 0.75, borderBottom: '1px solid #e0e0e0', mb: 0.5 }}>
             <Typography sx={{ fontSize: 12, fontWeight: 700, color: 'text.secondary', flex: 1 }}>Publications</Typography>
