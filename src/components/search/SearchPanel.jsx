@@ -814,27 +814,22 @@ function SearchPanel({
                   </Typography>
                 </Box>
               )
+              const ON_DEMAND_DESC = { 'Visual Analysis': "What's the Visual Story?", 'Social Media Insights': "What's Trending?" }
               return available.map(item => (
                 <MenuItem key={item} onClick={() => {
-                  const ON_DEMAND_DESC = { 'Visual Analysis': "What's the Visual Story?", 'Social Media Insights': "What's Trending?" }
                   setTabs(prev => [...prev, { label: item, description: ON_DEMAND_DESC[item] || '' }])
                   setPinTabAnchor(null)
                   triggerSave()
-                }} sx={{ px: 2, py: 1.25, fontSize: 15, color: 'text.primary' }}>
-                  {item}
+                }} sx={{ px: 2, py: 1.25, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                  <Typography sx={{ fontSize: 15, color: 'text.primary', lineHeight: 1.3 }}>{item}</Typography>
+                  {ON_DEMAND_DESC[item] && <Typography sx={{ fontSize: 12, color: 'text.secondary', lineHeight: 1.3 }}>{ON_DEMAND_DESC[item]}</Typography>}
                 </MenuItem>
               ))
             })()}
-            <Divider sx={{ my: 0.5 }} />
-            {[
-              { label: 'Create tab with AI',  Icon: AutoAwesomeIcon },
-              { label: 'Create custom tab',   Icon: TuneIcon        },
-            ].map(({ label, Icon }) => (
-              <Box key={label} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 2, py: 1.25, cursor: 'default' }}>
-                <Icon sx={{ fontSize: 18, color: '#616161', flexShrink: 0 }} />
-                <Typography sx={{ fontSize: 15, color: '#212121' }}>{label}</Typography>
-              </Box>
-            ))}
+            <Box sx={{ px: 2, py: 1.25, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+              <Typography sx={{ fontSize: 15, color: 'text.primary', lineHeight: 1.3 }}>Audience</Typography>
+              <Typography sx={{ fontSize: 12, color: 'text.secondary', lineHeight: 1.3 }}>Who is Consuming?</Typography>
+            </Box>
             {removedTabs.length > 0 && <Divider />}
             {removedTabs.map((tab, i) => {
               const label = typeof tab === 'string' ? tab : tab.label

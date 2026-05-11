@@ -7,7 +7,7 @@ export const TABS = [
   { label: 'Coverage',         description: 'How Much and Where?' },
   { label: 'Narrative',        description: "What's the Story?" },
   { label: 'Sentiment',        description: "What's the Tone?" },
-  { label: 'Audience',         description: "Who's Driving It?" },
+  { label: 'Authors',          description: "Who's creating content?" },
 ]
 
 export const MIRA_MESSAGES = {
