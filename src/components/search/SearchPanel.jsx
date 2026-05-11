@@ -834,16 +834,10 @@ function SearchPanel({
                 </MenuItem>
               ))
             })()}
-            <Divider sx={{ my: 0.5 }} />
-            {[
-              { label: 'Create tab with AI',  Icon: AutoAwesomeIcon },
-              { label: 'Create custom tab',   Icon: TuneIcon        },
-            ].map(({ label, Icon }) => (
-              <Box key={label} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 2, py: 1.25, cursor: 'default' }}>
-                <Icon sx={{ fontSize: 18, color: '#616161', flexShrink: 0 }} />
-                <Typography sx={{ fontSize: 15, color: '#212121' }}>{label}</Typography>
-              </Box>
-            ))}
+            <Box sx={{ px: 2, py: 1.25, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+              <Typography sx={{ fontSize: 15, color: 'text.primary', lineHeight: 1.3 }}>Audience</Typography>
+              <Typography sx={{ fontSize: 12, color: 'text.secondary', lineHeight: 1.3 }}>Who is Consuming?</Typography>
+            </Box>
           </Menu>
           </Box>{/* end tabsScrollRef */}
           {canScrollRight && (

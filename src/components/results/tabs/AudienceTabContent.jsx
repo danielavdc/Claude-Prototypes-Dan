@@ -28,7 +28,7 @@ const DARK   = '#212121'
 const YELLOW = '#FFC107'
 
 const NAV_TABS = [
-  { id: 'authors-list',  label: 'Authors'  },
+  { id: 'authors-list',  label: 'Social Authors'  },
   { id: 'journalists',   label: 'Journalists'   },
   { id: 'news-coverage', label: 'News Sources' },
 ]
