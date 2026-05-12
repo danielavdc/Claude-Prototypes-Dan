@@ -526,6 +526,8 @@ export function LocationsContent() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
 
+      <Box sx={{ pt: 2 }}><AIInsightWidget /></Box>
+
       <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2 }}>
         <WidgetHeader title="Countries Trend" />
         <ChartLegend datasets={COUNTRIES_TREND} />
@@ -989,6 +991,8 @@ function NCTrendWidget({ title, metricLabel, value, data = NC_DATA }) {
 export function NewsCoverageContent() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+
+      <Box sx={{ pt: 2 }}><AIInsightWidget /></Box>
 
       <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
         <NCTrendWidget title="Mentions Trend"   metricLabel="Total Mentions"   value="35.2k" />
