@@ -32,10 +32,9 @@ const DARK   = '#212121'
 const YELLOW = '#FFC107'
 
 const AUD_NAV = [
-  { id: 'aud-authors-list',  label: 'Authors List',  Icon: ArticleOutlinedIcon    },
-  { id: 'aud-journalists',   label: 'Journalists',   Icon: ArticleOutlinedIcon    },
-  { id: 'aud-x-authors',     label: 'X Authors',     Icon: ShowChartIcon          },
-  { id: 'aud-news-coverage', label: 'News Coverage', Icon: NewspaperOutlinedIcon  },
+  { id: 'aud-social-authors', label: 'Social Authors', Icon: ShowChartIcon          },
+  { id: 'aud-journalists',    label: 'Journalists',    Icon: ArticleOutlinedIcon   },
+  { id: 'aud-news-sources',   label: 'News Sources',   Icon: NewspaperOutlinedIcon },
 ]
 
 // ── shared ui ─────────────────────────────────────────────────────────────────
@@ -1231,10 +1230,12 @@ export default function AudienceTabContent({ loading, targetSubTab, subTabTrigge
   return (
     <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
       <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 3 }}>
-        <Box id="aud-authors-list"><AuthorsListContent  title="Authors List"  /></Box>
-        <Box id="aud-journalists"> <JournalistsContent  title="Journalists"   /></Box>
-        <Box id="aud-x-authors">  <XAuthorsContent     title="X Authors"     /></Box>
-        <Box id="aud-news-coverage"><NewsCoverageContent title="News Coverage" /></Box>
+        <Box id="aud-social-authors">
+          <XAuthorsContent    title="Social Authors" />
+          <AuthorsListContent />
+        </Box>
+        <Box id="aud-journalists"> <JournalistsContent  title="Journalists"  /></Box>
+        <Box id="aud-news-sources"><NewsCoverageContent title="News Sources"  /></Box>
       </Box>
       <AnchorNav items={AUD_NAV} />
     </Box>

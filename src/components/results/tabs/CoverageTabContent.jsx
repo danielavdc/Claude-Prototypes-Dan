@@ -279,7 +279,7 @@ function MiniSparkline({ data, up }) {
 
 // ── shared ai insight ─────────────────────────────────────────────────────────
 
-function AIInsightWidget() {
+export function AIInsightWidget() {
   return (
     <Box sx={{ p: '1.5px', borderRadius: 2, background: 'linear-gradient(135deg, #9C4DD6 0%, #CF2D8A 40%, #1D9F9F 100%)' }}>
       <Box sx={{ bgcolor: 'background.paper', borderRadius: '6px', p: 2 }}>
@@ -346,7 +346,7 @@ function MentionsContent() {
 
 // ── engagement tab ────────────────────────────────────────────────────────────
 
-function EngagementContent() {
+export function EngagementContent() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
 
