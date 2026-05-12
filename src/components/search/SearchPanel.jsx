@@ -119,8 +119,10 @@ function SearchPanel({
   ]
   const ALL_PINNABLE_TABS = [
     ...TABS.map(t => ({ label: t.label, description: t.description })),
+    { label: 'Locations',            description: "Where's the conversation?"  },
+    { label: 'News Coverage',        description: "What's being published?"    },
+    { label: 'Social Media Insights', description: "What's Buzzing?"           },
     { label: 'Visual Analysis',      description: "How's the Visual Story?"    },
-    { label: 'Social Media Insights', description: "What's Buzzing?" },
   ]
   const [tabs, setTabs] = useState(() =>
     TABS.map(t => ({ label: t.label, description: t.description }))
@@ -834,10 +836,6 @@ function SearchPanel({
                 </MenuItem>
               ))
             })()}
-            <Box sx={{ px: 2, py: 1.25, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-              <Typography sx={{ fontSize: 15, color: 'text.primary', lineHeight: 1.3 }}>Audience</Typography>
-              <Typography sx={{ fontSize: 12, color: 'text.secondary', lineHeight: 1.3 }}>Who is Consuming?</Typography>
-            </Box>
           </Menu>
           </Box>{/* end tabsScrollRef */}
           {canScrollRight && (

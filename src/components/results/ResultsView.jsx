@@ -35,7 +35,7 @@ import WidgetMenu from './WidgetMenu'
 import FilteredMentionsPanel from './FilteredMentionsPanel'
 import SpikeAnalysisPanel from './SpikeAnalysisPanel'
 import MediaContactsPanel from './MediaContactsPanel'
-import CoverageTabContent from './tabs/CoverageTabContent'
+import CoverageTabContent, { LocationsContent, NewsCoverageContent } from './tabs/CoverageTabContent'
 import NarrativeTabContent from './tabs/NarrativeTabContent'
 import SentimentTabContent from './tabs/SentimentTabContent'
 import AudienceTabContent from './tabs/AudienceTabContent'
@@ -250,6 +250,10 @@ function ResultsView({ query, brandName, loading, resultCount = 107, onDashboard
           <SocialMediaInsightsTabContent loading={loading} />
         ) : activeTabLabel === 'Visual Analysis' ? (
           <VisualAnalysisTabContent loading={loading} />
+        ) : activeTabLabel === 'Locations' ? (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, pt: 1 }}><LocationsContent /></Box>
+        ) : activeTabLabel === 'News Coverage' ? (
+          <NewsCoverageContent />
         ) : activeTabLabel === 'X Insight' ? (
           <SocialMediaInsightsTabContent loading={loading} />
         ) : activeTab === 5 ? (

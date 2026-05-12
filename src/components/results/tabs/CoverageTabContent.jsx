@@ -26,10 +26,8 @@ const GREEN  = '#4CAF50'
 const RED    = '#F44336'
 
 const NAV_SECTIONS = [
-  { id: 'volume',        label: 'Volume'        },
-  { id: 'locations',     label: 'Locations'     },
-  { id: 'sources',       label: 'Sources'       },
-  { id: 'news-coverage', label: 'News Coverage' },
+  { id: 'volume',  label: 'Volume'  },
+  { id: 'sources', label: 'Sources' },
 ]
 
 const X_LABELS = ['Aug 25', 'Aug 26', 'Aug 27', 'Aug 28', 'Aug 29', 'Aug 30', 'Aug 31']
@@ -416,7 +414,7 @@ function MentionsContent() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
 
-      <AIInsightWidget />
+      <Box sx={{ pt: 2 }}><AIInsightWidget /></Box>
 
       <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2 }}>
         <WidgetHeader title="Mentions Trend" />
@@ -524,7 +522,7 @@ function EngagementContent() {
 
 // ── locations tab ─────────────────────────────────────────────────────────────
 
-function LocationsContent() {
+export function LocationsContent() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
 
@@ -988,7 +986,7 @@ function NCTrendWidget({ title, metricLabel, value, data = NC_DATA }) {
   )
 }
 
-function NewsCoverageContent() {
+export function NewsCoverageContent() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
 
@@ -1129,43 +1127,13 @@ function NewsCoverageContent() {
 
 // ── main export ───────────────────────────────────────────────────────────────
 
-export default function CoverageTabContent({ onDashboardSave, loading, targetSubTab, subTabTrigger }) {
-  const [activeTab, setActiveTab] = useState('volume')
-  const boxRef = useRef(null)
-  useEffect(() => { if (subTabTrigger > 0 && targetSubTab) setActiveTab(targetSubTab) }, [subTabTrigger])
-
-  const scrollToTop = () => {
-    let el = boxRef.current?.parentElement
-    while (el && el !== document.body) {
-      const s = window.getComputedStyle(el)
-      if (s.overflow === 'auto' || s.overflowY === 'auto') { el.scrollTo({ top: 0, behavior: 'smooth' }); break }
-      el = el?.parentElement
-    }
-  }
-
+export default function CoverageTabContent({ onDashboardSave, loading }) {
   if (loading) return null
   return (
-    <Box ref={boxRef} sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-      <StickySegmentNav items={NAV_SECTIONS} value={activeTab} onChange={(val) => { setActiveTab(val); scrollToTop() }} />
-      {activeTab === 'volume' && (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <MentionsContent />
-          <EngagementContent />
-        </Box>
-      )}
-      {activeTab === 'locations' && (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <AIInsightWidget />
-          <LocationsContent />
-        </Box>
-      )}
-      {activeTab === 'sources' && (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <AIInsightWidget />
-          <TrendingContent />
-        </Box>
-      )}
-      {activeTab === 'news-coverage' && <NewsCoverageContent />}
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+      <MentionsContent />
+      <EngagementContent />
+      <TrendingContent />
     </Box>
   )
 }
