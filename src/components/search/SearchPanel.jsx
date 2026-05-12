@@ -121,8 +121,9 @@ function SearchPanel({
     ...TABS.map(t => ({ label: t.label, description: t.description })),
     { label: 'Locations',            description: "Where's the conversation?"  },
     { label: 'News Coverage',        description: "What's being published?"    },
-    { label: 'Social Media Insights', description: "What's Buzzing?"           },
     { label: 'Visual Analysis',      description: "How's the Visual Story?"    },
+    { label: 'Authors',              description: "Who's creating content?"    },
+    { label: 'Social Media Insights', description: "What's Buzzing?"           },
   ]
   const [tabs, setTabs] = useState(() =>
     TABS.map(t => ({ label: t.label, description: t.description }))

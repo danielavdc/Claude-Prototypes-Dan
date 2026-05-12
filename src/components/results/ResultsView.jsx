@@ -42,6 +42,7 @@ import AudienceTabContent from './tabs/AudienceTabContent'
 import OverviewTabContent from './tabs/OverviewTabContent'
 import VisualAnalysisTabContent from './tabs/VisualAnalysisTabContent'
 import SocialMediaInsightsTabContent from './tabs/SocialMediaInsightsTabContent'
+import EngagementTabContent from './tabs/EngagementTabContent'
 
 function ResultsView({ query, brandName, loading, resultCount = 107, onDashboardSave, onWidgetInsight, activeTab, activeTabLabel, navigateToTab, targetSubTab, subTabTrigger }) {
   const [exportModalOpen, setExportModalOpen] = useState(false)
@@ -256,6 +257,8 @@ function ResultsView({ query, brandName, loading, resultCount = 107, onDashboard
           <NewsCoverageContent />
         ) : activeTabLabel === 'X Insight' ? (
           <SocialMediaInsightsTabContent loading={loading} />
+        ) : activeTabLabel === 'Authors' ? (
+          <AudienceTabContent loading={loading} targetSubTab={targetSubTab} subTabTrigger={subTabTrigger} />
         ) : activeTab === 5 ? (
           <MediaContactsPanel onDashboardSave={onDashboardSave} />
         ) : activeTab === 1 ? (
@@ -263,9 +266,9 @@ function ResultsView({ query, brandName, loading, resultCount = 107, onDashboard
         ) : activeTab === 2 ? (
           <NarrativeTabContent loading={loading} />
         ) : activeTab === 3 ? (
-          <SentimentTabContent loading={loading} />
+          <EngagementTabContent loading={loading} />
         ) : activeTab === 4 ? (
-          <AudienceTabContent loading={loading} targetSubTab={targetSubTab} subTabTrigger={subTabTrigger} />
+          <SentimentTabContent loading={loading} />
         ) : (<>
         {/* AI Insight card */}
         <Box sx={{ p: '1.5px', borderRadius: 2, background: 'linear-gradient(135deg, #9C4DD6 0%, #CF2D8A 40%, #1D9F9F 100%)', mt: 2 }}>
