@@ -675,19 +675,23 @@ export default function TrendChart() {
     return (
       <div style={{
         backgroundColor: 'white',
-        border: '1px solid #ccc',
-        borderRadius: '4px',
-        padding: '12px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+        border: '2px solid #3B82F6',
+        borderRadius: '8px',
+        padding: '16px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+        minWidth: '280px'
       }}>
-        {isNormalizedMode && (
-          <p style={{ fontWeight: 600, marginBottom: '8px', fontSize: '13px' }}>
-            {label}
-          </p>
-        )}
-        <div style={{ fontSize: '11px', color: '#666', marginBottom: '8px', fontWeight: 500 }}>
-          Total: {totalVolume.toLocaleString()} mentions
+        {/* Title */}
+        <div style={{
+          fontWeight: 700,
+          marginBottom: '12px',
+          fontSize: '16px',
+          color: '#1F2937'
+        }}>
+          {label}
         </div>
+
+        {/* Terms */}
         {payload.map((entry, idx) => {
           const termId = entry.dataKey.replace('_volume', '');
           const term = chartData.termsData.find(t => t.termId === termId);
@@ -700,41 +704,108 @@ export default function TrendChart() {
             : entry.payload.date;
 
           return (
-            <div key={idx} style={{ marginBottom: idx < payload.length - 1 ? '8px' : 0 }}>
+            <div key={idx} style={{ marginBottom: '12px' }}>
+              {/* Term name with dot */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px',
+                gap: '8px',
                 marginBottom: '4px'
               }}>
                 <div style={{
-                  width: '12px',
-                  height: '12px',
+                  width: '10px',
+                  height: '10px',
                   backgroundColor: entry.color,
-                  borderRadius: '2px'
+                  borderRadius: '50%'
                 }} />
-                <span style={{ fontWeight: 600, fontSize: '13px' }}>
+                <span style={{
+                  fontWeight: 700,
+                  fontSize: '15px',
+                  color: '#1F2937'
+                }}>
                   {term.termName}
                 </span>
               </div>
-              <div style={{ fontSize: '12px', color: '#666', paddingLeft: '18px' }}>
-                <div>Real date: {formatDate(realDate, granularity)}</div>
-                {isNormalizedMode && (
-                  <div>Relative: {label}</div>
-                )}
-                <div style={{ fontWeight: 600, color: '#000', marginTop: '2px' }}>
-                  Mentions: {volume.toLocaleString()}
-                </div>
-                <div style={{
-                  color: '#3b82f6',
-                  fontWeight: 600
+
+              {/* Date and metrics row */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                paddingLeft: '18px'
+              }}>
+                <span style={{
+                  fontSize: '13px',
+                  color: '#6B7280',
+                  fontWeight: 500
                 }}>
-                  Share: {share}%
+                  Real date: {formatDate(realDate, granularity)}
+                </span>
+                <div style={{
+                  display: 'flex',
+                  gap: '12px',
+                  alignItems: 'center'
+                }}>
+                  <span style={{
+                    fontSize: '15px',
+                    fontWeight: 600,
+                    color: '#1F2937'
+                  }}>
+                    {volume.toLocaleString()}
+                  </span>
+                  <span style={{
+                    fontSize: '15px',
+                    fontWeight: 600,
+                    color: '#1F2937'
+                  }}>
+                    {share}%
+                  </span>
                 </div>
               </div>
             </div>
           );
         })}
+
+        {/* Divider */}
+        <div style={{
+          borderTop: '1px solid #E5E7EB',
+          margin: '8px 0'
+        }} />
+
+        {/* Total row */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <span style={{
+            fontWeight: 700,
+            fontSize: '15px',
+            color: '#1F2937'
+          }}>
+            Total
+          </span>
+          <div style={{
+            display: 'flex',
+            gap: '12px',
+            alignItems: 'center'
+          }}>
+            <span style={{
+              fontSize: '15px',
+              fontWeight: 600,
+              color: '#1F2937'
+            }}>
+              {totalVolume.toLocaleString()}
+            </span>
+            <span style={{
+              fontSize: '15px',
+              fontWeight: 600,
+              color: '#1F2937'
+            }}>
+              100%
+            </span>
+          </div>
+        </div>
       </div>
     );
   };
