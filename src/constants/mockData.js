@@ -1,0 +1,11 @@
+export const EMPTY_STATE_ILLUSTRATION = '/empty_state.png'
+
+export const BASE_DATA_SUM = [6,4,3,6,5,2,4,6,3,2,1,2,4,3,3,10,4,2,1,2,1,2,4,3,1,4,2,2,9,3,4,2,1,2,9,3,50,15,7,3,5,8,6,4,3,5,4,3,2,4,4,3,2,4,3,2,3,2,2,1,4,6,4,3,2,4,2,1,6,4,3,2,3,5,4,3,2,6,5,4,5,4,3,2,3,2,1,2,1].reduce((a,b)=>a+b,0)
+
+export const FAKE_ARTICLES = [
+  { author: 'Eater SF', handle: '@eatersf', avatarColor: '#E53935', initials: 'ES', platform: 'Online News', location: 'US', time: 'Jan 5, 9:14 AM', snippet: 'Saint Frank Coffee Opens Stunning New Roastery in Hayes Valley — the beloved SF roaster has unveiled its most ambitious project yet, a 3,500 sq ft roastery and tasting room…', reach: '12.4k', sentiment: 'Positive', hasImage: true, imageColor: '#795548' },
+  { author: 'Timeout San Francisco', handle: '@timeoutsf', avatarColor: '#1565C0', initials: 'TF', platform: 'Online News', location: 'US', time: 'Jan 5, 8:52 AM', snippet: "Saint Frank Coffee continues to dominate the city's third-wave scene with consistent quality and approachable baristas across all locations in SF…", reach: '8.7k', sentiment: 'Positive', hasImage: false },
+  { author: 'SF Chronicle', handle: '@sfchronicle', avatarColor: '#2E7D32', initials: 'SC', platform: 'Online News', location: 'US', time: 'Jan 4, 6:30 PM', snippet: 'Independent roasters like Saint Frank are weathering rising costs by doubling down on direct trade relationships with farms in Ethiopia and Colombia…', reach: '29.5k', sentiment: 'Neutral', hasImage: true, imageColor: '#4CAF50' },
+  { author: 'Sprudge', handle: '@sprudge', avatarColor: '#6A1B9A', initials: 'SP', platform: 'Blog', location: 'US', time: 'Jan 3, 2:15 PM', snippet: "Saint Frank Coffee's new single origin Ethiopian washes — the roastery's latest seasonal release features three natural-processed lots from Yirgacheffe…", reach: '3.2k', sentiment: 'Positive', hasImage: false },
+  { author: 'Inside Scoop SF', handle: '@inscoopsf', avatarColor: '#E65100', initials: 'IS', platform: 'Online News', location: 'US', time: 'Jan 2, 11:00 AM', snippet: 'With more than a dozen new cafes opening in 2024, the Bay Area specialty coffee scene shows no signs of slowing down, with Saint Frank leading the charge…', reach: '5.1k', sentiment: 'Neutral', hasImage: false },
+]
