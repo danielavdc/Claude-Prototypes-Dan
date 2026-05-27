@@ -739,7 +739,7 @@ export default function TrendChart() {
                   color: '#6B7280',
                   fontWeight: 500
                 }}>
-                  Real date: {formatDate(realDate, granularity)}
+                  Date: {formatDate(realDate, granularity)}
                 </span>
                 <div style={{
                   display: 'flex',
@@ -765,47 +765,6 @@ export default function TrendChart() {
             </div>
           );
         })}
-
-        {/* Divider */}
-        <div style={{
-          borderTop: '1px solid #E5E7EB',
-          margin: '8px 0'
-        }} />
-
-        {/* Total row */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <span style={{
-            fontWeight: 700,
-            fontSize: '15px',
-            color: '#1F2937'
-          }}>
-            Total
-          </span>
-          <div style={{
-            display: 'flex',
-            gap: '12px',
-            alignItems: 'center'
-          }}>
-            <span style={{
-              fontSize: '15px',
-              fontWeight: 600,
-              color: '#1F2937'
-            }}>
-              {totalVolume.toLocaleString()}
-            </span>
-            <span style={{
-              fontSize: '15px',
-              fontWeight: 600,
-              color: '#1F2937'
-            }}>
-              100%
-            </span>
-          </div>
-        </div>
       </div>
     );
   };
