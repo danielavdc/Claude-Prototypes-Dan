@@ -501,6 +501,7 @@ export default function TrendChart() {
     }))
   );
   const [granularity, setGranularity] = useState('daily');
+  const [viewMode, setViewMode] = useState('absolute'); // 'absolute' or 'indexed'
   const [modalOpen, setModalOpen] = useState(false);
   const [activeTerm, setActiveTerm] = useState(null);
 
@@ -580,7 +581,14 @@ export default function TrendChart() {
         normalized.push(bucket);
       }
 
-      return { mode: 'normalized', data: normalized, termsData };
+      const result = { mode: 'normalized', data: normalized, termsData };
+
+      // Apply indexing if in indexed view mode
+      if (viewMode === 'indexed') {
+        applyIndexing(result);
+      }
+
+      return result;
     } else {
       const startDate = new Date(today);
       startDate.setDate(startDate.getDate() - globalDateRange);
@@ -618,9 +626,40 @@ export default function TrendChart() {
 
       const calendar = Array.from(buckets.values()).sort((a, b) => a.date - b.date);
 
-      return { mode: 'calendar', data: calendar, termsData };
+      const result = { mode: 'calendar', data: calendar, termsData };
+
+      // Apply indexing if in indexed view mode
+      if (viewMode === 'indexed') {
+        applyIndexing(result);
+      }
+
+      return result;
     }
-  }, [selectedTerms, globalDateRange, granularity, isNormalizedMode]);
+
+    // Helper function to index the data
+    function applyIndexing(result) {
+      const { data, termsData } = result;
+
+      // Get base values (first non-null value for each term)
+      const baseValues = {};
+      termsData.forEach(term => {
+        const firstPoint = data.find(bucket => bucket[`${term.termId}_volume`]);
+        if (firstPoint) {
+          baseValues[term.termId] = firstPoint[`${term.termId}_volume`];
+        }
+      });
+
+      // Index all values
+      data.forEach(bucket => {
+        termsData.forEach(term => {
+          const volume = bucket[`${term.termId}_volume`];
+          if (volume && baseValues[term.termId]) {
+            bucket[`${term.termId}_indexed`] = ((volume / baseValues[term.termId]) * 100).toFixed(2);
+          }
+        });
+      });
+    }
+  }, [selectedTerms, globalDateRange, granularity, isNormalizedMode, viewMode]);
 
   const toggleOverride = (termId) => {
     setSelectedTerms(prev =>
@@ -693,11 +732,13 @@ export default function TrendChart() {
 
         {/* Terms */}
         {payload.map((entry, idx) => {
-          const termId = entry.dataKey.replace('_volume', '');
+          const termId = entry.dataKey.replace('_volume', '').replace('_indexed', '');
           const term = chartData.termsData.find(t => t.termId === termId);
           if (!term) return null;
 
-          const volume = entry.value;
+          const actualVolume = entry.payload[`${termId}_volume`];
+          const indexedValue = entry.payload[`${termId}_indexed`];
+          const displayValue = viewMode === 'indexed' ? indexedValue : actualVolume;
           const share = entry.payload[`${termId}_share`];
           const realDate = isNormalizedMode
             ? entry.payload[`${termId}_date`]
@@ -751,7 +792,9 @@ export default function TrendChart() {
                     fontWeight: 600,
                     color: '#1F2937'
                   }}>
-                    {volume.toLocaleString()}
+                    {viewMode === 'indexed'
+                      ? parseFloat(displayValue).toFixed(1)
+                      : actualVolume?.toLocaleString() || '0'}
                   </span>
                   <span style={{
                     fontSize: '15px',
@@ -919,6 +962,25 @@ export default function TrendChart() {
               </div>
             </div>
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              {/* View Mode: Absolute / Indexed */}
+              <select
+                value={viewMode}
+                onChange={(e) => setViewMode(e.target.value)}
+                style={{
+                  padding: '8px 12px',
+                  border: '1px solid #D1D5DB',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  backgroundColor: 'white'
+                }}
+              >
+                <option value="absolute">Absolute</option>
+                <option value="indexed">Indexed</option>
+              </select>
+
+              {/* Granularity */}
               <select
                 value={granularity}
                 onChange={(e) => setGranularity(e.target.value)}
@@ -957,7 +1019,11 @@ export default function TrendChart() {
                 tick={{ fontSize: 12, fill: '#6B7280' }}
                 axisLine={false}
                 tickLine={false}
-                tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
+                tickFormatter={(value) =>
+                  viewMode === 'indexed'
+                    ? `${value.toFixed(0)}`
+                    : `${(value / 1000).toFixed(0)}k`
+                }
               />
               <Tooltip content={<CustomTooltip />} />
               {selectedTerms
@@ -967,21 +1033,26 @@ export default function TrendChart() {
                   const termData = chartData.termsData.find(t => t.termId === term.id);
                   const lastIndex = termData ? termData.data.length - 1 : -1;
 
+                  const dataKey = viewMode === 'indexed'
+                    ? `${term.id}_indexed`
+                    : `${term.id}_volume`;
+
                   return (
                     <Line
                       key={term.id}
                       type="monotone"
-                      dataKey={`${term.id}_volume`}
+                      dataKey={dataKey}
                       name={term.name}
                       stroke={term.color}
                       strokeWidth={2}
                       dot={(props) => {
                         // Show dot only at the last point of this term's data
-                        if (props.payload[`${term.id}_volume`]) {
+                        const checkKey = `${term.id}_volume`; // Always check volume for existence
+                        if (props.payload[checkKey]) {
                           const isLastPoint = isNormalizedMode
                             ? props.index === lastIndex
                             : props.index === chartData.data.length - 1 ||
-                              !chartData.data[props.index + 1]?.[`${term.id}_volume`];
+                              !chartData.data[props.index + 1]?.[checkKey];
 
                           if (isLastPoint) {
                             return (
