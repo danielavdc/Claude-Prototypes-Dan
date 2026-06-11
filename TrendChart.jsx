@@ -1019,6 +1019,10 @@ export default function TrendChart() {
                 tick={{ fontSize: 12, fill: '#6B7280' }}
                 axisLine={false}
                 tickLine={false}
+                domain={viewMode === 'indexed'
+                  ? [0, (dataMax) => Math.ceil(dataMax * 1.1)]
+                  : [0, 'auto']
+                }
                 tickFormatter={(value) =>
                   viewMode === 'indexed'
                     ? `${value.toFixed(0)}`
