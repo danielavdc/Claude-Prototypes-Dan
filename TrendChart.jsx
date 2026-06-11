@@ -823,6 +823,30 @@ export default function TrendChart() {
     return totals;
   }, [chartData]);
 
+  // Calculate Y-axis max for indexed mode
+  const yAxisDomain = useMemo(() => {
+    if (viewMode !== 'indexed' || !chartData.data) {
+      return [0, 'auto'];
+    }
+
+    // Find max indexed value across all terms
+    let maxIndexed = 100; // Start at baseline
+    chartData.data.forEach(bucket => {
+      selectedTerms
+        .filter(t => t.selected)
+        .forEach(term => {
+          const indexedValue = parseFloat(bucket[`${term.id}_indexed`]);
+          if (indexedValue && !isNaN(indexedValue)) {
+            maxIndexed = Math.max(maxIndexed, indexedValue);
+          }
+        });
+    });
+
+    // Add 20% padding
+    const maxWithPadding = Math.ceil(maxIndexed * 1.2);
+    return [0, maxWithPadding];
+  }, [viewMode, chartData, selectedTerms]);
+
   return (
     <div style={{ padding: '0', fontFamily: 'system-ui, -apple-system, sans-serif', backgroundColor: '#F9FAFB', minHeight: '100vh' }}>
       {/* Top Bar */}
@@ -1019,10 +1043,7 @@ export default function TrendChart() {
                 tick={{ fontSize: 12, fill: '#6B7280' }}
                 axisLine={false}
                 tickLine={false}
-                domain={viewMode === 'indexed'
-                  ? [0, (dataMax) => Math.ceil(dataMax * 1.1)]
-                  : [0, 'auto']
-                }
+                domain={yAxisDomain}
                 tickFormatter={(value) =>
                   viewMode === 'indexed'
                     ? `${value.toFixed(0)}`
