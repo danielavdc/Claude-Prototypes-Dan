@@ -72,11 +72,21 @@ const generateMockData = (termName, startDate, endDate, granularity) => {
 
   const baseVolume = Math.floor(Math.random() * 5000) + 1000;
 
+  // Special case: Tesla starts with 0 values to demonstrate indexed mode edge case
+  const zeroStartDays = termName === 'Tesla' ? 2 : 0;
+
   for (let i = 0; i < bucketCount; i++) {
     const bucketDate = new Date(start.getTime() + i * bucketSize);
-    const variance = Math.random() * 0.4 - 0.2;
-    const trend = Math.sin(i / bucketCount * Math.PI * 2) * 0.3;
-    const volume = Math.floor(baseVolume * (1 + variance + trend));
+
+    let volume;
+    if (termName === 'Tesla' && i < zeroStartDays) {
+      // Tesla starts with 0 mentions for first 2 days
+      volume = 0;
+    } else {
+      const variance = Math.random() * 0.4 - 0.2;
+      const trend = Math.sin(i / bucketCount * Math.PI * 2) * 0.3;
+      volume = Math.floor(baseVolume * (1 + variance + trend));
+    }
 
     data.push({
       date: bucketDate,
