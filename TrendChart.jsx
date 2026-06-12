@@ -652,28 +652,36 @@ export default function TrendChart() {
 
       // Get base values (first NON-ZERO value for each term)
       const baseValues = {};
+      const baseIndices = {};
+
       termsData.forEach(term => {
-        const firstNonZeroPoint = data.find(bucket => {
+        const firstNonZeroIndex = data.findIndex(bucket => {
           const vol = bucket[`${term.termId}_volume`];
           return vol && vol > 0;
         });
-        if (firstNonZeroPoint) {
-          baseValues[term.termId] = firstNonZeroPoint[`${term.termId}_volume`];
+
+        if (firstNonZeroIndex !== -1) {
+          baseValues[term.termId] = data[firstNonZeroIndex][`${term.termId}_volume`];
+          baseIndices[term.termId] = firstNonZeroIndex;
         }
       });
 
-      // Index all values
-      data.forEach(bucket => {
+      // Index all values - trim leading zeros by setting them to null
+      data.forEach((bucket, index) => {
         termsData.forEach(term => {
           const volume = bucket[`${term.termId}_volume`];
 
           if (volume !== undefined && volume !== null) {
-            if (baseValues[term.termId] && baseValues[term.termId] > 0) {
+            // Check if we've reached the baseline yet
+            const hasBaseline = baseIndices[term.termId] !== undefined;
+            const reachedBaseline = hasBaseline && index >= baseIndices[term.termId];
+
+            if (reachedBaseline && baseValues[term.termId] > 0) {
               // Calculate indexed value relative to first non-zero baseline
               bucket[`${term.termId}_indexed`] = ((volume / baseValues[term.termId]) * 100).toFixed(2);
             } else {
-              // If no baseline found (all zeros), show as 0
-              bucket[`${term.termId}_indexed`] = '0.00';
+              // TRIM: Set to null so line doesn't appear before first non-zero value
+              bucket[`${term.termId}_indexed`] = null;
             }
           }
         });
