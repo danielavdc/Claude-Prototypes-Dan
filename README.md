@@ -1,80 +1,121 @@
-# Interactive Trend Chart Component
+# _repo_template
 
-A comprehensive React component for visualizing search term trends with flexible date ranges and dynamic granularity.
+This project contains a README template. It will help you to create awesome READMEs for your projects.
 
-## Features
+To use the template, select it during the **GitHub repository creation process**.
 
-### Multi-select Search Terms
-- **Tesla**, **BMW**, and **Porsche** chips with individual selection
-- Each term has its own color coding
-- Visual feedback for selected/unselected state
+![create-repo-from-template](https://user-images.githubusercontent.com/163029/116595537-b628aa80-a923-11eb-9fa9-71835eaf0d61.JPG)
 
-### Dual Chart Modes
+## Using this template
 
-**Calendar Mode (Default)**
-- All selected terms use the global date range
-- X-axis shows real calendar dates
-- Terms are aligned by actual dates
+* [Create a new repo](https://github.com/new) via the GitHub UI
+* Under **Repository template** choose `meltwater/_repo_template` (see screenshot)
+* Your new repo will be created, using the template as a starting point.
+* Now edit `README.md` and delete all intro text before `# Project Name`
+* Fill in all sections of the README as you see fit, and delete the sections that don't apply for your project.
+* Enjoy your awesome README! :)
 
-**Normalized Mode (Auto-activated)**
-- Triggered when at least one chip has override enabled
-- X-axis shows relative time buckets (Day 1, Day 2, etc.)
-- All terms start at the same origin
-- Different date ranges can be compared side-by-side
+## Further info about writing better READMEs
 
-### Global Date Filter
-- Quick presets: 7d, 30d, 90d, 1y
-- Applies to all terms unless overridden
+We are collecting further info about writing better READMEs in [github.com/meltwater/_repo_template/wiki](https://github.com/meltwater/_repo_template/wiki).
 
-### Per-Term Date Override
-- Each chip can override the global range independently
-- Set custom date ranges per search term
-- Automatically switches to normalized mode
+## Improving this template
 
-### Dynamic Granularity
-- Auto-adjusts available options based on date range:
-  - **0-24h**: minute, hourly, daily
-  - **2-7d**: hourly, daily
-  - **8-30d**: daily, weekly
-  - **31-90d**: daily, weekly, monthly
-  - **>90d**: daily, weekly, monthly
-- Default granularity selected intelligently
+To make modifications to this template, send a PR with your proposed changes, and send a ping in [#github-guild][github-guild]. 
 
-### Rich Tooltips
-Shows for each data point:
-- Search term name with color indicator
-- Real calendar date for that bucket
-- Relative bucket label (in normalized mode)
-- Net mentions volume
-- Percentage change from previous point
+For any thoughts and questions, you can always come and talk to us in [#github-guild][github-guild]. See you there :)
 
-### Mock Data
-- Realistic trend patterns with variance
-- Seasonal/cyclical patterns
-- Random volatility
+[github-guild]: https://meltwater.slack.com/archives/CKZT80DL2
 
-## Installation
+<!-- DELETE EVERYTHING PRIOR TO THIS -->
 
-```bash
-npm install
-```
 
-## Run
+# Project Name
 
-```bash
-npm run dev
-```
+A short paragraph of project description goes here. This section should answer:
 
-## Usage Example
+> What is this?
 
-1. **Compare same period**: Select all three terms, use global 30d filter (Calendar Mode)
-2. **Compare different periods**: Enable override on BMW (7d) and Tesla (90d) while Porsche uses global (Normalized Mode)
-3. **Adjust granularity**: Switch from daily to weekly to see broader patterns
-4. **Hover over points**: See detailed metrics including real dates and percentage changes
+You can often use the first sentence of this for the **description** field of your GitHub repo as well. This will show up as the first thing in GitHub search.
 
-## Component Structure
+Adding visuals to this project description will make your project more memorable and the README easier to understand.
 
-- `TrendChart.jsx` - Main component with all logic
-- Self-contained with no external state management
-- Uses Recharts for visualization
-- Responsive design
+Great examples:
+
+* [meltwater/contact-source-service](https://github.com/meltwater/contact-source-service) - *It is the backend behind the Influencers application used by Meltwater customers. It provides sources/contacts management and search capabilities.*
+* [release-it/release-it](https://github.com/release-it/release-it) - *‌Generic CLI tool to automate versioning and package publishing related tasks*
+
+## Product / Business Purpose
+
+An explanation of the business purpose of this repo, e.g. the Meltwater Product that this ties into. This section should answer:
+
+> Why does this exist?
+
+Great examples:
+
+* [meltwater/chat-message-integration](https://github.com/meltwater/chat-message-integration) *The chat-message-integration project is the API that is used to configure and handle messages for Slack and Teams integrations in the MI App.*
+* [meltwater/explore-compare-service](https://github.com/meltwater/explore-compare-service) - *Compares in Explorer allow users to run several saved queries at the same time and do a comparison.*
+
+## Maintainers
+
+Meltwater's current ownership model assumes that every piece of software running in Production is owned by a team. This section should answer:
+
+> Who owns this?
+> Who to contact for help?
+
+Example: 
+
+> Maintained by TEAM_NAME (TEAM_EMAIL_ADDRESS@meltwater.com).
+> Contact us via #TEAM_SLACK_CHANNEL in Slack.
+
+## Contributing
+
+Make it easier for people to understand how they can contribute to your project. Remember that these people could be from your own team, or another team. 
+
+Example:
+
+> We welcome and appreciate any and all contributions, even if it is a typo fix to this README. 
+> When working on a larger contribution, please open an issue first, so that we can discuss the approach. 
+> Once you have your contribution ready, please open a Pull Requests containing your changes and contact us via #TEAM_SLACK_CHANNEL in Slack.
+
+## How do I use it? (Installation)
+
+Instructions targeted at the **user** of your project, rather than at a co-developer in your team. This section should answer:
+
+> How to use this?
+
+If this is an internal tool that is just used within your team, then you can share this here as well.
+
+## Development Guide
+
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. This section should answer:
+
+> How to get started with developing on this project?
+
+This is essential for onboarding new members on your team but also for allowing people from outside of your team to contribute.
+
+This Development Guide may contain different sub-sections, depending on what stack/ecosystem your project is using. Below some examples of sub-sections that apply to most projects.
+
+### Prerequisites
+
+What things do you need to install the software and how to install them? Including links here is helpful.
+
+### Running it locally
+
+A step-by-step series of examples that tell you how to get a development env running.
+
+End with an example of getting some data out of the system or using it for a little demo.
+
+### Running the tests
+
+Explain how to run the automated tests for this system.
+
+### Deployment
+
+Add additional notes about how to deploy this on a live system.
+You may also want to link to the different environments where this is deployed (e.g. Staging, Production).
+
+### Monitoring & Troubleshooting
+
+How can you inspect the system running in remote environments (Staging, Production)?
+This should include logs, dashboards, etc.
