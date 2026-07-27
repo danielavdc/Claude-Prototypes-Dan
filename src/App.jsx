@@ -74,6 +74,8 @@ export default function App() {
   const [widgetInsight, setWidgetInsight] = useState(null)
   const [searchMode, setSearchMode] = useState('boolean')
   const [initialSearchMode, setInitialSearchMode] = useState('boolean')
+  // Landing variant toggle for Searches & Filters: 'classic' (list-first) vs 'chat' (Mira-first)
+  const [searchesVariant, setSearchesVariant] = useState('classic')
 
   // Derive result count from query state
   const resultCount = (() => {
@@ -151,6 +153,25 @@ export default function App() {
             <Typography sx={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
               {page === 'mira-studio' ? 'Mira Studio' : 'Explore'}
             </Typography>
+
+            {/* Landing variant switch — only on Searches & Filters */}
+            {page === 'searches-list' && (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, ml: 2, bgcolor: '#f0f0f0', borderRadius: 5, p: 0.4 }}>
+                {[
+                  { key: 'classic', label: 'Proposal 1' },
+                  { key: 'chat', label: 'Proposal 2' },
+                  { key: 'proposal3', label: 'Proposal 3' },
+                ].map(opt => {
+                  const active = searchesVariant === opt.key
+                  return (
+                    <Box key={opt.key} onClick={() => setSearchesVariant(opt.key)}
+                      sx={{ px: 1.75, py: 0.5, borderRadius: 4, cursor: 'pointer', bgcolor: active ? 'background.paper' : 'transparent', boxShadow: active ? '0 1px 2px rgba(0,0,0,0.12)' : 'none', transition: 'all 0.12s ease' }}>
+                      <Typography sx={{ fontSize: 13, fontWeight: active ? 700 : 500, color: active ? '#1D9F9F' : '#757575' }}>{opt.label}</Typography>
+                    </Box>
+                  )
+                })}
+              </Box>
+            )}
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', border: '1px solid #e0e0e0', borderRadius: 5, px: 1.5, py: 0.5, gap: 1 }}>
@@ -259,7 +280,7 @@ export default function App() {
             ) : page === 'explore-landing' ? (
               <ExploreLandingPage onNavigate={(target) => setPage(target)} onOpenSearch={(q) => { setBooleanQuery(q); setPage('explore') }} onCreateSearch={(key) => { setInitialSearchMode(key === 'combined' ? 'combined' : key === 'keyword' ? 'keyword' : 'boolean'); setBooleanQuery(''); setPage('explore') }} />
             ) : page === 'searches-list' ? (
-              <SearchesListPage onOpenSearch={(q) => { setBooleanQuery(q); setPage('explore') }} onCreateSearch={(key) => { setInitialSearchMode(key === 'combined' ? 'combined' : key === 'keyword' ? 'keyword' : 'boolean'); setBooleanQuery(''); setPage('explore') }} />
+              <SearchesListPage variant={searchesVariant} onOpenSearch={(q) => { setBooleanQuery(q); setPage('explore') }} onCreateSearch={(key) => { setInitialSearchMode(key === 'combined' ? 'combined' : key === 'keyword' ? 'keyword' : 'boolean'); setBooleanQuery(''); setPage('explore') }} />
             ) : page === 'compare' ? (
               <ComparePage onBack={() => setPage('explore')} />
             ) : (
