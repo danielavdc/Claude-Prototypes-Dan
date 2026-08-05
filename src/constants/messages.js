@@ -4,10 +4,10 @@ export const LANGUAGES = ['English', 'Spanish', 'French', 'German', 'Portuguese'
 export const SOURCE_TYPES = ['Online News', 'Print', 'Broadcast', 'Blogs', 'Forums', 'Twitter / X', 'Instagram']
 export const TABS = [
   { label: 'Overview',         description: "What's Happening?" },
-  { label: 'Coverage',         description: 'How Much and Where?' },
+  { label: 'Volume',           description: 'How Much and Where?' },
   { label: 'Narrative',        description: "What's the Story?" },
+  { label: 'Engagement',       description: "What's Getting Attention?" },
   { label: 'Sentiment',        description: "What's the Tone?" },
-  { label: 'Audience',         description: "Who's Driving It?" },
 ]
 
 export const MIRA_MESSAGES = {

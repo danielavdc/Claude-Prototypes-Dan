@@ -28,10 +28,9 @@ const DARK   = '#212121'
 const YELLOW = '#FFC107'
 
 const NAV_TABS = [
-  { id: 'authors-list',  label: 'Authors List'  },
+  { id: 'authors-list',  label: 'Social Authors'  },
   { id: 'journalists',   label: 'Journalists'   },
-  { id: 'x-authors',     label: 'X Authors'     },
-  { id: 'news-coverage', label: 'News Coverage' },
+  { id: 'news-coverage', label: 'News Sources' },
 ]
 
 // ── shared ui ─────────────────────────────────────────────────────────────────
@@ -165,7 +164,8 @@ function Pagination({ text }) {
 }
 
 function StickySegmentNav({ value, onChange }) {
-  const [isSticky, setIsSticky] = useState(false)
+  const [isScrolling, setIsScrolling] = useState(false)
+  const scrollTimerRef = useRef(null)
   const ref = useRef(null)
   useEffect(() => {
     const el = ref.current
@@ -177,13 +177,13 @@ function StickySegmentNav({ value, onChange }) {
       parent = parent.parentElement
     }
     if (!parent) return
-    const check = () => setIsSticky(el.getBoundingClientRect().top <= parent.getBoundingClientRect().top + 1)
-    parent.addEventListener('scroll', check, { passive: true })
-    return () => parent.removeEventListener('scroll', check)
+    const onScroll = () => { setIsScrolling(true); clearTimeout(scrollTimerRef.current); scrollTimerRef.current = setTimeout(() => setIsScrolling(false), 200) }
+    parent.addEventListener('scroll', onScroll, { passive: true })
+    return () => { parent.removeEventListener('scroll', onScroll); clearTimeout(scrollTimerRef.current) }
   }, [])
   return (
-    <Box ref={ref} sx={{ position: 'sticky', top: 0, zIndex: 10, bgcolor: '#F5F5F5', py: 1.25, boxShadow: isSticky ? '0 2px 8px rgba(0,0,0,0.10)' : 'none', transition: 'box-shadow 0.2s' }}>
-      <Box sx={{ display: 'flex', gap: 0 }}>
+    <Box ref={ref} sx={{ position: 'sticky', top: 0, zIndex: 10, bgcolor: 'transparent', pl: 2, py: 1.25 }}>
+      <Box sx={{ display: 'inline-flex', gap: 0, boxShadow: isScrolling ? '0 4px 16px rgba(0,0,0,0.10)' : 'none', borderRadius: '4px', transition: 'box-shadow 0.2s' }}>
         {NAV_TABS.map(tab => (
           <Box
             key={tab.id}
@@ -192,12 +192,12 @@ function StickySegmentNav({ value, onChange }) {
               px: 2, py: 0.75, fontSize: 14, cursor: 'pointer', whiteSpace: 'nowrap',
               border: '1px solid', userSelect: 'none',
               borderColor: value === tab.id ? '#00827F' : '#9E9E9E',
-              bgcolor: value === tab.id ? 'rgba(29,159,159,0.12)' : 'transparent',
+              background: value === tab.id ? 'linear-gradient(rgba(29,159,159,0.18),rgba(29,159,159,0.18)) #F0F0F0' : '#F0F0F0',
               color: '#212121',
               '&:first-of-type': { borderRadius: '4px 0 0 4px' },
               '&:last-of-type':  { borderRadius: '0 4px 4px 0' },
               '&:not(:first-of-type)': { borderLeft: 'none' },
-              '&:hover': { bgcolor: value === tab.id ? 'rgba(29,159,159,0.18)' : 'rgba(0,0,0,0.04)' },
+              '&:hover': { background: value === tab.id ? 'linear-gradient(rgba(29,159,159,0.25),rgba(29,159,159,0.25)) #E0E0E0' : '#E0E0E0' },
             }}
           >
             {tab.label}
@@ -245,190 +245,6 @@ function NewsCoverageContent() {
         'Social Echo reached 52.1k total, driven primarily by Facebook (35.8%) and X (25.5%), suggesting high cross-platform amplification of key articles. 3, 4',
         'CNN and USA Today account for the largest social echo share by source, with combined reach exceeding 5.8k in the period — signaling strong mainstream amplification. 5, 6…',
       ]} />
-
-      {/* 6 KPI cards 2x3 */}
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
-        {NC_KPIS.map((kpi, i) => (
-          <Box key={i} sx={{ flex: '1 1 calc(50% - 8px)', minWidth: 240, border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <Typography sx={{ fontSize: 15, fontWeight: 700, color: '#212121' }}>{kpi.title}</Typography>
-                <InfoOutlinedIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
-              </Box>
-              <IconButton size="small"><MoreVertIcon sx={{ fontSize: 16, color: 'text.secondary' }} /></IconButton>
-            </Box>
-            <Typography sx={{ fontSize: 12, color: 'text.secondary', mb: 0.25 }}>{kpi.metric}</Typography>
-            <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, mb: 0.25 }}>
-              <Typography sx={{ fontSize: 28, fontWeight: 700, color: '#212121', lineHeight: 1.1 }}>{kpi.value}</Typography>
-              <Delta v={kpi.delta} />
-            </Box>
-            <Typography sx={{ fontSize: 11, color: 'text.secondary', mb: 1 }}>Previously 2.97M</Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.75 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: BLUE }} />
-                <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>All</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: '#9E9E9E' }} />
-                <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>Previous Period</Typography>
-              </Box>
-            </Box>
-            <LineAreaChart
-              datasets={[{ data: NC_CHART_DATA, color: BLUE }, { data: NC_PREV_DATA, color: '#9E9E9E' }]}
-              height={80}
-              xLabels={NC_X_LABELS}
-            />
-          </Box>
-        ))}
-      </Box>
-
-      {/* Social Echo Breakdown Trend */}
-      <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2 }}>
-        <WHeader title="Social Echo Breakdown Trend" />
-        <Box sx={{ display: 'flex', gap: 2, mb: 1.5 }}>
-          {SECHO_TREND.map((l, i) => (
-            <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: l.color }} />
-              <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>{l.label}</Typography>
-              <Typography sx={{ fontSize: 12, fontWeight: 700, color: '#212121' }}>{l.count}</Typography>
-            </Box>
-          ))}
-        </Box>
-        <LineAreaChart datasets={SECHO_TREND} height={140} xLabels={['Aug 25', 'Aug 27', 'Aug 29', 'Aug 31']} />
-      </Box>
-
-      {/* Social Echo by News Source + Social Echo Breakdown */}
-      <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
-        <Box sx={{ flex: 2, minWidth: 280, border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2 }}>
-          <WHeader title="Social Echo by News Source" />
-          <Box sx={{ display: 'flex', gap: 2, mb: 1.5 }}>
-            {[{ label: 'Facebook', color: BLUE }, { label: 'X', color: DARK }].map(s => (
-              <Box key={s.label} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: s.color }} />
-                <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>{s.label}</Typography>
-              </Box>
-            ))}
-          </Box>
-          {SECHO_SOURCES.map((row, i) => {
-            const total = row.fb + row.x, max = 3000
-            return (
-              <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.75 }}>
-                <Typography sx={{ fontSize: 12, color: '#424242', width: 120, flexShrink: 0 }}>{row.name}</Typography>
-                <Box sx={{ flex: 1, height: 10, bgcolor: '#f0f0f0', borderRadius: 1, overflow: 'hidden', display: 'flex' }}>
-                  <Box sx={{ width: `${(row.fb / max) * 100}%`, bgcolor: BLUE, height: '100%' }} />
-                  <Box sx={{ width: `${(row.x / max) * 100}%`, bgcolor: DARK, height: '100%' }} />
-                </Box>
-                <Typography sx={{ fontSize: 11, color: 'text.secondary', width: 32, textAlign: 'right', flexShrink: 0 }}>{(total / 1000).toFixed(0)}k</Typography>
-              </Box>
-            )
-          })}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
-            {['0', '1k', '2k', '3k'].map(l => <Typography key={l} sx={{ fontSize: 10, color: 'text.secondary' }}>{l}</Typography>)}
-          </Box>
-        </Box>
-
-        <Box sx={{ flex: 1, minWidth: 220, border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2 }}>
-          <WHeader title="Social Echo Breakdown" />
-          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1.5 }}>
-            <DonutChart size={140} segments={[{ pct: 35.8, color: BLUE }, { pct: 25.5, color: DARK }, { pct: 38.7, color: '#E0E0E0' }]} />
-          </Box>
-          {[{ label: 'Facebook', color: BLUE, pct: '35.8%', count: '1.9k' }, { label: 'X', color: DARK, pct: '25.5%', count: '1.4k' }].map((r, i) => (
-            <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.75 }}>
-              <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: r.color, flexShrink: 0 }} />
-              <Typography sx={{ fontSize: 13, flex: 1, color: '#424242' }}>{r.label}</Typography>
-              <Typography sx={{ fontSize: 13, color: '#212121' }}>{r.pct}</Typography>
-              <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#212121', width: 36, textAlign: 'right' }}>{r.count}</Typography>
-            </Box>
-          ))}
-        </Box>
-      </Box>
-
-      {/* News Sources by Reach — full table */}
-      {(() => {
-        const NS_TABLE = [
-          { rank: 1,  init: 'CN', color: '#C62828', name: 'CNN',                url: 'US | https://mtnwe...', reach: '134k', reachPct: 100, articles: 23, format: 'Online',  focus: 'International', social: ['X', 'LI'] },
-          { rank: 2,  init: 'UT', color: '#1565C0', name: 'USA Today',           url: 'US | https://mtnwe...', reach: '112k', reachPct: 84,  articles: 10, format: 'Print',   focus: 'International', social: ['X', 'LI', 'IG', 'FB'] },
-          { rank: 3,  init: 'NY', color: '#212121', name: 'The New York Times',  url: 'US | https://mtnwe...', reach: '98k',  reachPct: 73,  articles: 5,  format: 'Online',  focus: 'Regional',      social: ['X', 'LI', 'YT'] },
-          { rank: 4,  init: 'TG', color: '#1B5E20', name: 'The Guardian',        url: 'US | https://mtnwe...', reach: '54k',  reachPct: 40,  articles: 23, format: 'Online',  focus: 'Local',         social: ['X', 'LI', 'IG', 'FB', 'YT'] },
-          { rank: 5,  init: 'MN', color: '#E65100', name: 'Mountain News',       url: 'US | https://mtnwe...', reach: '12k',  reachPct: 9,   articles: 8,  format: 'Online',  focus: 'Local',         social: ['X', 'LI', 'IG', 'FB'] },
-          { rank: 6,  init: 'MN', color: '#E65100', name: 'Mountain News',       url: 'US | https://mtnwe...', reach: '12k',  reachPct: 9,   articles: 8,  format: 'Online',  focus: 'Local',         social: ['X', 'LI', 'IG', 'FB'] },
-          { rank: 7,  init: 'MN', color: '#E65100', name: 'Mountain News',       url: 'US | https://mtnwe...', reach: '12k',  reachPct: 9,   articles: 8,  format: 'Online',  focus: 'Local',         social: ['X', 'LI', 'IG', 'FB'] },
-          { rank: 8,  init: 'MN', color: '#E65100', name: 'Mountain News',       url: 'US | https://mtnwe...', reach: '12k',  reachPct: 9,   articles: 8,  format: 'Online',  focus: 'Local',         social: ['X', 'LI', 'IG', 'FB'] },
-          { rank: 9,  init: 'MN', color: '#E65100', name: 'Mountain News',       url: 'US | https://mtnwe...', reach: '12k',  reachPct: 9,   articles: 8,  format: 'Online',  focus: 'Local',         social: ['X', 'LI', 'IG', 'FB'] },
-          { rank: 10, init: 'MN', color: '#E65100', name: 'Mountain News',       url: 'US | https://mtnwe...', reach: '12k',  reachPct: 9,   articles: 8,  format: 'Online',  focus: 'Local',         social: ['X', 'LI', 'IG', 'FB'] },
-        ]
-        const SOCIAL_COLOR = { X: '#212121', LI: '#0A66C2', IG: '#E1306C', FB: '#1877F2', YT: '#FF0000' }
-        return (
-          <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2, pt: 1.5, pb: 1 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                <Typography sx={{ fontSize: 16, fontWeight: 700, color: '#212121' }}>News Sources by Reach</Typography>
-                <InfoOutlinedIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
-              </Box>
-              <Box sx={{ display: 'flex', gap: 0.5 }}>
-                <IconButton size="small"><FilterListIcon sx={{ fontSize: 18, color: 'text.secondary' }} /></IconButton>
-                <IconButton size="small"><SortIcon sx={{ fontSize: 18, color: 'text.secondary' }} /></IconButton>
-                <IconButton size="small"><MoreVertIcon sx={{ fontSize: 18, color: 'text.secondary' }} /></IconButton>
-              </Box>
-            </Box>
-            <Box sx={{ display: 'flex', px: 2, py: 0.75, borderTop: '1px solid #e0e0e0', borderBottom: '1px solid #e0e0e0', bgcolor: '#FAFAFA' }}>
-              <Box sx={{ width: 28 }} /><Box sx={{ width: 24 }} />
-              <Typography sx={{ fontSize: 11, fontWeight: 700, color: 'text.secondary', flex: 1 }}>Name</Typography>
-              <Typography sx={{ fontSize: 11, fontWeight: 700, color: 'text.secondary', width: 80 }}>Reach ↓</Typography>
-              <Typography sx={{ fontSize: 11, fontWeight: 700, color: 'text.secondary', width: 56, textAlign: 'center' }}>Articles</Typography>
-              <Typography sx={{ fontSize: 11, fontWeight: 700, color: 'text.secondary', width: 60 }}>Format</Typography>
-              <Typography sx={{ fontSize: 11, fontWeight: 700, color: 'text.secondary', width: 90 }}>Focus</Typography>
-              <Typography sx={{ fontSize: 11, fontWeight: 700, color: 'text.secondary', width: 100 }}>Social Profiles</Typography>
-              <Box sx={{ width: 60 }} />
-            </Box>
-            {NS_TABLE.map((row, i) => (
-              <Box key={i} sx={{ display: 'flex', alignItems: 'center', px: 2, py: 1, borderBottom: i < NS_TABLE.length - 1 ? '1px solid #f5f5f5' : 'none', '&:hover': { bgcolor: 'rgba(0,0,0,0.02)' } }}>
-                <Checkbox size="small" sx={{ p: 0, mr: 0.5, width: 28 }} />
-                <Typography sx={{ fontSize: 12, color: 'text.secondary', width: 24 }}>{row.rank}</Typography>
-                <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
-                  <Box sx={{ width: 32, height: 32, borderRadius: '50%', bgcolor: row.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <Typography sx={{ fontSize: 9, fontWeight: 700, color: 'white' }}>{row.init}</Typography>
-                  </Box>
-                  <Box sx={{ minWidth: 0 }}>
-                    <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#212121', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.name}</Typography>
-                    <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>{row.url}</Typography>
-                  </Box>
-                </Box>
-                <Box sx={{ width: 80, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#212121' }}>{row.reach}</Typography>
-                  <Box sx={{ width: 20, height: 6, bgcolor: '#f0f0f0', borderRadius: 1, overflow: 'hidden' }}>
-                    <Box sx={{ width: `${row.reachPct}%`, height: '100%', bgcolor: BLUE, borderRadius: 1 }} />
-                  </Box>
-                </Box>
-                <Typography sx={{ fontSize: 13, color: '#424242', width: 56, textAlign: 'center' }}>{row.articles}</Typography>
-                <Typography sx={{ fontSize: 12, color: '#424242', width: 60 }}>{row.format}</Typography>
-                <Box sx={{ width: 90, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <LocationOnOutlinedIcon sx={{ fontSize: 13, color: 'text.secondary' }} />
-                  <Typography sx={{ fontSize: 12, color: '#424242' }}>{row.focus}</Typography>
-                </Box>
-                <Box sx={{ width: 100, display: 'flex', alignItems: 'center', gap: 0.25 }}>
-                  {row.social.slice(0, 4).map((s, si) => (
-                    s.startsWith('+')
-                      ? <Box key={si} sx={{ fontSize: 9, fontWeight: 700, bgcolor: '#f0f0f0', color: '#424242', px: 0.5, borderRadius: 0.5 }}>{s}</Box>
-                      : <Box key={si} sx={{ width: 18, height: 18, borderRadius: '50%', bgcolor: SOCIAL_COLOR[s] || '#9E9E9E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <Typography sx={{ fontSize: 7, fontWeight: 700, color: 'white' }}>{s}</Typography>
-                        </Box>
-                  ))}
-                </Box>
-                <Box sx={{ width: 60, display: 'flex', gap: 0.5, justifyContent: 'flex-end' }}>
-                  <IconButton size="small" sx={{ p: 0.25 }}><PersonOutlineIcon sx={{ fontSize: 15, color: 'text.secondary' }} /></IconButton>
-                  <IconButton size="small" sx={{ p: 0.25 }}><PlaylistAddIcon sx={{ fontSize: 15, color: 'text.secondary' }} /></IconButton>
-                </Box>
-              </Box>
-            ))}
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1, px: 2, py: 1, borderTop: '1px solid #e0e0e0' }}>
-              <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>1 - 7 of 30</Typography>
-              <Typography sx={{ fontSize: 12, color: '#bdbdbd', cursor: 'pointer' }}>{'<'}</Typography>
-              <Typography sx={{ fontSize: 12, color: TEAL, cursor: 'pointer' }}>{'>'}</Typography>
-            </Box>
-          </Box>
-        )
-      })()}
 
       {/* News Sources Breakdown by Reach + News Sources Reach Trend */}
       {(() => {
@@ -1045,17 +861,35 @@ const AL_AUTHORS = [
 const AL_OCC_KW = [
   { text: 'Living rooms', s: 18 }, { text: 'Backyards', s: 14 }, { text: 'Real Estate', s: 14 },
   { text: 'Microsoft', s: 13 }, { text: 'Rugs', s: 13 }, { text: 'Natural landscapes', s: 20 },
-  { text: 'Nationwide Advisory...', s: 12 }, { text: 'Real Estate Ma...', s: 13 }, { text: 'Rugs', s: 12 },
-  { text: 'value', s: 13 }, { text: 'Chairs', s: 24 }, { text: 'Interiors', s: 13 },
-  { text: 'Nature', s: 13 }, { text: 'Joshua Slack', s: 13 }, { text: 'Tables Desks', s: 22 },
-  { text: 'Trees and leaves', s: 14 }, { text: 'Lego', s: 12 }, { text: 'Knoll', s: 12 },
-  { text: 'Logitech', s: 12 }, { text: 'Figma', s: 12 }, { text: 'Home Interiors', s: 26 },
-  { text: 'PR Newswire', s: 12 }, { text: 'aesthetic contrast', s: 12 }, { text: 'entire line', s: 12 },
-  { text: 'FilzFelt', s: 13 }, { text: 'Hanssem', s: 13 }, { text: 'Office spaces', s: 18 },
-  { text: 'Game rooms', s: 16 }, { text: 'Woven Baskets', s: 13 }, { text: 'Books stacked', s: 13 },
-  { text: 'Amazon Ebay', s: 13 }, { text: 'The Verge', s: 12 }, { text: 'Wood finishes', s: 13 },
-  { text: 'Leather goods', s: 13 }, { text: 'Computers', s: 24 }, { text: 'Microsoft', s: 18 },
-  { text: 'Nationwide', s: 14 },
+]
+
+const AL_TOP_LOCATIONS = [
+  { name: 'United States',       flag: '🇺🇸', value: 903 },
+  { name: 'Canada',              flag: '🇨🇦', value: 823 },
+  { name: 'Ivory Coast',         flag: '🇨🇮', value: 522 },
+  { name: 'Mexico',              flag: '🇲🇽', value: 487 },
+  { name: 'Mainland China',      flag: '🇨🇳', value: 333 },
+  { name: 'Germany',             flag: '🇩🇪', value: 288 },
+  { name: 'Malaysia',            flag: '🇲🇾', value: 153 },
+  { name: 'New Zealand',         flag: '🇳🇿', value: 102 },
+  { name: 'Hong Kong SAR China', flag: '🇭🇰', value: 67  },
+  { name: 'United Kingdom',      flag: '🇬🇧', value: 58  },
+]
+
+const AL_OCC_SEGS = [
+  { label: 'Marketing',    pct: 28, color: '#2196F3' },
+  { label: 'Technology',   pct: 22, color: '#FFC107' },
+  { label: 'Media / PR',   pct: 16, color: '#CF2D8A' },
+  { label: 'Healthcare',   pct: 12, color: '#1D9F9F' },
+  { label: 'Education',    pct: 10, color: '#FF9800' },
+  { label: 'Finance',      pct: 8,  color: '#9C4DD6' },
+  { label: 'Other',        pct: 4,  color: '#78909C' },
+]
+
+const AL_AUTHORITY = [
+  { label: 'Low (0-3)',    value: 52.1, color: '#2196F3' },
+  { label: 'Medium (4-6)', value: 38.3, color: '#FFC107' },
+  { label: 'High (7-9)',   value: 30.9, color: '#CF2D8A' },
 ]
 
 function SentimentBar({ positive = 70, negative = 10, neutral = 20 }) {
@@ -1076,6 +910,49 @@ function AuthorsListContent() {
         'Spanish and English are the leading languages, each at 60% share, suggesting strong bilingual reach. French and Arabic represent growth opportunities in underserved markets. 3, 4',
         'Reddit.com/r/apple and Sports Illustrated show the highest engagement growth at +85.4% and +21.9% respectively — signaling high-value communities for targeted amplification. 5…',
       ]} />
+
+      {/* X Author Segment banner */}
+      <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ width: 44, height: 44, borderRadius: '50%', bgcolor: 'rgba(29,159,159,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="2.5" fill="#1D9F9F" />
+            <circle cx="4"  cy="6"  r="1.5" fill="#1D9F9F" opacity="0.7" />
+            <circle cx="20" cy="6"  r="1.5" fill="#1D9F9F" opacity="0.7" />
+            <circle cx="4"  cy="18" r="1.5" fill="#1D9F9F" opacity="0.7" />
+            <circle cx="20" cy="18" r="1.5" fill="#1D9F9F" opacity="0.7" />
+            <line x1="12" y1="12" x2="4"  y2="6"  stroke="#1D9F9F" strokeWidth="1.2" opacity="0.6" />
+            <line x1="12" y1="12" x2="20" y2="6"  stroke="#1D9F9F" strokeWidth="1.2" opacity="0.6" />
+            <line x1="12" y1="12" x2="4"  y2="18" stroke="#1D9F9F" strokeWidth="1.2" opacity="0.6" />
+            <line x1="12" y1="12" x2="20" y2="18" stroke="#1D9F9F" strokeWidth="1.2" opacity="0.6" />
+          </svg>
+        </Box>
+        <Box>
+          <Typography sx={{ fontSize: 14, color: '#212121', mb: 0.5 }}>Find and understand relevant X communities and authors.</Typography>
+          <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#1D9F9F', cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}>Create Author Segment Dashboard</Typography>
+        </Box>
+      </Box>
+
+      {/* Unique X Authors + X Verification */}
+      <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+        <Box sx={{ flex: 1, minWidth: 220, border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2 }}>
+          <WHeader title="Unique X Authors" download />
+          <Box sx={{ mt: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+              <Typography sx={{ fontSize: 36, fontWeight: 700, color: '#212121', lineHeight: 1.1 }}>33.3k</Typography>
+              <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.25, bgcolor: '#E8F5E9', color: '#2E7D32', fontSize: 12, fontWeight: 700, px: 0.75, py: 0.25, borderRadius: 1 }}>
+                <ArrowUpwardIcon sx={{ fontSize: 12 }} />18%
+              </Box>
+            </Box>
+            <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>Previously <strong>2.97M</strong></Typography>
+          </Box>
+        </Box>
+        <Box sx={{ flex: 1, minWidth: 220, border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2 }}>
+          <WHeader title="X Verification" download />
+          <Box sx={{ mt: 2 }}>
+            <Typography sx={{ fontSize: 36, fontWeight: 700, color: '#212121', lineHeight: 1.1 }}>33.3k</Typography>
+          </Box>
+        </Box>
+      </Box>
 
       {/* Author Gender + Author Demographic */}
       <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
@@ -1137,15 +1014,26 @@ function AuthorsListContent() {
         </Box>
       </Box>
 
-      {/* Author Occupation + Top Language */}
+      {/* Top Locations + Top Language */}
       <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
         <Box sx={{ flex: 1, minWidth: 220, border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2 }}>
-          <WHeader title="Author Occupation" />
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, lineHeight: 1.8 }}>
-            {AL_OCC_KW.map((kw, i) => (
-              <Typography key={i} sx={{ fontSize: kw.s, fontWeight: kw.s >= 20 ? 700 : 400, color: BIO_COLORS[i % BIO_COLORS.length], cursor: 'pointer' }}>{kw.text}</Typography>
-            ))}
-          </Box>
+          <WHeader title="Top Locations" download action={
+            <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, px: 1, py: 0.4, display: 'flex', alignItems: 'center', gap: 0.5, cursor: 'pointer' }}>
+              <Typography sx={{ fontSize: 12, color: '#424242' }}>Country</Typography>
+              <ArrowDownwardIcon sx={{ fontSize: 12, color: 'text.secondary' }} />
+            </Box>
+          } />
+          {AL_TOP_LOCATIONS.map((row, i) => (
+            <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.75 }}>
+              <Typography sx={{ fontSize: 13, color: '#424242', width: 130, flexShrink: 0, textAlign: 'right' }}>{row.name}</Typography>
+              <Typography sx={{ fontSize: 15, flexShrink: 0 }}>{row.flag}</Typography>
+              <Box sx={{ flex: 1, height: 14, bgcolor: '#f0f0f0', borderRadius: 1, overflow: 'hidden' }}>
+                <Box sx={{ width: `${(row.value / 903) * 100}%`, height: '100%', bgcolor: YELLOW, borderRadius: 1 }} />
+              </Box>
+              <Typography sx={{ fontSize: 12, fontWeight: 700, color: '#212121', width: 32, textAlign: 'right', flexShrink: 0 }}>{row.value}</Typography>
+            </Box>
+          ))}
+          <Pagination text="1 - 10 of 30 Locations" />
         </Box>
         <Box sx={{ flex: 1, minWidth: 220, border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2 }}>
           <WHeader title="Top Language" />
@@ -1177,41 +1065,141 @@ function AuthorsListContent() {
         </Box>
       </Box>
 
-      {/* Sources (Top 1000) table */}
-      <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white' }}>
-        <Box sx={{ display: 'flex', px: 2, py: 1, borderBottom: '1px solid #e0e0e0' }}>
-          <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#212121' }}>Sources (Top 1000)</Typography>
-        </Box>
-        <Box sx={{ display: 'flex', px: 2, py: 0.75, borderBottom: '1px solid #e0e0e0', bgcolor: '#FAFAFA' }}>
-          <Box sx={{ width: 28 }} />
-          <Typography sx={{ fontSize: 11, fontWeight: 700, color: 'text.secondary', flex: 1 }}>Name</Typography>
-          <Typography sx={{ fontSize: 11, fontWeight: 700, color: 'text.secondary', width: 70, textAlign: 'right' }}>Subscribers</Typography>
-          <Typography sx={{ fontSize: 11, fontWeight: 700, color: 'text.secondary', width: 70, textAlign: 'right' }}>Mentions</Typography>
-          <Typography sx={{ fontSize: 11, fontWeight: 700, color: 'text.secondary', width: 100, textAlign: 'right' }}>Engagement ↓</Typography>
-          <Typography sx={{ fontSize: 11, fontWeight: 700, color: 'text.secondary', width: 100, textAlign: 'right' }}>Est. reach</Typography>
-          <Typography sx={{ fontSize: 11, fontWeight: 700, color: 'text.secondary', width: 60, textAlign: 'center' }}>Sentiment</Typography>
-        </Box>
-        {AL_SOURCES.map((row, i) => (
-          <Box key={i} sx={{ display: 'flex', alignItems: 'center', px: 2, py: 0.875, borderBottom: i < AL_SOURCES.length - 1 ? '1px solid #f5f5f5' : 'none', '&:hover': { bgcolor: 'rgba(0,0,0,0.02)' } }}>
-            <Box sx={{ width: 28, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>#{row.rank}</Typography>
+      {/* Top Occupations + Authors By Authority Level */}
+      <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+
+        {/* Top Occupations donut */}
+        <Box sx={{ flex: 1, minWidth: 220, border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2 }}>
+          <WHeader title="Top Occupations" download />
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+            {(() => {
+              const size = 160, cx = 80, cy = 80, r = 65, ir = 38
+              let cum = -90
+              const paths = AL_OCC_SEGS.map(seg => {
+                const s = (cum * Math.PI) / 180
+                const sweep = (seg.pct / 100) * 360; cum += sweep
+                const e = (cum * Math.PI) / 180
+                const large = sweep > 180 ? 1 : 0
+                const d = `M ${cx + r * Math.cos(s)} ${cy + r * Math.sin(s)} A ${r} ${r} 0 ${large} 1 ${cx + r * Math.cos(e)} ${cy + r * Math.sin(e)} L ${cx + ir * Math.cos(e)} ${cy + ir * Math.sin(e)} A ${ir} ${ir} 0 ${large} 0 ${cx + ir * Math.cos(s)} ${cy + ir * Math.sin(s)} Z`
+                return { ...seg, d }
+              })
+              return (
+                <svg width={size} height={size} style={{ flexShrink: 0, display: 'block' }}>
+                  {paths.map((p, i) => <path key={i} d={p.d} fill={p.color} stroke="white" strokeWidth="1.5" />)}
+                  <circle cx={cx} cy={cy} r={ir} fill="white" />
+                </svg>
+              )
+            })()}
+            <Box sx={{ flex: 1 }}>
+              {AL_OCC_SEGS.map((s, i) => (
+                <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.625 }}>
+                  <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: s.color, flexShrink: 0 }} />
+                  <Typography sx={{ fontSize: 12, flex: 1, color: '#424242' }}>{s.label}</Typography>
+                  <Typography sx={{ fontSize: 12, fontWeight: 700, color: '#212121' }}>{s.pct}%</Typography>
+                </Box>
+              ))}
             </Box>
-            <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', gap: 0.75, minWidth: 0 }}>
-              <Box sx={{ width: 28, height: 28, borderRadius: '50%', bgcolor: row.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <Typography sx={{ fontSize: 8, fontWeight: 700, color: 'white' }}>{row.init}</Typography>
-              </Box>
-              <Box sx={{ minWidth: 0 }}>
-                <Typography sx={{ fontSize: 12, fontWeight: 600, color: '#212121', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.name}</Typography>
-                <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>{row.loc}</Typography>
-              </Box>
-            </Box>
-            <Typography sx={{ fontSize: 12, color: '#424242', width: 70, textAlign: 'right' }}>{row.subs}</Typography>
-            <Typography sx={{ fontSize: 12, color: '#424242', width: 70, textAlign: 'right' }}>{row.mentions}</Typography>
-            <Typography sx={{ fontSize: 11, color: '#424242', width: 100, textAlign: 'right' }}>{row.eng}</Typography>
-            <Typography sx={{ fontSize: 11, color: '#424242', width: 100, textAlign: 'right' }}>{row.reach}</Typography>
-            <Box sx={{ width: 60, display: 'flex', justifyContent: 'center' }}><SentimentBar /></Box>
           </Box>
-        ))}
+        </Box>
+
+        {/* Authors By Authority Level bar chart */}
+        <Box sx={{ flex: 1, minWidth: 220, border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2 }}>
+          <WHeader title="Authors By Authority Level" />
+          {(() => {
+            const w = 300, h = 200, padL = 36, padB = 32, padT = 20, padR = 8
+            const cW = w - padL - padR, cH = h - padB - padT
+            const maxV = 60, yTicks = [0, 10, 20, 30, 40, 50, 60]
+            const barW = 52, barGap = (cW - AL_AUTHORITY.length * barW) / (AL_AUTHORITY.length + 1)
+            return (
+              <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="xMidYMid meet" style={{ display: 'block' }}>
+                {yTicks.map(v => {
+                  const y = padT + (1 - v / maxV) * cH
+                  return <g key={v}>
+                    <line x1={padL} y1={y} x2={w - padR} y2={y} stroke="#f0f0f0" strokeWidth="1" />
+                    <text x={padL - 4} y={y + 3} textAnchor="end" fontSize="9" fill="#9E9E9E">{v ? `${v}k` : '0'}</text>
+                  </g>
+                })}
+                {AL_AUTHORITY.map((bar, i) => {
+                  const x = padL + barGap + i * (barW + barGap)
+                  const barH = (bar.value / maxV) * cH
+                  const y = padT + cH - barH
+                  return <g key={i}>
+                    <rect x={x} y={y} width={barW} height={barH} fill={bar.color} rx="2" />
+                    <text x={x + barW / 2} y={y - 5} textAnchor="middle" fontSize="9" fontWeight="600" fill="#212121">{bar.value}k</text>
+                    <text x={x + barW / 2} y={h - 6} textAnchor="middle" fontSize="9" fill="#9E9E9E">{bar.label}</text>
+                  </g>
+                })}
+              </svg>
+            )
+          })()}
+        </Box>
+
+      </Box>
+
+      {/* Top Interests + Top Bio Keywords */}
+      <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+
+        {/* Top Interests */}
+        <Box sx={{ flex: 1, minWidth: 280, border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2 }}>
+          <WHeader title="Top Interests" download />
+          <Box sx={{ display: 'flex', pb: 0.75, borderBottom: '1px solid #e0e0e0', mb: 0.25 }}>
+            <Typography sx={{ fontSize: 12, fontWeight: 700, color: 'text.secondary', flex: 1 }}>Interests</Typography>
+            <Typography sx={{ fontSize: 12, fontWeight: 700, color: 'text.secondary' }}>Percentage</Typography>
+          </Box>
+          {[
+            { name: 'Travel',                 pct: 50 },
+            { name: 'Science',                pct: 50 },
+            { name: 'Sports',                 pct: 40 },
+            { name: 'Law, govt and politics', pct: 20 },
+            { name: 'Society',                pct: 20 },
+            { name: 'News',                   pct: 10 },
+            { name: 'Movie and TV',           pct: 1  },
+          ].map((row, i, arr) => (
+            <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 0.875, borderBottom: i < arr.length - 1 ? '1px solid #f5f5f5' : 'none' }}>
+              <Typography sx={{ fontSize: 13, color: 'text.secondary', width: 16, flexShrink: 0 }}>{i + 1}</Typography>
+              <Box sx={{ width: 34, height: 34, borderRadius: '50%', bgcolor: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <svg width="18" height="18" viewBox="0 0 18 18">
+                  <path d="M4 4 L8 4 L8 8 L4 8 Z" fill="#93C5FD" rx="1" />
+                  <circle cx="13" cy="6" r="2.5" fill="#3B82F6" />
+                  <path d="M4 10 L6 14 L8 10 Z" fill="#60A5FA" />
+                  <rect x="10.5" y="10" width="5" height="4" rx="1" fill="#BFDBFE" />
+                </svg>
+              </Box>
+              <Typography sx={{ fontSize: 14, fontWeight: 700, color: '#212121', flex: 1 }}>{row.name}</Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Typography sx={{ fontSize: 13, color: '#424242', width: 36, textAlign: 'right' }}>{row.pct}%</Typography>
+                <Box sx={{ width: 100, height: 10, bgcolor: '#f0f0f0', borderRadius: 1, overflow: 'hidden' }}>
+                  <Box sx={{ width: `${row.pct}%`, height: '100%', bgcolor: '#3B82F6', borderRadius: 1 }} />
+                </Box>
+              </Box>
+            </Box>
+          ))}
+          <Pagination text="1 - 10 of 30 Interest" />
+        </Box>
+
+        {/* Top Bio Keywords */}
+        <Box sx={{ flex: 1, minWidth: 280, border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2 }}>
+          <WHeader title="Top Bio Keywords" download />
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, lineHeight: 2, mt: 1 }}>
+            {AL_OCC_KW.concat([
+              { text: 'Backyards', s: 20 }, { text: 'Interiors', s: 14 }, { text: 'Rugs', s: 12 },
+              { text: 'Joshua Slack', s: 13 }, { text: 'Lego', s: 12 }, { text: 'Knoll', s: 12 },
+              { text: 'Ebay', s: 13 }, { text: 'Amazon', s: 14 }, { text: 'The Verge', s: 12 },
+              { text: 'Wood finishes', s: 12 }, { text: 'Books stacked', s: 13 },
+            ]).map((kw, i) => (
+              <Typography key={i} sx={{
+                fontSize: kw.s,
+                fontWeight: kw.s >= 22 ? 700 : kw.s >= 17 ? 600 : 400,
+                color: `rgba(109,40,217,${0.35 + ((i * 7) % 13) * 0.05})`,
+                cursor: 'pointer',
+                '&:hover': { opacity: 0.75 },
+              }}>
+                {kw.text}
+              </Typography>
+            ))}
+          </Box>
+        </Box>
+
       </Box>
 
       {/* Authors (Top 1000) table */}
@@ -1257,14 +1245,24 @@ function AuthorsListContent() {
 
 export default function AudienceTabContent({ loading, targetSubTab, subTabTrigger }) {
   const [activeTab, setActiveTab] = useState('authors-list')
+  const boxRef = useRef(null)
   useEffect(() => { if (subTabTrigger > 0 && targetSubTab) setActiveTab(targetSubTab) }, [subTabTrigger])
+
+  const scrollToTop = () => {
+    let el = boxRef.current?.parentElement
+    while (el && el !== document.body) {
+      const s = window.getComputedStyle(el)
+      if (s.overflow === 'auto' || s.overflowY === 'auto') { el.scrollTo({ top: 0, behavior: 'smooth' }); break }
+      el = el?.parentElement
+    }
+  }
+
   if (loading) return null
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-      <StickySegmentNav value={activeTab} onChange={setActiveTab} />
+    <Box ref={boxRef} sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, flexShrink: 0 }}>
+      <StickySegmentNav value={activeTab} onChange={(val) => { setActiveTab(val); scrollToTop() }} />
       {activeTab === 'authors-list'  && <AuthorsListContent />}
       {activeTab === 'journalists'   && <JournalistsContent />}
-      {activeTab === 'x-authors'     && <XAuthorsContent />}
       {activeTab === 'news-coverage' && <NewsCoverageContent />}
     </Box>
   )
