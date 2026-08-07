@@ -35,6 +35,7 @@ import MiraStudioPage from './components/mira/MiraStudioPage'
 import ComparePage from './components/compare/ComparePage'
 import ExploreLandingPage from './components/explore/ExploreLandingPage'
 import SearchesListPage from './components/explore/SearchesListPage'
+import MediaListPage from './components/media/MediaListPage'
 import DashboardConfirmBanner from './components/core/DashboardConfirmBanner'
 import { EMPTY_STATE_ILLUSTRATION } from './constants/mockData'
 import { MIRA_HALO_BG, MIRA_AI_BG } from './constants/layout'
@@ -51,7 +52,7 @@ const INITIAL_INDUSTRY_STATE = {
 }
 
 export default function App() {
-  const [page, setPage] = useState('explore')
+  const [page, setPage] = useState('media-lists')
   const [panelOpen, setPanelOpen] = useState(false)
   const [panelType, setPanelType] = useState(null)
   const [step, setStep] = useState(0)
@@ -76,6 +77,8 @@ export default function App() {
   const [initialSearchMode, setInitialSearchMode] = useState('boolean')
   // Landing variant toggle for Searches & Filters: 'classic' (list-first) vs 'chat' (Mira-first)
   const [searchesVariant, setSearchesVariant] = useState('classic')
+  // Media Relations sidebar submenu expand/collapse
+  const [mediaRelationsOpen, setMediaRelationsOpen] = useState(true)
 
   // Derive result count from query state
   const resultCount = (() => {
@@ -151,7 +154,7 @@ export default function App() {
               </Box>
             )}
             <Typography sx={{ fontSize: 20, fontWeight: 500, color: 'rgba(0,0,0,0.87)' }}>
-              {page === 'mira-studio' ? 'Mira Studio' : 'Explore'}
+              {page === 'mira-studio' ? 'Mira Studio' : page.startsWith('media-') ? 'Media Relations' : 'Explore'}
             </Typography>
 
             {/* Landing variant switch — only on Searches & Filters */}
@@ -230,11 +233,52 @@ export default function App() {
                 </Box>
               </Box>
 
-              {/* Collapsible items */}
+              {/* Collapsible items — before Media Relations */}
               {[
                 { icon: <ShowChartIcon sx={{ fontSize: 20, color: '#616161' }} />, label: 'Monitor', hasChevron: true },
                 { icon: <BarChartIcon sx={{ fontSize: 20, color: '#616161' }} />, label: 'Analyze', hasChevron: false },
-                { icon: <GroupIcon sx={{ fontSize: 20, color: '#616161' }} />, label: 'Media Relations', hasChevron: true },
+              ].map(item => (
+                <Box key={item.label} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 2, py: 1, cursor: 'pointer', '&:hover': { bgcolor: alpha('#000', 0.04) } }}>
+                  {item.icon}
+                  <Typography sx={{ fontSize: 14, color: '#424242', flex: 1 }}>{item.label}</Typography>
+                  {item.hasChevron && <ExpandMoreIcon sx={{ fontSize: 18, color: '#9e9e9e' }} />}
+                </Box>
+              ))}
+
+              {/* Media Relations (expandable) */}
+              {(() => {
+                const mediaActive = page.startsWith('media-')
+                return (
+                  <Box sx={{ mx: 1, borderRadius: 1.5 }}>
+                    <Box onClick={() => setMediaRelationsOpen(o => !o)} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 1.5, py: 1, cursor: 'pointer', borderRadius: 1.5, '&:hover': { bgcolor: alpha('#000', 0.04) } }}>
+                      <GroupIcon sx={{ fontSize: 20, color: mediaActive ? '#1D9F9F' : '#616161' }} />
+                      <Typography sx={{ fontSize: 14, fontWeight: mediaActive ? 700 : 400, color: mediaActive ? '#212121' : '#424242', flex: 1 }}>Media Relations</Typography>
+                      {mediaRelationsOpen ? <ExpandLessIcon sx={{ fontSize: 18, color: '#616161' }} /> : <ExpandMoreIcon sx={{ fontSize: 18, color: '#9e9e9e' }} />}
+                    </Box>
+                    {/* Submenu */}
+                    {mediaRelationsOpen && (
+                      <Box sx={{ borderLeft: '2px solid #e0e0e0', ml: 3.25, mb: 0.5 }}>
+                        {[
+                          { label: 'Media Lists', target: 'media-lists' },
+                          { label: 'Search', target: 'media-search' },
+                          { label: 'Outreach', target: 'media-outreach' },
+                          { label: 'PR Assistant', target: 'media-pr-assistant' },
+                        ].map(({ label, target }) => {
+                          const isActive = page === target
+                          return (
+                            <Box key={label} onClick={() => setPage(target)} sx={{ px: 2, py: 0.75, cursor: 'pointer', borderRadius: 1, bgcolor: isActive ? alpha('#28BBBB', 0.1) : 'transparent', '&:hover': { bgcolor: isActive ? alpha('#28BBBB', 0.14) : alpha('#000', 0.04) } }}>
+                              <Typography sx={{ fontSize: 14, color: isActive ? '#1D9F9F' : '#757575', fontWeight: isActive ? 600 : 400 }}>{label}</Typography>
+                            </Box>
+                          )
+                        })}
+                      </Box>
+                    )}
+                  </Box>
+                )
+              })()}
+
+              {/* Collapsible items — after Media Relations */}
+              {[
                 { icon: <ChatIcon sx={{ fontSize: 20, color: '#616161' }} />, label: 'Engage', hasChevron: true },
                 { icon: <HubIcon sx={{ fontSize: 20, color: '#616161' }} />, label: 'Author Segments', hasChevron: false },
                 { icon: <ArticleIcon sx={{ fontSize: 20, color: '#616161' }} />, label: 'Newsletters', hasChevron: false },
@@ -281,6 +325,16 @@ export default function App() {
               <ExploreLandingPage onNavigate={(target) => setPage(target)} onOpenSearch={(q) => { setBooleanQuery(q); setPage('explore') }} onCreateSearch={(key) => { setInitialSearchMode(key === 'combined' ? 'combined' : key === 'keyword' ? 'keyword' : 'boolean'); setBooleanQuery(''); setPage('explore') }} />
             ) : page === 'searches-list' ? (
               <SearchesListPage variant={searchesVariant} onOpenSearch={(q) => { setBooleanQuery(q); setPage('explore') }} onCreateSearch={(key) => { setInitialSearchMode(key === 'combined' ? 'combined' : key === 'keyword' ? 'keyword' : 'boolean'); setBooleanQuery(''); setPage('explore') }} />
+            ) : page === 'media-lists' ? (
+              <MediaListPage />
+            ) : page.startsWith('media-') ? (
+              <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 1.5, bgcolor: '#f5f5f5' }}>
+                <GroupIcon sx={{ fontSize: 56, color: '#bdbdbd' }} />
+                <Typography sx={{ fontSize: 20, fontWeight: 700, color: '#616161' }}>
+                  {page === 'media-search' ? 'Search' : page === 'media-outreach' ? 'Outreach' : 'PR Assistant'}
+                </Typography>
+                <Typography sx={{ fontSize: 14, color: '#9e9e9e' }}>Coming soon</Typography>
+              </Box>
             ) : page === 'compare' ? (
               <ComparePage onBack={() => setPage('explore')} />
             ) : (
