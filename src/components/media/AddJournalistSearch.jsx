@@ -37,7 +37,7 @@ export default function AddJournalistSearch({ onAdd }) {
           <Typography sx={{ position: 'absolute', top: -9, left: 12, px: 0.75, bgcolor: 'background.paper', fontSize: 12, color: focused ? TEAL_DARK : '#757575' }}>Add a Journalist</Typography>
           <SearchIcon sx={{ fontSize: 20, color: '#9e9e9e' }} />
           <InputBase value={query} onChange={e => setQuery(e.target.value)} onFocus={() => setFocused(true)}
-            placeholder="Search journalists by name (e.g. John Doe)" sx={{ flex: 1, fontSize: 15, color: '#212121' }} />
+            placeholder="Search journalist by name or email" sx={{ flex: 1, fontSize: 15, color: '#212121' }} />
           {query && (
             <IconButton size="small" onClick={() => setQuery('')}><CancelIcon sx={{ fontSize: 20, color: '#9e9e9e' }} /></IconButton>
           )}
@@ -58,15 +58,18 @@ export default function AddJournalistSearch({ onAdd }) {
               <Box sx={{ px: 2, py: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
                 <Typography sx={{ fontSize: 16, fontWeight: 700, color: '#616161', textAlign: 'center' }}>No matching email found</Typography>
                 <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', justifyContent: 'center' }}>
-                  <Button variant="outlined" size="small"
+                  <Button variant="outlined" size="small" endIcon={<OpenInNewIcon sx={{ fontSize: 16 }} />}
                     sx={{ textTransform: 'none', borderColor: '#bdbdbd', color: '#212121', fontWeight: 600, fontSize: 14, borderRadius: 1, px: 2, py: 0.75, '&:hover': { borderColor: TEAL, bgcolor: alpha(TEAL, 0.04) } }}>
-                    Report Missing Contact
+                    Open Deeper Search
                   </Button>
                   <Button variant="outlined" size="small"
                     sx={{ textTransform: 'none', borderColor: '#bdbdbd', color: '#212121', fontWeight: 600, fontSize: 14, borderRadius: 1, px: 2, py: 0.75, '&:hover': { borderColor: TEAL, bgcolor: alpha(TEAL, 0.04) } }}>
                     Create Private Contact
                   </Button>
                 </Box>
+                <Typography sx={{ fontSize: 13, color: TEAL_DARK, fontWeight: 600, textDecoration: 'underline', cursor: 'pointer' }}>
+                  Report Missing Contact
+                </Typography>
               </Box>
             ) : matches.map((j, i) => (
               <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 2, py: 1.5, borderBottom: '1px solid #f0f0f0', '&:hover': { bgcolor: '#f5f5f5' } }}>
@@ -101,13 +104,15 @@ export default function AddJournalistSearch({ onAdd }) {
               </Box>
             ))}
 
-            {/* Footer — full search */}
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, px: 2, py: 1.75, cursor: 'pointer', '&:hover': { bgcolor: '#fafafa' } }}>
-              <Typography sx={{ fontSize: 15, color: '#212121' }}>
-                Didn't find who you're looking for? <Box component="span" sx={{ fontWeight: 700 }}>Open full search for “{query.trim()}”</Box>
-              </Typography>
-              <OpenInNewIcon sx={{ fontSize: 20, color: '#616161', flexShrink: 0 }} />
-            </Box>
+            {/* Footer — full search. Omitted when there are no matches; "Open Deeper Search" above already covers that case. */}
+            {matches.length > 0 && (
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, px: 2, py: 1.75, cursor: 'pointer', '&:hover': { bgcolor: '#fafafa' } }}>
+                <Typography sx={{ fontSize: 15, color: '#212121' }}>
+                  Want a deeper search? Search “<Box component="span" sx={{ fontWeight: 700 }}>{query.trim()}</Box>” across topics, sources and podcasts
+                </Typography>
+                <OpenInNewIcon sx={{ fontSize: 20, color: '#616161', flexShrink: 0 }} />
+              </Box>
+            )}
           </Paper>
         )}
       </Box>

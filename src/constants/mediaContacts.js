@@ -71,6 +71,35 @@ export const MEDIA_CONTACTS = [
   ...Array.from({ length: 100 - BASE.length }, (_, k) => generate(k + BASE.length)),
 ].map((c, id) => ({ id, ...c }))
 
+// Newsdesk (outlet-level) contacts for the "Newsdesks" sub-tab in Media List. Same shape as
+// MEDIA_CONTACTS so the same List Health / column filters apply uniformly. IDs offset by 100000
+// so they never collide with journalist ids when both pools coexist in selection state.
+export const NEWSDESK_CONTACTS = OUTLETS.map((outlet, i) => {
+  const bounced = i === 7
+  const unsubscribed = i === 4
+  const opened = !bounced && i % 4 !== 0
+  const clicked = opened && i % 3 === 0
+  return {
+    id: 100000 + i,
+    name: outlet,
+    private: false,
+    color: COLORS[(i * 5) % COLORS.length],
+    onList: LISTS[(i * 11) % LISTS.length],
+    beats: BEATS[(i * 17) % BEATS.length],
+    notes: NOTES_PATTERN[i % NOTES_PATTERN.length],
+    openRate: RATES[(i * 19) % RATES.length],
+    last: LASTC[(i * 23) % LASTC.length],
+    title: TITLES[(i * 3) % TITLES.length],
+    beatCategory: BEAT_CATEGORIES[(i * 29) % BEAT_CATEGORIES.length],
+    location: LOCATIONS[(i * 31) % LOCATIONS.length],
+    outlet,
+    opened, clicked, unsubscribed, bounced,
+    lastResponseDays: (i * 23) % 130,
+    lastPublishedDays: (i * 31) % 130,
+    noReplyAttempts: (i * 7) % 6,
+  }
+})
+
 // Searchable journalist directory for the "Add a Journalist" search bar (not on the list yet).
 // Search any of these first names: Samantha, James, Sofia, Chen, Aisha, Carlos, Emma, Liam,
 // Olivia, Ethan, Ava, Lucas, Mia, Daniel, Grace, Noah, Hannah, Marcus.

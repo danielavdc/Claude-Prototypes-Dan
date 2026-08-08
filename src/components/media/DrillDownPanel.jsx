@@ -79,14 +79,17 @@ function SpikeChart() {
 
 export default function DrillDownPanel({ open, onClose, viewing }) {
   const isPerson = viewing?.kind === 'person'
+  const isProfileOnly = viewing?.kind === 'profile' // View Profile icon / chart name click — profile alone, no tab bar
   const [tab, setTab] = useState('contacts')
   // Open on the tab requested by the trigger (row → mentions, profile icon → profile, group → contacts)
-  useEffect(() => { if (open) setTab(viewing?.tab || (isPerson ? 'mentions' : 'contacts')) }, [open, viewing?.label]) // eslint-disable-line
+  useEffect(() => { if (open) setTab(isProfileOnly ? 'profile' : viewing?.tab || (isPerson ? 'mentions' : 'contacts')) }, [open, viewing?.label]) // eslint-disable-line
 
-  const TABS = isPerson
-    ? [{ key: 'mentions', label: 'Mentions' }, { key: 'analytics', label: 'Analytics' }, { key: 'profile', label: 'Profile Card' }]
-    : [{ key: 'mentions', label: 'Mentions' }, { key: 'analytics', label: 'Analytics' }, { key: 'contacts', label: 'Contacts' }]
-  const title = (isPerson || tab === 'mentions') ? 'Filtered Mentions' : 'Filtered'
+  const TABS = isProfileOnly
+    ? []
+    : isPerson
+      ? [{ key: 'mentions', label: 'Mentions' }, { key: 'analytics', label: 'Analytics' }] // no Profile Card tab here — reached only via the dedicated entry points below
+      : [{ key: 'mentions', label: 'Mentions' }, { key: 'analytics', label: 'Analytics' }, { key: 'contacts', label: 'Contacts' }]
+  const title = isProfileOnly ? 'Profile Card' : (isPerson || tab === 'mentions') ? 'Filtered Mentions' : 'Filtered'
 
   return (
     <Drawer anchor="right" open={open} onClose={onClose} slotProps={{ paper: { sx: { width: 440, maxWidth: '92vw' } } }}>
@@ -97,25 +100,29 @@ export default function DrillDownPanel({ open, onClose, viewing }) {
           <IconButton size="small" onClick={onClose}><CloseIcon sx={{ fontSize: 22, color: '#616161' }} /></IconButton>
         </Box>
 
-        {/* Tabs */}
-        <Box sx={{ flexShrink: 0, display: 'flex', borderBottom: '1px solid #e0e0e0', px: 1 }}>
-          {TABS.map(t => {
-            const active = tab === t.key
-            return (
-              <Box key={t.key} onClick={() => setTab(t.key)} sx={{ flex: 1, textAlign: 'center', py: 1.25, cursor: 'pointer', borderBottom: active ? `2px solid ${TEAL}` : '2px solid transparent', bgcolor: active ? alpha(TEAL, 0.06) : 'transparent', mb: '-1px' }}>
-                <Typography sx={{ fontSize: 15, fontWeight: active ? 700 : 500, color: active ? '#212121' : '#757575' }}>{t.label}</Typography>
-              </Box>
-            )
-          })}
-        </Box>
+        {/* Tabs — omitted entirely for the profile-only entry point */}
+        {!isProfileOnly && (
+          <Box sx={{ flexShrink: 0, display: 'flex', borderBottom: '1px solid #e0e0e0', px: 1 }}>
+            {TABS.map(t => {
+              const active = tab === t.key
+              return (
+                <Box key={t.key} onClick={() => setTab(t.key)} sx={{ flex: 1, textAlign: 'center', py: 1.25, cursor: 'pointer', borderBottom: active ? `2px solid ${TEAL}` : '2px solid transparent', bgcolor: active ? alpha(TEAL, 0.06) : 'transparent', mb: '-1px' }}>
+                  <Typography sx={{ fontSize: 15, fontWeight: active ? 700 : 500, color: active ? '#212121' : '#757575' }}>{t.label}</Typography>
+                </Box>
+              )
+            })}
+          </Box>
+        )}
 
-        {/* Viewing bar */}
-        <Box sx={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 1.25, px: 2.5, py: 1.5, bgcolor: '#eef2f7' }}>
-          <Avatar sx={{ width: 32, height: 32, bgcolor: '#e0e0e0' }}><VisibilityOutlinedIcon sx={{ fontSize: 18, color: '#616161' }} /></Avatar>
-          <Typography sx={{ fontSize: 14.5, color: '#212121' }}>
-            <b>Viewing:</b> {viewing?.label} <Box component="span" sx={{ color: '#616161' }}>({viewing?.type})</Box>
-          </Typography>
-        </Box>
+        {/* Viewing bar — omitted for the profile-only entry point */}
+        {!isProfileOnly && (
+          <Box sx={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 1.25, px: 2.5, py: 1.5, bgcolor: '#eef2f7' }}>
+            <Avatar sx={{ width: 32, height: 32, bgcolor: '#e0e0e0' }}><VisibilityOutlinedIcon sx={{ fontSize: 18, color: '#616161' }} /></Avatar>
+            <Typography sx={{ fontSize: 14.5, color: '#212121' }}>
+              <b>Viewing:</b> {viewing?.label} <Box component="span" sx={{ color: '#616161' }}>({viewing?.type})</Box>
+            </Typography>
+          </Box>
+        )}
 
         {/* Body */}
         <Box sx={{ flex: 1, minHeight: 0, overflow: 'auto' }}>

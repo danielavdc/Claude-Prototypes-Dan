@@ -4,29 +4,21 @@ import { alpha } from '@mui/material/styles'
 import CloseIcon from '@mui/icons-material/Close'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 
+const TEAL = '#1D9F9F'
 const TEAL_DARK = '#00827F'
-const INDIGO = '#5B4FC4'
-const INDIGO_BG = alpha(INDIGO, 0.08)
-
-const RULES = [
-  { key: 'unsubscribe', label: 'Contact Unsubscribes' },
-  { key: 'noReply', label: 'Hasn’t replied recently', criteria: 'noReply' },
-  { key: 'lowActivity', label: 'Has low publication activity', criteria: 'lowActivity' },
-  { key: 'bounced', label: 'Email has bounced' },
-]
 
 const checkboxSx = { p: 0, mr: 1.5, '&.Mui-checked': { color: TEAL_DARK } }
 
-// Small "N Unit(s) ▾" control that opens a menu of numeric options.
+// Small teal "N Unit(s) ▾" control, inline within a rule's sentence, opens a menu of numeric options.
 function ComboDropdown({ value, unit, options, onChange }) {
   const [anchorEl, setAnchorEl] = useState(null)
   const label = `${value} ${unit}${value === 1 ? '' : 's'}`
   return (
     <>
-      <Box onClick={(e) => setAnchorEl(e.currentTarget)}
-        sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.25, px: 1, py: 0.5, border: '1px solid #bdbdbd', borderRadius: 1, cursor: 'pointer', bgcolor: 'background.paper', '&:hover': { borderColor: '#9e9e9e' } }}>
-        <Typography sx={{ fontSize: 15, fontWeight: 700, color: '#212121' }}>{label}</Typography>
-        <ArrowDropDownIcon sx={{ fontSize: 20, color: '#616161' }} />
+      <Box onClick={(e) => { e.stopPropagation(); setAnchorEl(e.currentTarget) }}
+        sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.25, px: 1, py: 0.4, border: '1px solid', borderColor: TEAL, borderRadius: 1, cursor: 'pointer', bgcolor: 'background.paper', '&:hover': { bgcolor: alpha(TEAL, 0.06) } }}>
+        <Typography sx={{ fontSize: 15, fontWeight: 700, color: TEAL_DARK }}>{label}</Typography>
+        <ArrowDropDownIcon sx={{ fontSize: 20, color: TEAL_DARK }} />
       </Box>
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
         {options.map(o => (
@@ -34,15 +26,6 @@ function ComboDropdown({ value, unit, options, onChange }) {
         ))}
       </Menu>
     </>
-  )
-}
-
-function CriteriaBox({ children }) {
-  return (
-    <Box sx={{ bgcolor: INDIGO_BG, borderRadius: 1.5, p: 2, mt: 1, ml: 4.5 }}>
-      <Typography sx={{ fontSize: 14, fontWeight: 700, color: INDIGO, mb: 1 }}>What’s the criteria?</Typography>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>{children}</Box>
-    </Box>
   )
 }
 
@@ -55,6 +38,9 @@ export default function AutoCleanupModal({ open, onClose }) {
 
   const toggleRule = (key) => setRules(prev => ({ ...prev, [key]: !prev[key] }))
 
+  const rowSx = { display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1, py: 1.25, cursor: 'pointer' }
+  const textSx = { fontSize: 16, color: '#212121' }
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth slotProps={{ paper: { sx: { borderRadius: 2 } } }}>
       {/* Header */}
@@ -66,28 +52,30 @@ export default function AutoCleanupModal({ open, onClose }) {
 
       {/* Rules */}
       <Box sx={{ px: 3, py: 2 }}>
-        <Typography sx={{ fontSize: 15, fontWeight: 700, color: '#212121', mb: 1.5 }}>Remove contacts when:</Typography>
-        {RULES.map((r, i) => (
-          <Box key={r.key} sx={{ mb: i === RULES.length - 1 ? 0 : 2 }}>
-            <Box onClick={() => toggleRule(r.key)} sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-              <Checkbox checked={!!rules[r.key]} sx={checkboxSx} disableRipple />
-              <Typography sx={{ fontSize: 16, color: '#212121' }}>{r.label}</Typography>
-            </Box>
-            {r.criteria === 'noReply' && rules.noReply && (
-              <CriteriaBox>
-                <Typography sx={{ fontSize: 15, color: '#212121' }}>Remove contact after</Typography>
-                <ComboDropdown value={noReplyEmails} unit="Email" options={[1, 2, 3, 4, 5]} onChange={setNoReplyEmails} />
-                <Typography sx={{ fontSize: 15, color: '#212121' }}>without reply</Typography>
-              </CriteriaBox>
-            )}
-            {r.criteria === 'lowActivity' && rules.lowActivity && (
-              <CriteriaBox>
-                <Typography sx={{ fontSize: 15, color: '#212121' }}>Hasn’t published in the last</Typography>
-                <ComboDropdown value={lowActivityMonths} unit="Month" options={[1, 2, 3, 6]} onChange={setLowActivityMonths} />
-              </CriteriaBox>
-            )}
-          </Box>
-        ))}
+        <Typography sx={{ fontSize: 15, fontWeight: 700, color: '#212121', mb: 0.5 }}>Remove When Contact:</Typography>
+
+        <Box onClick={() => toggleRule('unsubscribe')} sx={rowSx}>
+          <Checkbox checked={!!rules.unsubscribe} sx={checkboxSx} disableRipple />
+          <Typography sx={textSx}>Unsubscribes</Typography>
+        </Box>
+
+        <Box onClick={() => toggleRule('noReply')} sx={rowSx}>
+          <Checkbox checked={!!rules.noReply} sx={checkboxSx} disableRipple />
+          <Typography sx={textSx}>Hasn’t reply after</Typography>
+          <ComboDropdown value={noReplyEmails} unit="Email" options={[1, 2, 3, 4, 5]} onChange={setNoReplyEmails} />
+          <Typography sx={textSx}>attempts</Typography>
+        </Box>
+
+        <Box onClick={() => toggleRule('lowActivity')} sx={rowSx}>
+          <Checkbox checked={!!rules.lowActivity} sx={checkboxSx} disableRipple />
+          <Typography sx={textSx}>Hasn't published in the last</Typography>
+          <ComboDropdown value={lowActivityMonths} unit="Month" options={[1, 2, 3, 6]} onChange={setLowActivityMonths} />
+        </Box>
+
+        <Box onClick={() => toggleRule('bounced')} sx={{ ...rowSx, pb: 0 }}>
+          <Checkbox checked={!!rules.bounced} sx={checkboxSx} disableRipple />
+          <Typography sx={textSx}>Email has bounced</Typography>
+        </Box>
       </Box>
       <Divider />
 
@@ -102,7 +90,7 @@ export default function AutoCleanupModal({ open, onClose }) {
       <Divider />
 
       {/* Require approval toggle */}
-      <Box sx={{ px: 3, py: 1.75, bgcolor: '#F5F7F6', display: 'flex', alignItems: 'center', gap: 1.5 }}>
+      <Box sx={{ px: 3, py: 1.75, bgcolor: alpha(TEAL, 0.06), display: 'flex', alignItems: 'center', gap: 1.5 }}>
         <Switch checked={requireApproval} onChange={(e) => setRequireApproval(e.target.checked)}
           sx={{ '& .MuiSwitch-switchBase.Mui-checked': { color: TEAL_DARK }, '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': { bgcolor: TEAL_DARK } }} />
         <Typography sx={{ fontSize: 15.5, color: '#212121' }}>Require approval by email before removing contacts</Typography>

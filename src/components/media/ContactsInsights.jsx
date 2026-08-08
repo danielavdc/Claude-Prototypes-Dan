@@ -131,7 +131,7 @@ const SENTIMENT_SEGMENTS = [
   { key: 'negative', color: '#E53935' },
 ]
 
-function SentimentChart({ title, rows, total, onBarClick }) {
+function SentimentChart({ title, rows, total, onBarClick, onNameClick }) {
   const H = 190, MAX = 60
   return (
     <Panel title={title} info action={
@@ -170,8 +170,10 @@ function SentimentChart({ title, rows, total, onBarClick }) {
           </Box>
           <Box sx={{ display: 'flex', gap: 1.5, mt: 0.5 }}>
             {rows.map(row => (
-              <Typography key={row.name} onClick={() => onBarClick && onBarClick(row.name)}
-                sx={{ flex: 1, minWidth: 0, fontSize: 10.5, color: '#424242', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', cursor: 'pointer', '&:hover': { color: TEAL, fontWeight: 700 } }}>{row.name}</Typography>
+              <Tooltip key={row.name} title="View profile" placement="top" arrow enterDelay={400}>
+                <Typography onClick={() => onNameClick && onNameClick(row.name)}
+                  sx={{ flex: 1, minWidth: 0, fontSize: 10.5, color: '#424242', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', cursor: 'pointer', '&:hover': { color: TEAL, fontWeight: 700, textDecoration: 'underline' } }}>{row.name}</Typography>
+              </Tooltip>
             ))}
           </Box>
         </Box>
@@ -343,10 +345,10 @@ export default function ContactsInsights({ contacts }) {
       <Box sx={{ display: 'flex', gap: 2 }}>
         <ReachTable title="Journalists by Reach" rows={journalists.slice(0, 6)} total={journalists.length}
           onRow={(r) => setDrill({ label: r.name, type: 'Journalist by Reach', kind: 'person', tab: 'mentions' })}
-          onProfile={(r) => setDrill({ label: r.name, type: 'Journalist by Reach', kind: 'person', tab: 'profile' })} />
+          onProfile={(r) => setDrill({ label: r.name, type: 'Journalist by Reach', kind: 'profile' })} />
         <ReachTable title="Newsdesks by Reach" rows={newsdesks.slice(0, 6)} total={newsdesks.length} isOutlet
           onRow={(r) => setDrill({ label: r.name, type: 'Newsdesk by Reach', kind: 'person', tab: 'mentions' })}
-          onProfile={(r) => setDrill({ label: r.name, type: 'Newsdesk by Reach', kind: 'person', tab: 'profile' })} />
+          onProfile={(r) => setDrill({ label: r.name, type: 'Newsdesk by Reach', kind: 'profile' })} />
       </Box>
 
       {/* Clusters */}
@@ -380,9 +382,11 @@ export default function ContactsInsights({ contacts }) {
       {/* Sentiment */}
       <Box sx={{ display: 'flex', gap: 2, pb: 1 }}>
         <SentimentChart title="Sentiment by Journalist" rows={sentJournalists} total={journalists.length}
-          onBarClick={(name) => setDrill({ label: name, type: 'Sentiment by Journalist', kind: 'person', tab: 'mentions' })} />
+          onBarClick={(name) => setDrill({ label: name, type: 'Sentiment by Journalist', kind: 'person', tab: 'mentions' })}
+          onNameClick={(name) => setDrill({ label: name, type: 'Sentiment by Journalist', kind: 'profile' })} />
         <SentimentChart title="Sentiment by Newsdesks" rows={sentOutlets} total={newsdesks.length}
-          onBarClick={(name) => setDrill({ label: name, type: 'Sentiment by Newsdesk', kind: 'person', tab: 'mentions' })} />
+          onBarClick={(name) => setDrill({ label: name, type: 'Sentiment by Newsdesk', kind: 'person', tab: 'mentions' })}
+          onNameClick={(name) => setDrill({ label: name, type: 'Sentiment by Newsdesk', kind: 'profile' })} />
       </Box>
 
       <DrillDownPanel open={!!drill} onClose={() => setDrill(null)} viewing={drill} />

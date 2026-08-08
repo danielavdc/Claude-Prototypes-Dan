@@ -23,7 +23,7 @@ import NavigateNextIcon from '@mui/icons-material/NavigateNext'
 import CloseIcon from '@mui/icons-material/Close'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import MailOutlineIcon from '@mui/icons-material/MailOutline'
-import { MEDIA_CONTACTS, TITLES, BEAT_CATEGORIES, LOCATIONS, OUTLETS, LAST_EMAILED } from '../../constants/mediaContacts'
+import { MEDIA_CONTACTS, NEWSDESK_CONTACTS, TITLES, BEAT_CATEGORIES, LOCATIONS, OUTLETS, LAST_EMAILED } from '../../constants/mediaContacts'
 import FilterDropdown from './FilterDropdown'
 import ListHealthPanel from './ListHealthPanel'
 import AddJournalistSearch from './AddJournalistSearch'
@@ -33,9 +33,9 @@ const TEAL = '#1D9F9F'
 const MAGENTA = '#B627A1'
 
 const SUB_TABS = [
-  { key: 'journalists', label: 'Journalists', icon: ContactMailOutlinedIcon },
-  { key: 'newsdesks', label: 'Newsdesks', icon: ApartmentOutlinedIcon },
-  { key: 'private', label: 'Private Contacts', icon: LockOutlinedIcon },
+  { key: 'journalists', label: 'Journalists', icon: ContactMailOutlinedIcon, noun: ['Journalist', 'Journalists'] },
+  { key: 'newsdesks', label: 'Newsdesks', icon: ApartmentOutlinedIcon, noun: ['Newsdesk', 'Newsdesks'] },
+  { key: 'private', label: 'Private Contacts', icon: LockOutlinedIcon, noun: ['Contact', 'Contacts'] },
 ]
 
 // Filter config: key on the contact object, display label, option pool, folder style
@@ -73,8 +73,9 @@ function HeaderCell({ label, info, sortActive }) {
 export default function MediaListPage() {
   const [tab, setTab] = useState('media-list')
   const [subTab, setSubTab] = useState('journalists')
-  const [contacts, setContacts] = useState(MEDIA_CONTACTS)
-  const [selected, setSelected] = useState([]) // array of contact ids
+  const [contacts, setContacts] = useState(MEDIA_CONTACTS) // journalists + private (split by c.private)
+  const [newsdeskContacts, setNewsdeskContacts] = useState(NEWSDESK_CONTACTS)
+  const [selected, setSelected] = useState([]) // array of contact ids, scoped to the active sub-tab's pool
   const [page, setPage] = useState(0)
   const [removeAnchor, setRemoveAnchor] = useState(null)
   const [confirm, setConfirm] = useState(null) // 'this' | 'all' | null
@@ -89,33 +90,47 @@ export default function MediaListPage() {
       onList: 'Eco Media List', beats: '---', notes: 0, openRate: '—', last: 'Just now',
       title: j.title, beatCategory: j.beatCategory, location: j.country, outlet: j.outlet,
       opened: false, clicked: false, unsubscribed: false, bounced: false,
-      lastResponseDays: 0, lastPublishedDays: 0,
+      lastResponseDays: 0, lastPublishedDays: 0, noReplyAttempts: 0,
     }
     const next = [...contacts, newContact]
     setContacts(next)
     // Jump to the page where the contact lands alphabetically so it's visible
-    const sortedIdx = [...next].sort((a, b) => a.name.localeCompare(b.name)).findIndex(c => c.id === nextId)
+    const sortedIdx = next.filter(c => !c.private).sort((a, b) => a.name.localeCompare(b.name)).findIndex(c => c.id === nextId)
+    setSubTab('journalists')
     setPage(Math.floor(sortedIdx / ROWS_PER_PAGE))
     setSnackOpen(true)
   }
-  // List Health filters — engagement is single-select; inactivity combines with it
+  // List Health filters — engagement is single-select; inactivity combines with it.
+  // This state is global (not per sub-tab), so a click filters Journalists, Newsdesks, and
+  // Private Contacts simultaneously — only the currently visible table updates on screen, but
+  // all three sub-tab counts (in SUB_TABS below) reflect it live.
   const [engagement, setEngagement] = useState(null) // 'opened' | 'not-opened' | 'clicked' | 'not-clicked' | 'unsubscribed' | 'bounced' | null
   const [respInactive, setRespInactive] = useState({ active: false, value: 3 }) // value = no-reply outreach attempts
   const [pubInactive, setPubInactive] = useState({ active: false, value: 3 }) // value = months since last published
 
+  // --- The three sub-tab pools, all sharing the same filter state above ---
+  const pools = {
+    journalists: contacts.filter(c => !c.private),
+    private: contacts.filter(c => c.private),
+    newsdesks: newsdeskContacts,
+  }
+  const activePool = pools[subTab]
+
   // --- Column filters ---
   const matchesExcept = (c, skipKey) => FILTER_DEFS.every(def =>
     def.key === skipKey || filters[def.key].length === 0 || filters[def.key].includes(c[def.field]))
+  // Column-filtered set for the ACTIVE pool only — feeds the List Health metrics and the
+  // column-filter option counts, so both stay contextual to whichever sub-tab is open.
   const columnFiltered = useMemo(
-    () => contacts.filter(c => matchesExcept(c, null)),
-    [contacts, filters], // eslint-disable-line
+    () => activePool.filter(c => matchesExcept(c, null)),
+    [activePool, filters], // eslint-disable-line
   )
   const optionsFor = (def) => def.pool.map(value => ({
     value,
-    count: contacts.filter(c => c[def.field] === value && matchesExcept(c, def.key)).length,
+    count: activePool.filter(c => c[def.field] === value && matchesExcept(c, def.key)).length,
   }))
 
-  // --- Health filter predicates ---
+  // --- Health filter predicates (shared across all three pools) ---
   const engagementPred = {
     'opened': c => c.opened, 'not-opened': c => !c.opened,
     'clicked': c => c.clicked, 'not-clicked': c => !c.clicked,
@@ -128,13 +143,17 @@ export default function MediaListPage() {
     return true
   }
 
-  const filteredContacts = useMemo(
-    () => columnFiltered.filter(c => matchesHealth(c)).sort((a, b) => a.name.localeCompare(b.name)),
-    [columnFiltered, engagement, respInactive, pubInactive], // eslint-disable-line
-  )
+  // Fully filtered (column + health) + sorted list for each pool — powers the "(N)" count
+  // shown on every sub-tab label, so switching tabs isn't required to see a filter's effect.
+  const filteredPools = useMemo(() => {
+    const filterOne = (pool) => pool.filter(c => matchesExcept(c, null)).filter(c => matchesHealth(c)).sort((a, b) => a.name.localeCompare(b.name))
+    return { journalists: filterOne(pools.journalists), private: filterOne(pools.private), newsdesks: filterOne(pools.newsdesks) }
+  }, [contacts, newsdeskContacts, filters, engagement, respInactive, pubInactive]) // eslint-disable-line
 
-  // Health counts — computed over the column-filtered set (stable; each box always shows
-  // its own total regardless of which health filter is active, matching the reference).
+  const filteredContacts = filteredPools[subTab]
+
+  // Health counts — computed over the active pool's column-filtered set (stable; each box
+  // always shows its own total regardless of which health filter is active).
   const healthTotal = columnFiltered.length
   const healthCounts = {
     opened: columnFiltered.filter(c => c.opened).length,
@@ -163,6 +182,7 @@ export default function MediaListPage() {
   const toggleResp = () => { setRespInactive(p => ({ ...p, active: !p.active })); afterFilterChange() }
   const setPubValue = (v) => { setPubInactive(p => ({ ...p, value: v })); afterFilterChange() }
   const togglePub = () => { setPubInactive(p => ({ ...p, active: !p.active })); afterFilterChange() }
+  const changeSubTab = (key) => { setSubTab(key); setPage(0); setSelected([]) }
 
   const pageCount = Math.max(1, Math.ceil(filteredContacts.length / ROWS_PER_PAGE))
   const pageStart = page * ROWS_PER_PAGE
@@ -182,12 +202,14 @@ export default function MediaListPage() {
   const closeRemoveMenu = () => setRemoveAnchor(null)
   const chooseRemove = (scope) => { setRemoveAnchor(null); setConfirm(scope) }
   const confirmRemove = () => {
-    setContacts(prev => prev.filter(c => !selected.includes(c.id)))
+    if (subTab === 'newsdesks') setNewsdeskContacts(prev => prev.filter(c => !selected.includes(c.id)))
+    else setContacts(prev => prev.filter(c => !selected.includes(c.id)))
     setSelected([])
     setConfirm(null)
   }
 
   const selCount = selected.length
+  const [selSingular, selPlural] = SUB_TABS.find(st => st.key === subTab)?.noun || ['Contact', 'Contacts']
 
   return (
     <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', bgcolor: '#f5f5f5' }}>
@@ -214,10 +236,10 @@ export default function MediaListPage() {
         </Box>
       </Box>
 
-      {/* Top white band — full width: tabs + Add a Journalist */}
-      <Box sx={{ flexShrink: 0, bgcolor: 'background.paper', borderBottom: '1px solid #e0e0e0', px: 2, pt: 0.5, pb: 2 }}>
+      {/* Top white band — full width: tabs + Add a Journalist (search only shown on Media List) */}
+      <Box sx={{ flexShrink: 0, bgcolor: 'background.paper', borderBottom: '1px solid #e0e0e0', px: 2, pt: 0.5, pb: tab === 'media-list' ? 2 : 0 }}>
         {/* Page tabs */}
-        <Box sx={{ display: 'flex', gap: 3, borderBottom: '1px solid #e0e0e0', mb: 2.5 }}>
+        <Box sx={{ display: 'flex', gap: 3, borderBottom: '1px solid #e0e0e0', mb: tab === 'media-list' ? 2.5 : 0 }}>
           {[
             { key: 'media-list', label: 'Media List' },
             { key: 'analytics', label: 'Contacts Insights' },
@@ -231,8 +253,8 @@ export default function MediaListPage() {
           })}
         </Box>
 
-        {/* Add a Journalist — interactive search */}
-        <AddJournalistSearch onAdd={addJournalist} />
+        {/* Add a Journalist — interactive search, Media List tab only */}
+        {tab === 'media-list' && <AddJournalistSearch onAdd={addJournalist} />}
       </Box>
 
       {/* Content — fills remaining width & height, edge to edge */}
@@ -242,37 +264,22 @@ export default function MediaListPage() {
         {tab === 'analytics' ? (
           <ContactsInsights contacts={contacts} />
         ) : (
-          /* Split: List Health panel (left) + contacts table (right) */
+          /* Split: contacts table (left) + List Health panel (right) */
           <Box sx={{ flex: 1, minHeight: 0, display: 'flex', gap: 2 }}>
-
-          <ListHealthPanel
-            lastEmailed={LAST_EMAILED}
-            engagement={engagement}
-            onEngagement={toggleEngagement}
-            counts={healthCounts}
-            total={healthTotal}
-            respInactive={respInactive}
-            onRespValue={setRespValue}
-            onRespToggle={toggleResp}
-            respCount={respCount}
-            pubInactive={pubInactive}
-            onPubValue={setPubValue}
-            onPubToggle={togglePub}
-            pubCount={pubCount}
-          />
 
           {/* Contacts panel — grows to fill remaining width & height */}
           <Box sx={{ flex: 1, minWidth: 0, minHeight: 0, border: '1px solid #e0e0e0', borderRadius: 1, bgcolor: 'background.paper', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
 
-            {/* Sub-tabs */}
+            {/* Sub-tabs — each label shows the live filtered count for its own pool, so you can
+                see a filter's effect even on tabs you're not currently viewing */}
             <Box sx={{ display: 'flex', gap: 0.5, px: 1.5, pt: 1.25, borderBottom: '1px solid #e0e0e0', flexShrink: 0 }}>
               {SUB_TABS.map(st => {
                 const active = subTab === st.key
                 const Icon = st.icon
                 return (
-                  <Box key={st.key} onClick={() => setSubTab(st.key)} sx={{ display: 'flex', alignItems: 'center', gap: 0.75, px: 1.5, py: 1, cursor: 'pointer', borderRadius: '6px 6px 0 0', borderBottom: active ? `2px solid ${TEAL}` : '2px solid transparent', bgcolor: active ? alpha(TEAL, 0.08) : 'transparent', mb: '-1px' }}>
+                  <Box key={st.key} onClick={() => changeSubTab(st.key)} sx={{ display: 'flex', alignItems: 'center', gap: 0.75, px: 1.5, py: 1, cursor: 'pointer', borderRadius: '6px 6px 0 0', borderBottom: active ? `2px solid ${TEAL}` : '2px solid transparent', bgcolor: active ? alpha(TEAL, 0.08) : 'transparent', mb: '-1px' }}>
                     <Icon sx={{ fontSize: 18, color: active ? TEAL : '#757575' }} />
-                    <Typography sx={{ fontSize: 14, fontWeight: active ? 700 : 500, color: active ? '#212121' : '#757575' }}>{st.label}</Typography>
+                    <Typography sx={{ fontSize: 14, fontWeight: active ? 700 : 500, color: active ? '#212121' : '#757575' }}>{st.label} ({filteredPools[st.key].length})</Typography>
                   </Box>
                 )
               })}
@@ -283,7 +290,7 @@ export default function MediaListPage() {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2, py: 1.25, flexShrink: 0, bgcolor: alpha(TEAL, 0.12), flexWrap: 'wrap' }}>
                 <IconButton size="small" onClick={clearSelection} sx={{ color: '#00827F' }}><CloseIcon sx={{ fontSize: 20 }} /></IconButton>
                 <Typography sx={{ fontSize: 15, fontWeight: 700, color: '#00827F', mr: 1 }}>
-                  {selCount} {selCount === 1 ? 'Journalist' : 'Journalists'} selected
+                  {selCount} {selCount === 1 ? selSingular : selPlural} selected
                 </Typography>
                 <Button size="small" startIcon={<PersonAddAltOutlinedIcon sx={{ fontSize: 18 }} />}
                   sx={{ textTransform: 'none', bgcolor: 'transparent', color: '#00827F', border: '1px solid', borderColor: alpha('#00827F', 0.4), fontWeight: 700, fontSize: 13, borderRadius: 1, px: 1.5, '&:hover': { bgcolor: alpha('#00827F', 0.06) } }}>
@@ -413,6 +420,22 @@ export default function MediaListPage() {
               </Box>
             </Box>
           </Box>
+
+          <ListHealthPanel
+            lastEmailed={LAST_EMAILED}
+            engagement={engagement}
+            onEngagement={toggleEngagement}
+            counts={healthCounts}
+            total={healthTotal}
+            respInactive={respInactive}
+            onRespValue={setRespValue}
+            onRespToggle={toggleResp}
+            respCount={respCount}
+            pubInactive={pubInactive}
+            onPubValue={setPubValue}
+            onPubToggle={togglePub}
+            pubCount={pubCount}
+          />
           </Box>
         )}
         </Box>
