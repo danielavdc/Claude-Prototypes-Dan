@@ -42,6 +42,7 @@ import AudienceTabContent from './tabs/AudienceTabContent'
 import OverviewTabContent from './tabs/OverviewTabContent'
 import VisualAnalysisTabContent from './tabs/VisualAnalysisTabContent'
 import SocialMediaInsightsTabContent from './tabs/SocialMediaInsightsTabContent'
+import EngagementTabContent from './tabs/EngagementTabContent'
 
 function ResultsView({ query, brandName, loading, resultCount = 107, onDashboardSave, onWidgetInsight, activeTab, activeTabLabel, navigateToTab, targetSubTab, subTabTrigger }) {
   const [exportModalOpen, setExportModalOpen] = useState(false)
@@ -239,9 +240,7 @@ function ResultsView({ query, brandName, loading, resultCount = 107, onDashboard
       {/* Right: AI Insight + chart */}
       <Box sx={{ flex: 1, minWidth: 350, display: 'flex', flexDirection: 'column', gap: 1.5, overflow: 'auto', pt: 0, pb: 2, position: 'relative' }}>
         <Typography sx={{ fontSize: 20, fontWeight: 700, color: '#212121', px: 0.5, pt: 2 }}>
-          {activeTabLabel === 'Visual Analysis' ? "What's the Visual Story?"
-            : activeTabLabel === 'Social Media Insights' ? "What's Trending?"
-            : TABS[activeTab]?.description || TABS[0].description}
+          {activeTabLabel || TABS[activeTab]?.label || TABS[0].label}
         </Typography>
         {/* Filtered mentions overlay panel */}
         <FilteredMentionsPanel filter={filteredMentions} onClose={() => setFilteredMentions(null)} />
@@ -252,15 +251,17 @@ function ResultsView({ query, brandName, loading, resultCount = 107, onDashboard
           <VisualAnalysisTabContent loading={loading} />
         ) : activeTabLabel === 'X Insight' ? (
           <SocialMediaInsightsTabContent loading={loading} />
-        ) : activeTab === 5 ? (
+        ) : activeTab === 6 ? (
           <MediaContactsPanel onDashboardSave={onDashboardSave} />
         ) : activeTab === 1 ? (
           <CoverageTabContent loading={loading} onDashboardSave={onDashboardSave} targetSubTab={targetSubTab} subTabTrigger={subTabTrigger} />
         ) : activeTab === 2 ? (
           <NarrativeTabContent loading={loading} />
         ) : activeTab === 3 ? (
-          <SentimentTabContent loading={loading} />
+          <EngagementTabContent loading={loading} />
         ) : activeTab === 4 ? (
+          <SentimentTabContent loading={loading} />
+        ) : activeTab === 5 ? (
           <AudienceTabContent loading={loading} targetSubTab={targetSubTab} subTabTrigger={subTabTrigger} />
         ) : (<>
         {/* AI Insight card */}

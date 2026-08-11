@@ -10,6 +10,10 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import { useState, useRef, useEffect } from 'react'
+import AnchorNav, { SectionTitle } from './AnchorNav'
+import ShowChartIcon from '@mui/icons-material/ShowChart'
+import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'
+import PublicIcon from '@mui/icons-material/Public'
 
 // ── constants ─────────────────────────────────────────────────────────────────
 
@@ -24,10 +28,10 @@ const DARK   = '#424242'
 const PINK   = '#CF2D8A'
 const PURPLE = '#9C4DD6'
 
-const SOCIAL_TABS = [
-  { id: 'x',       label: 'X' },
-  { id: 'youtube', label: 'Youtube' },
-  { id: 'weibo',   label: 'Weibo' },
+const SMI_NAV = [
+  { id: 'smi-x',       label: 'X',       Icon: ShowChartIcon          },
+  { id: 'smi-youtube', label: 'Youtube', Icon: PlayCircleOutlineIcon  },
+  { id: 'smi-weibo',   label: 'Weibo',   Icon: PublicIcon             },
 ]
 
 const SPARKLINE_DATA = [10,12,14,11,13,15,14,12,13,16,14,13,15,12,14,13,16,14,12,15,13,14,16,12,14,15]
@@ -309,47 +313,9 @@ function AIWidget({ bullets }) {
   )
 }
 
-function StickySegmentNav({ value, onChange }) {
-  const [isSticky, setIsSticky] = useState(false)
-  const ref = useRef(null)
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    let parent = el.parentElement
-    while (parent && parent !== document.body) {
-      const s = window.getComputedStyle(parent)
-      if (s.overflow === 'auto' || s.overflowY === 'auto') break
-      parent = parent.parentElement
-    }
-    if (!parent) return
-    const check = () => setIsSticky(el.getBoundingClientRect().top <= parent.getBoundingClientRect().top + 1)
-    parent.addEventListener('scroll', check, { passive: true })
-    return () => parent.removeEventListener('scroll', check)
-  }, [])
-  return (
-    <Box ref={ref} sx={{ position: 'sticky', top: 0, zIndex: 10, bgcolor: '#F5F5F5', py: 1.25, boxShadow: isSticky ? '0 2px 8px rgba(0,0,0,0.10)' : 'none', transition: 'box-shadow 0.2s' }}>
-      <Box sx={{ display: 'flex' }}>
-        {SOCIAL_TABS.map(tab => (
-          <Box key={tab.id} onClick={() => onChange(tab.id)} sx={{
-            px: 2, py: 0.75, fontSize: 14, cursor: 'pointer', whiteSpace: 'nowrap', userSelect: 'none',
-            border: '1px solid', borderColor: value === tab.id ? '#00827F' : '#9E9E9E',
-            bgcolor: value === tab.id ? 'rgba(29,159,159,0.12)' : 'transparent', color: '#212121',
-            '&:first-of-type': { borderRadius: '4px 0 0 4px' },
-            '&:last-of-type': { borderRadius: '0 4px 4px 0' },
-            '&:not(:first-of-type)': { borderLeft: 'none' },
-            '&:hover': { bgcolor: value === tab.id ? 'rgba(29,159,159,0.18)' : 'rgba(0,0,0,0.04)' },
-          }}>
-            {tab.label}
-          </Box>
-        ))}
-      </Box>
-    </Box>
-  )
-}
-
 // ── X tab ─────────────────────────────────────────────────────────────────────
 
-function XContent() {
+function XContent({ title }) {
   const donutPostType = [
     { pct: 35.8, color: BLUE, label: 'Retweets',      count: '1.9k' },
     { pct: 25.5, color: YELLOW, label: 'Replies',     count: '1.4k' },
@@ -369,6 +335,7 @@ function XContent() {
         'Positive sentiment leads at 35.8% (1.9k) but Negative at 25.5% warrants monitoring — primarily concentrated around "apple store", "sanctions" and "samsung phones" keywords. 3, 4',
         'University of SC, technology and South Carolina are the top entities, suggesting strong regional and brand authority across X conversations during this period. 5…',
       ]} />
+      {title && <SectionTitle>{title}</SectionTitle>}
 
       {/* Row 1: Mentions + Authors */}
       <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
@@ -611,7 +578,7 @@ function XContent() {
 
 // ── Youtube tab ───────────────────────────────────────────────────────────────
 
-function YoutubeContent() {
+function YoutubeContent({ title }) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <AIWidget bullets={[
@@ -619,6 +586,7 @@ function YoutubeContent() {
         'Lisboa leads Mentions Trend by Searches at 55k peak (Aug 10-13), significantly outpacing Arctic Monkeys and IGIT — suggesting event-driven discovery moments worth targeting. 3, 4',
         'Share of Potential Audience shows Views correlating strongly with Mention spikes, particularly Apr 4-6 and Apr 6-7, indicating content virality and secondary amplification. 5…',
       ]} />
+      {title && <SectionTitle>{title}</SectionTitle>}
 
       <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
         {/* Total Mentions */}
@@ -755,7 +723,7 @@ function YoutubeContent() {
 
 // ── Weibo tab ─────────────────────────────────────────────────────────────────
 
-function WeiboContent() {
+function WeiboContent({ title }) {
   const wbSentimentDonut = [
     { pct: 25.8, color: GREEN, label: 'Positive', count: '1.5k' },
     { pct: 25.5, color: RED,   label: 'Negative', count: '1.4k' },
@@ -769,6 +737,7 @@ function WeiboContent() {
         'Verification Type shows Blue accounts (52.1%, 9.7k) dominating coverage — indicating mainstream media and verified public figures are the primary Weibo amplifiers for this topic. 3, 4',
         'Audience is most active Thursday 8–9 AM and Monday 7–8 AM — optimal windows for publishing content targeting maximum organic reach on Weibo. 5…',
       ]} />
+      {title && <SectionTitle>{title}</SectionTitle>}
 
       {/* Mentions Trend by Post Type */}
       <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2 }}>
@@ -1020,14 +989,15 @@ function WeiboContent() {
 // ── main export ───────────────────────────────────────────────────────────────
 
 export default function SocialMediaInsightsTabContent({ loading }) {
-  const [activeTab, setActiveTab] = useState('x')
   if (loading) return null
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-      <StickySegmentNav value={activeTab} onChange={setActiveTab} />
-      {activeTab === 'x'       && <XContent />}
-      {activeTab === 'youtube' && <YoutubeContent />}
-      {activeTab === 'weibo'   && <WeiboContent />}
+    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+      <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 3 }}>
+        <Box id="smi-x">      <XContent       title="X"       /></Box>
+        <Box id="smi-youtube"><YoutubeContent title="Youtube" /></Box>
+        <Box id="smi-weibo">  <WeiboContent   title="Weibo"   /></Box>
+      </Box>
+      <AnchorNav items={SMI_NAV} />
     </Box>
   )
 }
