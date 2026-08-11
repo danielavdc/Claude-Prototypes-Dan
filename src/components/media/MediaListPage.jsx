@@ -46,6 +46,10 @@ const FILTER_DEFS = [
   { key: 'outlet', field: 'outlet', label: 'Media Outlet', pool: OUTLETS, useFolder: false },
 ]
 
+// Column filters hidden on specific sub-tabs — both from the toolbar and from the matching
+// logic for that sub-tab's pool, so a hidden filter never silently keeps affecting results.
+const HIDDEN_FILTERS_BY_TAB = { journalists: [], newsdesks: ['outlet'], private: ['beat'] }
+
 const ROWS_PER_PAGE = 25
 
 const GRID = '40px minmax(180px,1.5fr) minmax(150px,1.3fr) minmax(130px,1.1fr) 110px 96px 120px 44px'
@@ -117,13 +121,17 @@ export default function MediaListPage() {
   const activePool = pools[subTab]
 
   // --- Column filters ---
-  const matchesExcept = (c, skipKey) => FILTER_DEFS.every(def =>
+  // Which FILTER_DEFS apply for a given sub-tab (excludes that tab's hidden filters entirely,
+  // so a hidden filter's leftover selection from another tab never silently narrows results).
+  const visibleDefsFor = (key) => FILTER_DEFS.filter(def => !(HIDDEN_FILTERS_BY_TAB[key] || []).includes(def.key))
+  const activeDefs = visibleDefsFor(subTab)
+  const matchesExcept = (c, skipKey, defs = activeDefs) => defs.every(def =>
     def.key === skipKey || filters[def.key].length === 0 || filters[def.key].includes(c[def.field]))
   // Column-filtered set for the ACTIVE pool only — feeds the List Health metrics and the
   // column-filter option counts, so both stay contextual to whichever sub-tab is open.
   const columnFiltered = useMemo(
     () => activePool.filter(c => matchesExcept(c, null)),
-    [activePool, filters], // eslint-disable-line
+    [activePool, filters, subTab], // eslint-disable-line
   )
   const optionsFor = (def) => def.pool.map(value => ({
     value,
@@ -146,8 +154,8 @@ export default function MediaListPage() {
   // Fully filtered (column + health) + sorted list for each pool — powers the "(N)" count
   // shown on every sub-tab label, so switching tabs isn't required to see a filter's effect.
   const filteredPools = useMemo(() => {
-    const filterOne = (pool) => pool.filter(c => matchesExcept(c, null)).filter(c => matchesHealth(c)).sort((a, b) => a.name.localeCompare(b.name))
-    return { journalists: filterOne(pools.journalists), private: filterOne(pools.private), newsdesks: filterOne(pools.newsdesks) }
+    const filterOne = (pool, key) => pool.filter(c => matchesExcept(c, null, visibleDefsFor(key))).filter(c => matchesHealth(c)).sort((a, b) => a.name.localeCompare(b.name))
+    return { journalists: filterOne(pools.journalists, 'journalists'), private: filterOne(pools.private, 'private'), newsdesks: filterOne(pools.newsdesks, 'newsdesks') }
   }, [contacts, newsdeskContacts, filters, engagement, respInactive, pubInactive]) // eslint-disable-line
 
   const filteredContacts = filteredPools[subTab]
@@ -314,7 +322,7 @@ export default function MediaListPage() {
                 </Box>
                 {/* Filters — horizontal scroll when they grow, never wrap/collapse */}
                 <Box sx={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 1, overflowX: 'auto', py: 0.5, '&::-webkit-scrollbar': { height: 6 }, '&::-webkit-scrollbar-thumb': { bgcolor: '#e0e0e0', borderRadius: 3 } }}>
-                  {FILTER_DEFS.map(def => (
+                  {activeDefs.map(def => (
                     <FilterDropdown key={def.key} label={def.label} options={optionsFor(def)} selected={filters[def.key]} onApply={(v) => applyFilter(def.key, v)} useFolder={def.useFolder} />
                   ))}
                 </Box>

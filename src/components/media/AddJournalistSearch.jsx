@@ -106,7 +106,7 @@ export default function AddJournalistSearch({ onAdd }) {
 
             {/* Footer — full search. Omitted when there are no matches; "Open Deeper Search" above already covers that case. */}
             {matches.length > 0 && (
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, px: 2, py: 1.75, cursor: 'pointer', '&:hover': { bgcolor: '#fafafa' } }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, px: 2, py: 1.75, cursor: 'pointer', bgcolor: alpha('#1D9F9F', 0.06), '&:hover': { bgcolor: alpha('#1D9F9F', 0.1) } }}>
                 <Typography sx={{ fontSize: 15, color: '#212121' }}>
                   Want a deeper search? Search “<Box component="span" sx={{ fontWeight: 700 }}>{query.trim()}</Box>” across topics, sources and podcasts
                 </Typography>

@@ -128,12 +128,13 @@ export default function ListHealthPanel({
           <Typography sx={{ fontSize: 15.5, fontWeight: 700, color: '#212121' }}>List Health</Typography>
           <Badge badgeContent={savedRuleCount} invisible={savedRuleCount === 0}
             sx={{ '& .MuiBadge-badge': { bgcolor: TEAL_DARK, color: '#fff', fontSize: 11, fontWeight: 700, minWidth: 17, height: 17 } }}>
-            <Button variant="text" startIcon={<CleaningServicesIcon />} onClick={() => setCleanupOpen(true)}
+            <Button variant="outlined" startIcon={<CleaningServicesIcon />} onClick={() => setCleanupOpen(true)}
               sx={{
-                textTransform: 'none', color: TEAL_DARK, fontWeight: 700, fontSize: 13, minWidth: 0, px: 0.5, '&:hover': { bgcolor: alpha(TEAL, 0.06) },
+                textTransform: 'none', color: TEAL_DARK, borderColor: TEAL, fontWeight: 700, fontSize: 13, minWidth: 0, px: 1.5, borderRadius: 1,
+                '&:hover': { bgcolor: alpha(TEAL, 0.06), borderColor: TEAL },
                 '& .MuiButton-startIcon': { mr: 0.5 }, '& .MuiButton-startIcon > svg': { fontSize: 13 },
               }}>
-              Auto Clean-Up
+              Automate
             </Button>
           </Badge>
         </Box>
