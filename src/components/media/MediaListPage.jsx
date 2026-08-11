@@ -23,13 +23,16 @@ import NavigateNextIcon from '@mui/icons-material/NavigateNext'
 import CloseIcon from '@mui/icons-material/Close'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import MailOutlineIcon from '@mui/icons-material/MailOutline'
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
 import { MEDIA_CONTACTS, NEWSDESK_CONTACTS, TITLES, BEAT_CATEGORIES, LOCATIONS, OUTLETS, LAST_EMAILED } from '../../constants/mediaContacts'
 import FilterDropdown from './FilterDropdown'
 import ListHealthPanel from './ListHealthPanel'
 import AddJournalistSearch from './AddJournalistSearch'
 import ContactsInsights from './ContactsInsights'
+import MiraCompanionPanel from './MiraCompanionPanel'
 
 const TEAL = '#1D9F9F'
+const MIRA_PURPLE = '#8B49A0'
 const MAGENTA = '#B627A1'
 
 const SUB_TABS = [
@@ -104,6 +107,26 @@ export default function MediaListPage() {
     setPage(Math.floor(sortedIdx / ROWS_PER_PAGE))
     setSnackOpen(true)
   }
+
+  // Mira Companion side panel — "Suggest Contacts"
+  const [miraOpen, setMiraOpen] = useState(false)
+  // Bulk-add contacts Mira suggested (from the searchable directory) and confirm via snackbar
+  const addSuggestedContacts = (people) => {
+    if (people.length === 0) return
+    setContacts(prev => {
+      let nextId = prev.reduce((m, c) => Math.max(m, c.id), 0) + 1
+      const newOnes = people.map(j => ({
+        id: nextId++, name: j.name, color: j.color, private: false,
+        onList: 'Eco Media List', beats: '---', notes: 0, openRate: '—', last: 'Just now',
+        title: j.title, beatCategory: j.beatCategory, location: j.country, outlet: j.outlet,
+        opened: false, clicked: false, unsubscribed: false, bounced: false,
+        lastResponseDays: 0, lastPublishedDays: 0, noReplyAttempts: 0,
+      }))
+      return [...prev, ...newOnes]
+    })
+    setSnackOpen(true)
+  }
+
   // List Health filters — engagement is single-select; inactivity combines with it.
   // This state is global (not per sub-tab), so a click filters Journalists, Newsdesks, and
   // Private Contacts simultaneously — only the currently visible table updates on screen, but
@@ -232,6 +255,10 @@ export default function MediaListPage() {
             <Typography sx={{ fontSize: 14, fontWeight: 700, color: '#212121', whiteSpace: 'nowrap' }}>Eco Media List</Typography>
             <ArrowDropDownIcon sx={{ fontSize: 20, color: '#616161' }} />
           </Box>
+          <Button variant="outlined" size="small" startIcon={<AutoAwesomeIcon sx={{ fontSize: 15, color: MIRA_PURPLE }} />} onClick={() => setMiraOpen(true)}
+            sx={{ ml: 1, textTransform: 'none', borderColor: alpha(MIRA_PURPLE, 0.4), color: MIRA_PURPLE, fontSize: 13, fontWeight: 700, height: 34, borderRadius: 1, whiteSpace: 'nowrap', '&:hover': { borderColor: MIRA_PURPLE, bgcolor: alpha(MIRA_PURPLE, 0.06) } }}>
+            Suggest Contacts
+          </Button>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
           <Tooltip title="Export"><IconButton size="small"><FileDownloadOutlinedIcon sx={{ fontSize: 20, color: '#616161' }} /></IconButton></Tooltip>
@@ -479,6 +506,9 @@ export default function MediaListPage() {
           <IconButton size="small" onClick={() => setSnackOpen(false)}><CloseIcon sx={{ fontSize: 20, color: '#fff' }} /></IconButton>
         </Box>
       </Snackbar>
+
+      {/* Mira Companion — "Suggest Contacts" */}
+      <MiraCompanionPanel open={miraOpen} onClose={() => setMiraOpen(false)} listName="Eco Media List" contacts={contacts} onAddContacts={addSuggestedContacts} />
     </Box>
   )
 }
