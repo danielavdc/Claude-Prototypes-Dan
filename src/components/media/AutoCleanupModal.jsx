@@ -29,7 +29,7 @@ function ComboDropdown({ value, unit, options, onChange }) {
   )
 }
 
-export default function AutoCleanupModal({ open, onClose }) {
+export default function AutoCleanupModal({ open, onClose, onSave }) {
   const [rules, setRules] = useState({})
   const [noReplyEmails, setNoReplyEmails] = useState(3)
   const [lowActivityMonths, setLowActivityMonths] = useState(2)
@@ -37,6 +37,8 @@ export default function AutoCleanupModal({ open, onClose }) {
   const [requireApproval, setRequireApproval] = useState(false)
 
   const toggleRule = (key) => setRules(prev => ({ ...prev, [key]: !prev[key] }))
+  const activeRuleCount = Object.values(rules).filter(Boolean).length
+  const handleSave = () => { onSave && onSave(activeRuleCount, frequency); onClose() }
 
   const rowSx = { display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1, py: 1.25, cursor: 'pointer' }
   const textSx = { fontSize: 16, color: '#212121' }
@@ -100,7 +102,7 @@ export default function AutoCleanupModal({ open, onClose }) {
       {/* Footer */}
       <Box sx={{ px: 3, py: 2, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1.5 }}>
         <Button onClick={onClose} sx={{ textTransform: 'none', color: TEAL_DARK, fontWeight: 700, fontSize: 15 }}>Cancel</Button>
-        <Button onClick={onClose} variant="contained" disableElevation
+        <Button onClick={handleSave} variant="contained" disableElevation
           sx={{ textTransform: 'none', bgcolor: TEAL_DARK, '&:hover': { bgcolor: '#006B68' }, fontWeight: 700, fontSize: 15, px: 2.5, py: 1, borderRadius: 1.5 }}>
           Save Rules
         </Button>

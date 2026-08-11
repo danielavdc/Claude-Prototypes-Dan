@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { Box, Typography, Tooltip, Button, Divider, Menu, MenuItem } from '@mui/material'
+import { Box, Typography, Tooltip, Button, Divider, Menu, MenuItem, Badge, Snackbar, IconButton } from '@mui/material'
 import { alpha } from '@mui/material/styles'
 import CleaningServicesIcon from '@mui/icons-material/CleaningServices'
 import ReplyIcon from '@mui/icons-material/Reply'
 import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
+import CloseIcon from '@mui/icons-material/Close'
 import AutoCleanupModal from './AutoCleanupModal'
 
 const TEAL = '#1D9F9F'
@@ -12,6 +13,9 @@ const TEAL_DARK = '#00827F'
 // Active filter styling — same teal used by the table column filters
 const ACTIVE_BORDER = TEAL
 const ACTIVE_BG = alpha(TEAL, 0.06)
+
+// Review Frequency dropdown value → the noun used in the confirmation sentence ("every {unit}")
+const FREQ_UNIT = { Daily: 'day', Weekly: 'week', Biweekly: 'two weeks', Monthly: 'month' }
 
 const ENGAGEMENT = [
   { key: 'opened', label: 'Opened', dot: '#2E7D32', countKey: 'opened' },
@@ -104,6 +108,17 @@ export default function ListHealthPanel({
   pubInactive, onPubValue, onPubToggle, pubCount,
 }) {
   const [cleanupOpen, setCleanupOpen] = useState(false)
+  const [savedRuleCount, setSavedRuleCount] = useState(0)
+  const [snack, setSnack] = useState({ open: false, message: '' })
+
+  const handleCleanupSave = (activeRuleCount, frequency) => {
+    setSavedRuleCount(activeRuleCount)
+    const message = activeRuleCount > 0
+      ? `Auto Clean-Up rules saved. You'll receive an email every ${FREQ_UNIT[frequency] || frequency.toLowerCase()}.`
+      : `Changes saved. You've turned off Auto Clean-Up rules.`
+    setSnack({ open: true, message })
+  }
+
   return (
     <Box sx={{ width: 300, flexShrink: 0, display: 'flex' }}>
       <Box sx={{ flex: 1, minHeight: 0, border: '1px solid #e0e0e0', borderRadius: 1, bgcolor: 'background.paper', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -111,13 +126,16 @@ export default function ListHealthPanel({
         {/* Fixed header: title + Auto Clean-Up */}
         <Box sx={{ flexShrink: 0, px: 2, pt: 1.25, pb: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
           <Typography sx={{ fontSize: 15.5, fontWeight: 700, color: '#212121' }}>List Health</Typography>
-          <Button variant="text" startIcon={<CleaningServicesIcon />} onClick={() => setCleanupOpen(true)}
-            sx={{
-              textTransform: 'none', color: TEAL_DARK, fontWeight: 700, fontSize: 13, minWidth: 0, px: 0.5, '&:hover': { bgcolor: alpha(TEAL, 0.06) },
-              '& .MuiButton-startIcon': { mr: 0.5 }, '& .MuiButton-startIcon > svg': { fontSize: 13 },
-            }}>
-            Auto Clean-Up
-          </Button>
+          <Badge badgeContent={savedRuleCount} invisible={savedRuleCount === 0}
+            sx={{ '& .MuiBadge-badge': { bgcolor: TEAL_DARK, color: '#fff', fontSize: 11, fontWeight: 700, minWidth: 17, height: 17 } }}>
+            <Button variant="text" startIcon={<CleaningServicesIcon />} onClick={() => setCleanupOpen(true)}
+              sx={{
+                textTransform: 'none', color: TEAL_DARK, fontWeight: 700, fontSize: 13, minWidth: 0, px: 0.5, '&:hover': { bgcolor: alpha(TEAL, 0.06) },
+                '& .MuiButton-startIcon': { mr: 0.5 }, '& .MuiButton-startIcon > svg': { fontSize: 13 },
+              }}>
+              Auto Clean-Up
+            </Button>
+          </Badge>
         </Box>
         <Divider />
 
@@ -155,7 +173,16 @@ export default function ListHealthPanel({
         </Box>
       </Box>
 
-      <AutoCleanupModal open={cleanupOpen} onClose={() => setCleanupOpen(false)} />
+      <AutoCleanupModal open={cleanupOpen} onClose={() => setCleanupOpen(false)} onSave={handleCleanupSave} />
+
+      {/* Confirmation snackbar (bottom-left) */}
+      <Snackbar open={snack.open} onClose={(e, reason) => { if (reason !== 'clickaway') setSnack(s => ({ ...s, open: false })) }} autoHideDuration={4000}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, bgcolor: '#212121', color: '#fff', borderRadius: 1, pl: 2, pr: 1, py: 1, boxShadow: '0 4px 12px rgba(0,0,0,0.3)', minWidth: 320, maxWidth: 380 }}>
+          <Typography sx={{ fontSize: 14.5, flex: 1 }}>{snack.message}</Typography>
+          <IconButton size="small" onClick={() => setSnack(s => ({ ...s, open: false }))}><CloseIcon sx={{ fontSize: 20, color: '#fff' }} /></IconButton>
+        </Box>
+      </Snackbar>
     </Box>
   )
 }
