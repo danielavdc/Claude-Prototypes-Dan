@@ -1,0 +1,33 @@
+{
+  "name": "outreach-template-editor",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@emoji-mart/data": "^1.2.1",
+    "@emoji-mart/react": "^1.1.1",
+    "@lexical/html": "^0.51.0",
+    "@lexical/link": "^0.51.0",
+    "@lexical/list": "^0.51.0",
+    "@lexical/markdown": "^0.51.0",
+    "@lexical/react": "^0.51.0",
+    "@lexical/rich-text": "^0.51.0",
+    "@lexical/selection": "^0.51.0",
+    "@lexical/table": "^0.51.0",
+    "@lexical/utils": "^0.51.0",
+    "emoji-mart": "^5.6.0",
+    "lexical": "^0.51.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.4.2"
+  },
+  "description": "Create Outreach Template \u2014 Lexical-based, Notion-style template editor prototype"
+}
