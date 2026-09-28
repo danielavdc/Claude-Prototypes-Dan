@@ -111,7 +111,20 @@ button { font-family: inherit; }
   position: relative;
 }
 
-.te-toggle { display: inline-flex; margin-bottom: 15px; }
+.te-canvas-bar {
+  width: 100%;
+  max-width: 640px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 15px;
+  flex-shrink: 0;
+}
+.te-canvas-title { margin: 0; font-size: 18px; font-weight: 700; color: var(--te-text); white-space: nowrap; }
+.te-canvas-actions { display: flex; align-items: center; gap: 12px; }
+
+.te-toggle { display: inline-flex; }
 .te-toggle button {
   height: 36px;
   display: inline-flex;
@@ -132,10 +145,13 @@ button { font-family: inherit; }
   color: var(--te-text);
 }
 .te-toggle button:last-child.is-active { border-left: 1px solid var(--te-teal); margin-left: -1px; }
+.te-toggle-icon button, .te-toggle-icon button:first-child { padding: 0 12px; color: #555; }
+.te-toggle-icon button.is-active { color: var(--te-text); }
 
 .te-card {
   width: 100%;
   max-width: 640px;
+  transition: max-width 0.25s ease;
   min-height: 615px;
   background: var(--te-surface);
   border-radius: 3px;
@@ -143,6 +159,17 @@ button { font-family: inherit; }
   flex-shrink: 0;
 }
 .te-card-inner { position: relative; padding: 18px 0 24px; }
+
+/* Mobile preview: a 375px email viewport, laid out the way responsive emails stack. */
+.te-card.is-mobile { max-width: 375px; }
+.te-card.is-mobile .te-preview { padding: 16px 16px 20px; }
+.te-card.is-mobile .te-preview [style*="grid"] { display: block !important; }
+.te-card.is-mobile .te-preview [style*="grid"] > * + * { margin-top: 14px; }
+.te-card.is-mobile .te-preview img { max-width: 100% !important; }
+/* Block images shrink to fit (never grow) and keep their ratio */
+.te-card.is-mobile .te-preview div[style*="overflow-x"] img { height: auto !important; }
+.te-card.is-mobile .te-preview table { font-size: 13px; }
+.te-card.is-mobile .te-preview td, .te-card.is-mobile .te-preview th { padding: 8px 10px; }
 
 /* ---------- Editable content ---------- */
 .te-content {
@@ -666,6 +693,9 @@ button { font-family: inherit; }
   transition: opacity 0.12s;
 }
 .te-drag-handle:hover { background: #efefef; color: #555; }
+/* Always-visible copies; the live handle (z-index 2) lands on top of them on hover. */
+.te-drag-handle { z-index: 2; }
+.te-drag-handle.te-drag-handle-static { z-index: 1; opacity: 1; pointer-events: none; transition: none; }
 .te-drag-handle:active { cursor: grabbing; }
 
 .te-drop-line {

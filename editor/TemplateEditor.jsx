@@ -243,6 +243,43 @@ function ModeToggle({ mode, onChange }) {
   );
 }
 
+// Preview widths: desktop = the template card, mobile = the common 375px email viewport.
+function DeviceToggle({ device, onChange }) {
+  return (
+    <div className="te-toggle te-toggle-icon" role="tablist" aria-label="Preview device">
+      {[
+        { key: 'desktop', label: 'Desktop preview' },
+        { key: 'mobile', label: 'Mobile preview' },
+      ].map((d) => (
+        <button
+          key={d.key}
+          type="button"
+          role="tab"
+          aria-label={d.label}
+          title={d.label}
+          aria-selected={device === d.key}
+          className={device === d.key ? 'is-active' : ''}
+          onClick={() => onChange(d.key)}
+        >
+          <Icon name={d.key} size={18} />
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function CanvasBar({ mode, onModeChange, device, onDeviceChange }) {
+  return (
+    <div className="te-canvas-bar">
+      <h2 className="te-canvas-title">Build Your Template</h2>
+      <div className="te-canvas-actions">
+        {mode === 'preview' && <DeviceToggle device={device} onChange={onDeviceChange} />}
+        <ModeToggle mode={mode} onChange={onModeChange} />
+      </div>
+    </div>
+  );
+}
+
 function PreviewPane() {
   const [editor] = useLexicalComposerContext();
   const [html, setHtml] = useState('');
@@ -261,11 +298,12 @@ function PreviewPane() {
 
 /* ---------- Editor card ---------- */
 
-function EditorCard({ mode, canvasElem }) {
+function EditorCard({ mode, device, canvasElem }) {
   const [anchorElem, setAnchorElem] = useState(null);
+  const mobile = mode === 'preview' && device === 'mobile';
 
   return (
-    <div className="te-card">
+    <div className={`te-card${mobile ? ' is-mobile' : ''}`}>
       <div className="te-card-inner" ref={setAnchorElem} hidden={mode !== 'edit'}>
         <RichTextPlugin
           contentEditable={<ContentEditable className="te-content" aria-label="Template body" />}
@@ -303,6 +341,7 @@ function EditorCard({ mode, canvasElem }) {
 
 export default function TemplateEditor() {
   const [mode, setMode] = useState('edit');
+  const [device, setDevice] = useState('desktop');
   const [toast, setToast] = useState(null);
   const [canvasElem, setCanvasElem] = useState(null);
 
@@ -360,8 +399,8 @@ export default function TemplateEditor() {
         </div>
 
         <main className="te-canvas" ref={setCanvasElem}>
-          <ModeToggle mode={mode} onChange={setMode} />
-          <EditorCard mode={mode} canvasElem={canvasElem} />
+          <CanvasBar mode={mode} onModeChange={setMode} device={device} onDeviceChange={setDevice} />
+          <EditorCard mode={mode} device={device} canvasElem={canvasElem} />
         </main>
 
         {toast && <div className="te-toast">{toast}</div>}
