@@ -124,7 +124,7 @@ function toCanvasRect(rect, canvas) {
 
 const keepFocus = (e) => e.preventDefault();
 
-function TbButton({ tip, active, onClick, children, className = '', ...rest }) {
+function TbButton({ tip, active, onClick, children, className = '', disabled = false, ...rest }) {
   return (
     <button
       type="button"
@@ -132,6 +132,7 @@ function TbButton({ tip, active, onClick, children, className = '', ...rest }) {
       aria-label={tip}
       aria-pressed={active}
       className={`te-tb-btn${active ? ' is-active' : ''} ${className}`}
+      disabled={disabled}
       onMouseDown={keepFocus}
       onClick={onClick}
       {...rest}
@@ -152,12 +153,35 @@ function Swatch({ icon, color }) {
 
 /* ---------- plugin ---------- */
 
-export default function TextToolbarPlugin({ anchorElem }) {
+// Shown by the fixed toolbar before the caret has been anywhere.
+const DEFAULT_INFO = {
+  bold: false,
+  italic: false,
+  underline: false,
+  strikethrough: false,
+  fontFamily: '',
+  fontSize: 14,
+  color: '',
+  background: '',
+  align: 'left',
+  listType: null,
+  linkUrl: '',
+  blockKey: null,
+  cellKey: null,
+  cellBackground: '',
+};
+
+/**
+ * variant="floating": appears over the selection (or on double-click).
+ * variant="fixed": always visible in `slotElem` (Jira-style); cell-only tools are disabled outside tables.
+ */
+export default function TextToolbarPlugin({ anchorElem, variant = 'floating', slotElem = null, trailing = null }) {
   const [editor] = useLexicalComposerContext();
+  const fixed = variant === 'fixed';
   const toolbarRef = useRef(null);
   const linkRef = useRef(null);
   const [target, setTarget] = useState(null); // selection rect in canvas coords
-  const [info, setInfo] = useState(null);
+  const [info, setInfo] = useState(fixed ? DEFAULT_INFO : null);
   const [menu, setMenu] = useState(null);
   const [overlay, setOverlay] = useState([]);
   const [editorFocused, setEditorFocused] = useState(true);
@@ -174,6 +198,13 @@ export default function TextToolbarPlugin({ anchorElem }) {
   /* --- compute visibility + position --- */
   const refresh = useCallback(() => {
     if (menuRef.current) return;
+    if (fixed) {
+      editor.getEditorState().read(() => {
+        const selection = $getSelection();
+        if ($isRangeSelection(selection)) setInfo($readInfo(selection));
+      });
+      return;
+    }
     editor.getEditorState().read(() => {
       const selection = $getSelection();
       const root = editor.getRootElement();
@@ -206,12 +237,12 @@ export default function TextToolbarPlugin({ anchorElem }) {
       setInfo(next);
       setTarget(toCanvasRect(rect, anchorElem));
     });
-  }, [editor, anchorElem]);
+  }, [editor, anchorElem, fixed]);
 
   /* --- place the toolbar once its width is known --- */
   useLayoutEffect(() => {
     const el = toolbarRef.current;
-    if (!el || !target) return;
+    if (fixed || !el || !target) return;
     const width = el.offsetWidth;
     const height = el.offsetHeight;
     const maxLeft = anchorElem.scrollLeft + anchorElem.clientWidth - width - 8;
@@ -220,7 +251,7 @@ export default function TextToolbarPlugin({ anchorElem }) {
     if (top < anchorElem.scrollTop + 4) top = target.bottom + TOOLBAR_GAP;
     el.style.left = `${left}px`;
     el.style.top = `${top}px`;
-  }, [target, anchorElem, menu]);
+  }, [target, anchorElem, menu, fixed]);
 
   /* --- editor + DOM listeners --- */
   useEffect(() => {
@@ -421,29 +452,18 @@ export default function TextToolbarPlugin({ anchorElem }) {
     navigator.clipboard?.writeText(linkDraft).catch(() => {});
   };
 
-  if (!target || !info) return null;
+  if (fixed ? !slotElem : !target || !info) return null;
 
   const fontLabel =
     FONT_FAMILIES.find((f) => f.value && info.fontFamily && f.value === info.fontFamily)?.label || 'System Font';
   const currentAlign = ALIGNMENTS.find((a) => a.key === info.align) || ALIGNMENTS[0];
   const showOverlay = menu && !editorFocused && overlay.length > 0;
 
-  return createPortal(
-    <>
-      {showOverlay &&
-        overlay.map((r, i) => (
-          <span
-            key={i}
-            className="te-sel-overlay"
-            style={{ top: r.top, left: r.left, width: r.width, height: r.height }}
-          />
-        ))}
-
-      {menu === 'link' ? (
+  const linkEditor = (
         <div
           ref={linkRef}
-          className="te-link"
-          style={{ top: target.bottom + 8, left: Math.max(8, target.left - 12) }}
+          className={fixed ? 'te-link te-link-menu' : 'te-link'}
+          style={fixed ? undefined : { top: target.bottom + 8, left: Math.max(8, target.left - 12) }}
         >
           <button type="button" className="te-link-icon" data-tip="Copy link" onClick={copyLink}>
             <TbIcon name="copy" size={16} />
@@ -470,10 +490,12 @@ export default function TextToolbarPlugin({ anchorElem }) {
             <TbIcon name="cancel" size={17} />
           </button>
         </div>
-      ) : (
+  );
+
+  const toolbar = (
         <div
           ref={toolbarRef}
-          className={`te-tb${menu ? ' has-menu' : ''}`}
+          className={`te-tb${fixed ? ' te-tb-fixed' : ''}${menu ? ' has-menu' : ''}`}
           role="toolbar"
           aria-label="Text formatting"
         >
@@ -621,10 +643,16 @@ export default function TextToolbarPlugin({ anchorElem }) {
             )}
           </div>
 
-          {/* Cell color — only inside a table */}
-          {info.cellKey && (
+          {/* Cell color — floating: only inside a table; fixed: always shown, disabled outside cells */}
+          {(fixed || info.cellKey) && (
             <div className="te-tb-group">
-              <TbButton tip="Cell color" active={menu === 'cell'} className="te-tb-drop" onClick={() => openMenu('cell')}>
+              <TbButton
+                tip={info.cellKey ? 'Cell color' : 'Cell color (place the cursor in a table cell)'}
+                active={menu === 'cell'}
+                disabled={!info.cellKey}
+                className="te-tb-drop"
+                onClick={() => openMenu('cell')}
+              >
                 <TbIcon name="palette" />
                 <TbIcon name="chevron" size={16} />
               </TbButton>
@@ -644,9 +672,12 @@ export default function TextToolbarPlugin({ anchorElem }) {
           )}
 
           {/* Link */}
-          <TbButton tip="Add hyperlink" active={!!info.linkUrl} onClick={() => openMenu('link')}>
-            <TbIcon name="link" />
-          </TbButton>
+          <div className="te-tb-group">
+            <TbButton tip="Add hyperlink" active={!!info.linkUrl || (fixed && menu === 'link')} onClick={() => openMenu('link')}>
+              <TbIcon name="link" />
+            </TbButton>
+            {fixed && menu === 'link' && linkEditor}
+          </div>
 
           <span className="te-tb-divider" />
 
@@ -707,9 +738,13 @@ export default function TextToolbarPlugin({ anchorElem }) {
 
           <span className="te-tb-divider" />
 
-          {/* Image in cell — flow comes later, icon only for now */}
-          {info.cellKey && (
-            <TbButton tip="Add image" onClick={addCellImage}>
+          {/* Image in cell — floating: only inside a table; fixed: always shown, disabled outside cells */}
+          {(fixed || info.cellKey) && (
+            <TbButton
+              tip={info.cellKey ? 'Add image' : 'Add image (place the cursor in a table cell)'}
+              disabled={!info.cellKey}
+              onClick={addCellImage}
+            >
               <TbIcon name="addImage" />
             </TbButton>
           )}
@@ -750,8 +785,34 @@ export default function TextToolbarPlugin({ anchorElem }) {
               </div>
             )}
           </div>
+          {fixed && trailing && (
+            <>
+              <span className="te-tb-divider" />
+              {trailing}
+            </>
+          )}
         </div>
-      )}
+  );
+
+  const overlayRects = showOverlay
+    ? overlay.map((r, i) => (
+        <span key={i} className="te-sel-overlay" style={{ top: r.top, left: r.left, width: r.width, height: r.height }} />
+      ))
+    : null;
+
+  if (fixed) {
+    return (
+      <>
+        {createPortal(toolbar, slotElem)}
+        {overlayRects && createPortal(overlayRects, anchorElem)}
+      </>
+    );
+  }
+
+  return createPortal(
+    <>
+      {overlayRects}
+      {menu === 'link' ? linkEditor : toolbar}
     </>,
     anchorElem,
   );

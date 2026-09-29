@@ -116,8 +116,10 @@ export class LayoutItemNode extends ElementNode {
     return true;
   }
 
+  // Allowed to be momentarily empty (e.g. its only divider was deleted) so Lexical doesn't
+  // remove the column — ColumnLayoutPlugin refills it with a blank line right away.
   canBeEmpty() {
-    return false;
+    return true;
   }
 }
 

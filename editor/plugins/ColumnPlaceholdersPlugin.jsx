@@ -74,12 +74,16 @@ export default function ColumnPlaceholdersPlugin({ anchorElem }) {
           if (!$isLayoutItemNode(node) || !$isLayoutItemEmpty(node)) return;
           const key = node.getKey();
           if (key === caretKey && !held.current.has(key)) {
-            // Just became empty with the caret inside: was it text being deleted, or an element?
+            // Just became empty with the caret inside. Keep it (placeholder + caret) when the user
+            // deleted text or just added a fresh empty paragraph/heading/quote; release it when an
+            // element (divider/table/image) was removed.
             let wasText = !prevEditorState;
+            const blockKey = node.getFirstChild()?.getKey();
             if (prevEditorState) {
               prevEditorState.read(() => {
                 const prev = $getNodeByKey(key);
-                wasText = !!prev && $isTextOnlyItem(prev) && !$isLayoutItemEmpty(prev);
+                const freshBlock = !!prev && $isLayoutItemEmpty(prev) && prev.getFirstChild()?.getKey() !== blockKey;
+                wasText = !!prev && $isTextOnlyItem(prev) && (!$isLayoutItemEmpty(prev) || freshBlock);
               });
             }
             if (wasText) held.current.add(key);

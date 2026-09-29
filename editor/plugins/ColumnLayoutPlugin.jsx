@@ -138,6 +138,11 @@ export default function ColumnLayoutPlugin() {
       }),
       // A column that ended up outside its layout gives its content back to the document.
       editor.registerNodeTransform(LayoutItemNode, (item) => {
+        // A column is never left with nothing in it.
+        if (item.getChildrenSize() === 0) {
+          item.append($createParagraphNode());
+          return;
+        }
         if ($isLayoutContainerNode(item.getParent())) return;
         item.getChildren().forEach((child) => item.insertBefore(child));
         item.remove();

@@ -21,7 +21,7 @@ import { $findMatchingParent, mergeRegister } from '@lexical/utils';
 import { $distributeTableColumns, $maxImageWidth, measureTable } from './tableLayout';
 
 export const DEFAULT_IMAGE_HEIGHT = 110;
-const MIN_IMAGE_SIZE = 40;
+const MIN_IMAGE_SIZE = 20; // small enough for logos and icons
 const MAX_IMAGE_HEIGHT = 600;
 export const ALT_TEXT_MAX = 300;
 

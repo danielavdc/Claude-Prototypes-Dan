@@ -57,10 +57,11 @@ import VariablePlugin from './plugins/VariablePlugin';
 import PlaceholderPlugin from './plugins/PlaceholderPlugin';
 import DraggableBlockPlugin from './plugins/DraggableBlockPlugin';
 import TextToolbarPlugin from './toolbar/TextToolbarPlugin';
-import AddElementPlugin from './plugins/AddElementPlugin';
+import AddElementPlugin, { ToolbarAddElement } from './plugins/AddElementPlugin';
 import TableControlsPlugin from './plugins/TableControlsPlugin';
 import ColumnPlaceholdersPlugin from './plugins/ColumnPlaceholdersPlugin';
 import ColumnLayoutPlugin from './plugins/ColumnLayoutPlugin';
+import BlockMergePlugin from './plugins/BlockMergePlugin';
 import PastePlugin, { TOAST_EVENT } from './paste/PastePlugin';
 import { HTML_IMPORT } from './paste/htmlImport';
 import { Icon } from './icons';
@@ -131,7 +132,7 @@ const theme = {
 
 function $initialContent() {
   const root = $getRoot();
-  const heading = $createHeadingNode('h2').append($createTextNode('Add a clear section heading'));
+  const heading = $createHeadingNode('h2').append($createTextNode('Lead with your headline'));
   const greeting = $createParagraphNode().append(
     $createTextNode('Hi '),
     $createVariableNode('{{first_name}}'),
@@ -144,6 +145,16 @@ function $initialContent() {
     $createTextNode('End with a clear ask, like requesting an interview or more details.'),
   );
   root.append(heading, greeting, pitch, ask);
+}
+
+const TOOLBAR_VARIANT_KEY = 'te-toolbar-variant';
+
+function readToolbarVariant() {
+  try {
+    return localStorage.getItem(TOOLBAR_VARIANT_KEY) === 'fixed' ? 'fixed' : 'floating';
+  } catch {
+    return 'floating';
+  }
 }
 
 function readDraft() {
@@ -271,7 +282,7 @@ function DeviceToggle({ device, onChange }) {
 function CanvasBar({ mode, onModeChange, device, onDeviceChange }) {
   return (
     <div className="te-canvas-bar">
-      <h2 className="te-canvas-title">Build Your Template</h2>
+      <h2 className="te-canvas-title">{mode === 'preview' ? 'Previewing Your Template' : 'Build Your Template'}</h2>
       <div className="te-canvas-actions">
         {mode === 'preview' && <DeviceToggle device={device} onChange={onDeviceChange} />}
         <ModeToggle mode={mode} onChange={onModeChange} />
@@ -298,12 +309,16 @@ function PreviewPane() {
 
 /* ---------- Editor card ---------- */
 
-function EditorCard({ mode, device, canvasElem }) {
+function EditorCard({ mode, device, canvasElem, toolbarVariant }) {
   const [anchorElem, setAnchorElem] = useState(null);
+  const [slotElem, setSlotElem] = useState(null);
   const mobile = mode === 'preview' && device === 'mobile';
+  const fixedToolbar = toolbarVariant === 'fixed';
 
   return (
     <div className={`te-card${mobile ? ' is-mobile' : ''}`}>
+      {/* Fixed (Jira-style) toolbar lives in this sticky strip at the top of the card */}
+      {fixedToolbar && <div className="te-fixed-tb-slot" ref={setSlotElem} hidden={mode !== 'edit'} />}
       <div className="te-card-inner" ref={setAnchorElem} hidden={mode !== 'edit'}>
         <RichTextPlugin
           contentEditable={<ContentEditable className="te-content" aria-label="Template body" />}
@@ -315,6 +330,7 @@ function EditorCard({ mode, device, canvasElem }) {
         <LinkPlugin />
         <HorizontalRulePlugin />
         <ColumnLayoutPlugin />
+        <BlockMergePlugin />
         <PastePlugin />
         <TablePlugin hasCellMerge={false} hasCellBackgroundColor />
         <CheckListPlugin />
@@ -329,7 +345,20 @@ function EditorCard({ mode, device, canvasElem }) {
             <ColumnPlaceholdersPlugin anchorElem={anchorElem} />
           </>
         )}
-        {canvasElem && <TextToolbarPlugin anchorElem={canvasElem} />}
+        {canvasElem &&
+          (fixedToolbar ? (
+            slotElem && (
+              <TextToolbarPlugin
+                key="fixed"
+                variant="fixed"
+                anchorElem={canvasElem}
+                slotElem={slotElem}
+                trailing={<ToolbarAddElement />}
+              />
+            )
+          ) : (
+            <TextToolbarPlugin key="floating" anchorElem={canvasElem} />
+          ))}
         <AddElementPlugin />
       </div>
       {mode === 'preview' && <PreviewPane />}
@@ -342,6 +371,16 @@ function EditorCard({ mode, device, canvasElem }) {
 export default function TemplateEditor() {
   const [mode, setMode] = useState('edit');
   const [device, setDevice] = useState('desktop');
+  const [toolbarVariant, setToolbarVariant] = useState(readToolbarVariant);
+
+  const chooseToolbarVariant = (v) => {
+    setToolbarVariant(v);
+    try {
+      localStorage.setItem(TOOLBAR_VARIANT_KEY, v);
+    } catch {
+      /* storage unavailable — the choice just won't be remembered */
+    }
+  };
   const [toast, setToast] = useState(null);
   const [canvasElem, setCanvasElem] = useState(null);
 
@@ -377,9 +416,29 @@ export default function TemplateEditor() {
             <Icon name="logo" size={34} />
             <h1>Create Outreach Template</h1>
           </div>
-          <button type="button" className="te-icon-btn" aria-label="Close">
-            <Icon name="close" size={20} />
-          </button>
+          <div className="te-header-right">
+            {/* Prototype switch to compare the two toolbar experiences */}
+            <div className="te-variant" role="group" aria-label="Toolbar version">
+              <span className="te-variant-label">Proposals Switch</span>
+              {[
+                { key: 'floating', label: 'Floating' },
+                { key: 'fixed', label: 'Fixed' },
+              ].map((v) => (
+                <button
+                  key={v.key}
+                  type="button"
+                  aria-pressed={toolbarVariant === v.key}
+                  className={toolbarVariant === v.key ? 'is-active' : ''}
+                  onClick={() => chooseToolbarVariant(v.key)}
+                >
+                  {v.label}
+                </button>
+              ))}
+            </div>
+            <button type="button" className="te-icon-btn" aria-label="Close">
+              <Icon name="close" size={20} />
+            </button>
+          </div>
         </header>
 
         <div className="te-toolbar">
@@ -400,7 +459,7 @@ export default function TemplateEditor() {
 
         <main className="te-canvas" ref={setCanvasElem}>
           <CanvasBar mode={mode} onModeChange={setMode} device={device} onDeviceChange={setDevice} />
-          <EditorCard mode={mode} device={device} canvasElem={canvasElem} />
+          <EditorCard mode={mode} device={device} canvasElem={canvasElem} toolbarVariant={toolbarVariant} />
         </main>
 
         {toast && <div className="te-toast">{toast}</div>}

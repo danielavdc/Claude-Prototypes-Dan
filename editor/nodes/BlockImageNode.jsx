@@ -18,7 +18,7 @@ import {
 import { mergeRegister } from '@lexical/utils';
 import { AltTextDialog, pickImage } from './ImageNode';
 
-const MIN_WIDTH = 60;
+const MIN_WIDTH = 20; // small enough for logos and icons
 const MAX_WIDTH = 2400;
 const FAKE_UPLOAD_MS = 900; // prototype: simulates the upload round-trip
 

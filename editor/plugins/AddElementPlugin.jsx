@@ -5,10 +5,16 @@ import {
   $createTextNode,
   $getNodeByKey,
   $getRoot,
+  $getSelection,
+  $isElementNode,
+  $isNodeSelection,
   $isParagraphNode,
+  $isRangeSelection,
+  $isRootNode,
   $setSelection,
   createCommand,
 } from 'lexical';
+import { $findMatchingParent } from '@lexical/utils';
 import { $createHeadingNode, $createQuoteNode } from '@lexical/rich-text';
 import { $createHorizontalRuleNode } from '@lexical/react/LexicalHorizontalRuleNode';
 import {
@@ -23,7 +29,7 @@ import { $createBlockImageNode, finishUpload } from '../nodes/BlockImageNode';
 import { $createColumnsLayout, $isEmptyTextBlock, $isLayoutItemNode } from '../nodes/LayoutNodes';
 import ColumnsDialog from './ColumnsDialog';
 
-// Lets the text toolbar stay hidden when we programmatically select dummy text.
+// Lets the text toolbar stay hidden when we programmatically move the selection into a new element.
 export const SUPPRESS_TEXT_TOOLBAR_COMMAND = createCommand('SUPPRESS_TEXT_TOOLBAR_COMMAND');
 
 const ELEMENTS = [
@@ -32,14 +38,12 @@ const ELEMENTS = [
     label: 'Paragraph',
     icon: 'M4 6h16v1.6H4zm0 3.5h16v1.6H4zm0 3.5h16v1.6H4zm0 3.5h16v1.6H4z',
     create: () => $createParagraphNode(),
-    dummy: 'Start writing your outreach message here.',
   },
   {
     key: 'heading',
     label: 'Heading',
     icon: 'M19 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 14H5v-8h14v8zM5 8V6h14v2H5z',
     create: () => $createHeadingNode('h2'),
-    dummy: 'Add a clear section heading',
   },
   { key: 'divider', label: 'Divider', icon: 'M3 10.5h18v3H3z', insert: $insertDivider },
   {
@@ -59,7 +63,6 @@ const ELEMENTS = [
     label: 'Quote',
     icon: 'M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z',
     create: () => $createQuoteNode(),
-    dummy: '“Add a compelling quote from your spokesperson or source here.”',
   },
   {
     key: 'columns',
@@ -75,37 +78,45 @@ function $isEmptyParagraph(node) {
 
 // `parent` is the root or a column. Text blocks take over a trailing empty line;
 // other blocks go before it (or get a fresh one) so writing can continue below them.
-function $place(parent, block, { keepLine }) {
-  let last = parent.getLastChild();
-  // In a column, a blank heading/quote left behind after deleting text is also reused.
-  const reusable = $isLayoutItemNode(parent) ? $isEmptyTextBlock(last) : $isEmptyParagraph(last);
-  if (reusable && !$isParagraphNode(last)) {
+// `after` (optional) is the block holding the caret: insert right below it instead of at the end.
+function $place(parent, block, { keepLine, after = null }) {
+  const anchor = after && after.getParent() === parent ? after : null;
+  let target = anchor || parent.getLastChild();
+  // An empty line is reused; in a column a blank heading/quote left after deleting text is too.
+  const reusable = $isLayoutItemNode(parent) ? $isEmptyTextBlock(target) : $isEmptyParagraph(target);
+  if (reusable && !$isParagraphNode(target)) {
     const line = $createParagraphNode();
-    last.replace(line);
-    last = line;
+    target.replace(line);
+    target = line;
   }
   if (reusable) {
-    if (keepLine) last.insertBefore(block);
-    else last.replace(block);
-    return keepLine ? last : null;
+    if (keepLine) target.insertBefore(block);
+    else target.replace(block);
+    return keepLine ? target : null;
   }
-  parent.append(block);
+  if (anchor) anchor.insertAfter(block);
+  else parent.append(block);
   if (!keepLine) return null;
+  // Mid-document there's already a line below to continue on; only add one at the end.
+  const next = block.getNextSibling();
+  if ($isElementNode(next)) return next;
   const line = $createParagraphNode();
-  parent.append(line);
+  block.insertAfter(line);
   return line;
 }
 
-function $insertTextBlock(parent, el) {
-  const text = $createTextNode(el.dummy);
-  $place(parent, el.create().append(text), { keepLine: false });
-  // Dummy copy is pre-selected so the first keystroke replaces it.
-  text.select(0, el.dummy.length);
+// Paragraph / heading / quote start empty: their placeholder guides the writing and the caret waits inside.
+function $insertTextBlock(parent, el, after) {
+  const block = el.create();
+  $place(parent, block, { keepLine: false, after });
+  block.select();
 }
 
-// Like Notion: drop the divider and leave the caret on a fresh line below it.
-function $insertDivider(parent) {
-  $place(parent, $createHorizontalRuleNode(), { keepLine: true }).select();
+// Divider, table and image don't add an empty line below themselves (Daniela's call);
+// an empty line at the insertion point is taken over instead.
+function $insertDivider(parent, after) {
+  $place(parent, $createHorizontalRuleNode(), { keepLine: false, after });
+  $setSelection(null);
 }
 
 function $createTemplateCell(text, isHeader) {
@@ -117,7 +128,7 @@ function $createTemplateCell(text, isHeader) {
 
 // Starter table: one header row + two body rows of dummy copy.
 // 3 columns on the page, 2 inside a column layout where space is tighter.
-function $insertTable(parent) {
+function $insertTable(parent, after) {
   const cols = $isLayoutItemNode(parent) ? 2 : 3;
   const table = $createTableNode();
   const header = $createTableRowNode();
@@ -128,22 +139,22 @@ function $insertTable(parent) {
     for (let c = 0; c < cols; c += 1) row.append($createTemplateCell('Your cell', false));
     table.append(row);
   }
-  $place(parent, table, { keepLine: true });
+  $place(parent, table, { keepLine: false, after });
   const firstText = header.getFirstChild().getFirstDescendant();
   firstText.select(0, firstText.getTextContentSize());
 }
 
 // Image fills the width (keeping its ratio) and gets an editable line below it.
-function $insertBlockImage(parent, src) {
+function $insertBlockImage(parent, src, after) {
   const image = $createBlockImageNode({ src });
   image.setUploading(true);
-  $place(parent, image, { keepLine: true });
+  $place(parent, image, { keepLine: false, after });
   $setSelection(null);
   return image.getKey();
 }
 
-function $insertColumns(split) {
-  $place($getRoot(), $createColumnsLayout(split), { keepLine: true });
+function $insertColumns(split, after = null) {
+  $place($getRoot(), $createColumnsLayout(split), { keepLine: true, after });
   $setSelection(null);
 }
 
@@ -153,14 +164,14 @@ const $resolveParent = (parentKey) => (parentKey ? $getNodeByKey(parentKey) : $g
 export function useInsertElement() {
   const [editor] = useLexicalComposerContext();
   return useCallback(
-    async (el, parentKey = null) => {
+    async (el, parentKey = null, afterKey = null) => {
       if (el.pick) {
         const src = await pickImage();
         if (!src) return;
         let key = null;
         editor.update(() => {
           const parent = $resolveParent(parentKey);
-          if (parent) key = $insertBlockImage(parent, src);
+          if (parent) key = $insertBlockImage(parent, src, afterKey && $getNodeByKey(afterKey));
         });
         if (key) finishUpload(editor, key);
         return;
@@ -169,8 +180,9 @@ export function useInsertElement() {
       editor.update(() => {
         const parent = $resolveParent(parentKey);
         if (!parent) return;
-        if (el.insert) el.insert(parent);
-        else $insertTextBlock(parent, el);
+        const after = afterKey ? $getNodeByKey(afterKey) : null;
+        if (el.insert) el.insert(parent, after);
+        else $insertTextBlock(parent, el, after);
       });
       editor.focus();
     },
@@ -296,6 +308,76 @@ export default function AddElementPlugin() {
         <Icon name="plus" size={14} /> Add Element
       </button>
       {open && <ElementMenu triggerRef={triggerRef} wrapRef={wrapRef} onSelect={select} onClose={close} />}
+      {columnsOpen && <ColumnsDialog onCancel={() => setColumnsOpen(false)} onApply={applyColumns} />}
+    </div>
+  );
+}
+
+/* ---------- "Add Element" inside the fixed toolbar ---------- */
+
+// Where the caret is: the column it's in (if any) and the block to insert after.
+function $caretContext() {
+  const selection = $getSelection();
+  if (!$isRangeSelection(selection) && !$isNodeSelection(selection)) return { parentKey: null, afterKey: null };
+  const node = $isRangeSelection(selection) ? selection.anchor.getNode() : selection.getNodes()[0];
+  if (!node) return { parentKey: null, afterKey: null };
+  const block = $findMatchingParent(node, (n) => {
+    const p = n.getParent();
+    return !!p && ($isRootNode(p) || $isLayoutItemNode(p));
+  });
+  const item = block && $isLayoutItemNode(block.getParent()) ? block.getParent() : null;
+  return { parentKey: item ? item.getKey() : null, afterKey: block ? block.getKey() : null };
+}
+
+export function ToolbarAddElement() {
+  const [editor] = useLexicalComposerContext();
+  const insert = useInsertElement();
+  const [open, setOpen] = useState(false);
+  const [context, setContext] = useState({ parentKey: null, afterKey: null });
+  const [columnsOpen, setColumnsOpen] = useState(false);
+  const wrapRef = useRef(null);
+  const triggerRef = useRef(null);
+  const close = useCallback(() => setOpen(false), []);
+
+  const toggle = () => {
+    if (!open) editor.getEditorState().read(() => setContext($caretContext()));
+    setOpen((o) => !o);
+  };
+
+  const select = (el) => {
+    setOpen(false);
+    if (el.dialog) setColumnsOpen(true);
+    else insert(el, context.parentKey, context.afterKey);
+  };
+
+  const applyColumns = (split) => {
+    setColumnsOpen(false);
+    editor.update(() => $insertColumns(split, context.afterKey ? $getNodeByKey(context.afterKey) : null));
+  };
+
+  return (
+    <div className="te-tb-group te-tb-add" ref={wrapRef}>
+      <button
+        ref={triggerRef}
+        type="button"
+        className={`te-add-element te-tb-add-btn${open ? ' is-open' : ''}`}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={toggle}
+      >
+        <Icon name="plus" size={14} /> Add Element
+      </button>
+      {open && (
+        <ElementMenu
+          triggerRef={triggerRef}
+          wrapRef={wrapRef}
+          exclude={context.parentKey ? ['columns'] : []} // no layouts inside a column
+          className="te-add-menu-right"
+          onSelect={select}
+          onClose={close}
+        />
+      )}
       {columnsOpen && <ColumnsDialog onCancel={() => setColumnsOpen(false)} onApply={applyColumns} />}
     </div>
   );
