@@ -22,12 +22,13 @@ function PlaceholderBox({ itemKey, rect, open, onToggle, onClose }) {
         ref={triggerRef}
         type="button"
         className={`te-col-empty-btn${open ? ' is-open' : ''}`}
+        title="Add Element"
         aria-haspopup="menu"
         aria-expanded={open}
         onMouseDown={(e) => e.preventDefault()}
         onClick={onToggle}
       >
-        <Icon name="plus" size={14} /> Add Element
+        <Icon name="plus" size={14} /> <span className="te-col-empty-label">Add Element</span>
       </button>
       {open && (
         <ElementMenu
@@ -59,6 +60,7 @@ export default function ColumnPlaceholdersPlugin({ anchorElem }) {
     ({ editorState, prevEditorState } = {}) => {
       const state = editorState || editor.getEditorState();
       const keys = [];
+      const emptiness = []; // [domKey, isEmpty] for every column, to style layouts with no content yet
       let release = false;
 
       state.read(() => {
@@ -71,7 +73,9 @@ export default function ColumnPlaceholdersPlugin({ anchorElem }) {
         held.current.forEach((key) => key !== caretKey && held.current.delete(key));
 
         $dfs().forEach(({ node }) => {
-          if (!$isLayoutItemNode(node) || !$isLayoutItemEmpty(node)) return;
+          if (!$isLayoutItemNode(node)) return;
+          emptiness.push([node.getKey(), $isLayoutItemEmpty(node)]);
+          if (!$isLayoutItemEmpty(node)) return;
           const key = node.getKey();
           if (key === caretKey && !held.current.has(key)) {
             // Just became empty with the caret inside. Keep it (placeholder + caret) when the user
@@ -92,6 +96,10 @@ export default function ColumnPlaceholdersPlugin({ anchorElem }) {
           if (!held.current.has(key)) keys.push(key);
         });
       });
+
+      // Empty columns are tagged so CSS can give an all-empty layout a minimum height; once any
+      // column has content, the row simply fits its tallest element.
+      emptiness.forEach(([key, empty]) => editor.getElementByKey(key)?.classList.toggle('is-empty', empty));
 
       // The box covers the column, so the caret must not stay hidden underneath it.
       if (release) editor.update(() => $setSelection(null));

@@ -40,6 +40,15 @@ export class LayoutContainerNode extends ElementNode {
     return { ...super.exportJSON(), templateColumns: this.__templateColumns };
   }
 
+  getTemplateColumns() {
+    return this.getLatest().__templateColumns;
+  }
+
+  setTemplateColumns(templateColumns) {
+    this.getWritable().__templateColumns = templateColumns;
+    return this;
+  }
+
   createDOM() {
     const dom = document.createElement('div');
     dom.className = 'te-columns';

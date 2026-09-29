@@ -286,12 +286,14 @@ button { font-family: inherit; }
 }
 /* ---------- Tables ---------- */
 .te-table {
-  width: 100%;
+  /* Room on the right for the "add column" bar and below for the "add row" bar */
+  width: calc(100% - 24px);
   table-layout: fixed;
   border-collapse: collapse;
-  margin: 4px 0 16px;
+  margin: 4px 0 30px;
   font-size: 14px;
 }
+.te-content > .te-table:last-child, .te-column > .te-table:last-child { margin-bottom: 30px; }
 .te-td {
   position: relative;
   padding: 11px 16px;
@@ -348,11 +350,38 @@ button { font-family: inherit; }
 
 
 /* Empty cells hint that they accept text or an image */
+.te-td > .te-p:only-child:has(> br:only-child) { position: relative; }
 .te-td > .te-p:only-child:has(> br:only-child)::before {
   content: 'Write or add image';
   position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
   color: var(--te-muted);
   font-weight: 400;
+  pointer-events: none;
+  /* Only the hint is truncated, and only after using the lines the row's height allows
+     (--ph-lines comes from CellPlaceholderPlugin). Typed text wraps and the cell grows. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--ph-lines, 1);
+  overflow: hidden;
+}
+/* Full hint on hover when it's truncated */
+.te-td:hover > .te-p[data-ph-truncated]:has(> br:only-child)::after {
+  content: 'Write or add image';
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: -4px;
+  z-index: 7;
+  padding: 6px 10px;
+  background: #5c5c5c;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.2;
+  white-space: nowrap;
+  border-radius: 6px;
   pointer-events: none;
 }
 
@@ -511,10 +540,31 @@ button { font-family: inherit; }
 /* ---------- Column layouts ---------- */
 .te-columns { display: grid; gap: 16px; margin: 4px 0 14px; }
 .te-columns.is-selected { outline: 2px solid var(--te-teal); outline-offset: 4px; border-radius: 4px; background: rgba(0, 130, 127, 0.04); }
-.te-column { position: relative; min-width: 0; min-height: 64px; }
-.te-column > :last-child { margin-bottom: 0; }
+.te-column {
+  position: relative;
+  min-width: 0;
+  /* Blocks inside a column are spaced by the gap, not their own margins, so the row is exactly
+     as tall as its content (Lexical's invisible caret helpers are absolutely positioned and
+     don't take part in the gap). */
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.te-column > * { margin-top: 0 !important; margin-bottom: 0 !important; }
+/* Tables keep room below for their "add row" bar */
+.te-column > .te-table { margin-bottom: 30px !important; }
+/* Only a layout with no content at all reserves room for its "Add Element" boxes;
+   otherwise the row fits the tallest element and empty boxes stretch to it. */
+.te-columns:not(:has(> .te-column:not(.is-empty))) > .te-column { min-height: 64px; }
+.te-column.is-empty { min-height: 36px; }
 
-.te-col-empty { position: absolute; z-index: 4; }
+.te-col-empty { position: absolute; z-index: 4; container-type: inline-size; }
+/* Narrow (resized) columns: the box keeps just the "+" (tooltip says "Add Element") */
+@container (max-width: 110px) {
+  .te-col-empty-label { display: none; }
+}
+/* Hints inside columns stay on one line so they never spill out of a narrow column */
+.te-column [data-placeholder]::before { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .te-col-empty-btn {
   width: 100%;
   height: 100%;
@@ -535,6 +585,27 @@ button { font-family: inherit; }
 }
 .te-col-empty-btn:hover, .te-col-empty-btn.is-open { background: #f4fbfa; border-color: var(--te-teal); }
 .te-add-menu-centered { left: 50%; translate: -50% 0; } /* translate, not transform: the pop animation owns transform */
+
+/* Draggable divider between layout columns (min 60px per column) */
+.te-col-resize {
+  position: absolute;
+  z-index: 5;
+  cursor: col-resize;
+  touch-action: none;
+}
+.te-col-resize::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 4px;
+  margin-left: -2px;
+  border-radius: 2px;
+  background: #e6e6e6;
+  transition: background 0.12s;
+}
+.te-col-resize:hover::before, .te-col-resize.is-dragging::before { background: var(--te-teal); }
 
 /* Column layout modal */
 .te-cols-modal { max-width: 420px; }
@@ -681,6 +752,47 @@ button { font-family: inherit; }
 .te-btn-text:hover { background: var(--te-teal-tint); }
 .te-btn-primary { background: var(--te-teal); color: #fff; }
 .te-btn-primary:hover { background: var(--te-teal-hover); }
+
+/* Active-cell chevron (Lexical-style) → Delete row / Delete column */
+.te-cell-menu-wrap { position: absolute; z-index: 6; }
+.te-cell-menu-btn {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.06);
+  color: #555;
+  cursor: pointer;
+}
+.te-cell-menu-btn:hover, .te-cell-menu-btn.is-open { background: rgba(0, 0, 0, 0.12); color: var(--te-text); }
+.te-cell-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  width: 170px;
+  padding: 6px 0;
+  background: var(--te-surface);
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18), 0 6px 18px rgba(0, 0, 0, 0.14);
+}
+.te-cell-menu-item {
+  width: 100%;
+  display: block;
+  padding: 8px 14px;
+  border: 0;
+  background: transparent;
+  color: var(--te-text);
+  font-family: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+.te-cell-menu-item:hover:not(:disabled) { background: #f3f3f3; }
+.te-cell-menu-item:disabled { color: #bdbdbd; cursor: default; }
 
 .te-link-text { color: var(--te-teal); text-decoration: underline; cursor: text; }
 
@@ -1093,7 +1205,7 @@ button { font-family: inherit; }
 }
 
 /* ---------- Preview ---------- */
-.te-preview { padding: 18px 40px 24px; font-size: 14px; line-height: 1.57; }
+.te-preview { padding: 18px 24px 24px; /* no drag-handle gutter in preview */ font-size: 14px; line-height: 1.57; }
 .te-preview h1 { font-size: 26px; line-height: 34px; margin: 6px 0 12px; }
 .te-preview h2 { font-size: 20px; line-height: 30px; margin: 0 0 8px; }
 .te-preview h3 { font-size: 16px; line-height: 24px; margin: 4px 0 8px; }

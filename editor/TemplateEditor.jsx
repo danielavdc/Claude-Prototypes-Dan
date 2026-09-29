@@ -60,8 +60,10 @@ import TextToolbarPlugin from './toolbar/TextToolbarPlugin';
 import AddElementPlugin, { ToolbarAddElement } from './plugins/AddElementPlugin';
 import TableControlsPlugin from './plugins/TableControlsPlugin';
 import ColumnPlaceholdersPlugin from './plugins/ColumnPlaceholdersPlugin';
+import ColumnResizePlugin from './plugins/ColumnResizePlugin';
 import ColumnLayoutPlugin from './plugins/ColumnLayoutPlugin';
 import BlockMergePlugin from './plugins/BlockMergePlugin';
+import CellPlaceholderPlugin from './plugins/CellPlaceholderPlugin';
 import PastePlugin, { TOAST_EVENT } from './paste/PastePlugin';
 import { HTML_IMPORT } from './paste/htmlImport';
 import { Icon } from './icons';
@@ -331,6 +333,7 @@ function EditorCard({ mode, device, canvasElem, toolbarVariant }) {
         <HorizontalRulePlugin />
         <ColumnLayoutPlugin />
         <BlockMergePlugin />
+        <CellPlaceholderPlugin />
         <PastePlugin />
         <TablePlugin hasCellMerge={false} hasCellBackgroundColor />
         <CheckListPlugin />
@@ -343,6 +346,7 @@ function EditorCard({ mode, device, canvasElem, toolbarVariant }) {
             <DraggableBlockPlugin anchorElem={anchorElem} />
             <TableControlsPlugin anchorElem={anchorElem} />
             <ColumnPlaceholdersPlugin anchorElem={anchorElem} />
+            <ColumnResizePlugin anchorElem={anchorElem} />
           </>
         )}
         {canvasElem &&

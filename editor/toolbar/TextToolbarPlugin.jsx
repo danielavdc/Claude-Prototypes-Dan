@@ -25,7 +25,7 @@ import {
   REMOVE_LIST_COMMAND,
 } from '@lexical/list';
 import { $isLinkNode, $toggleLink } from '@lexical/link';
-import { $isTableCellNode } from '@lexical/table';
+import { $isTableCellNode, $isTableNode } from '@lexical/table';
 import { $findMatchingParent, $getNearestNodeOfType, mergeRegister } from '@lexical/utils';
 import data from '@emoji-mart/data';
 import Picker from '@emoji-mart/react';
@@ -36,7 +36,6 @@ import ColorPicker from './ColorPicker';
 import { SUPPRESS_TEXT_TOOLBAR_COMMAND } from '../plugins/AddElementPlugin';
 import { $insertImageIntoCell, pickImage } from '../nodes/ImageNode';
 import { $distributeTableColumns, measureTable } from '../nodes/tableLayout';
-import { $isTableNode } from '@lexical/table';
 
 /* ---------- options ---------- */
 
