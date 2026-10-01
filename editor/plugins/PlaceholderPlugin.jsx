@@ -6,7 +6,7 @@ import { $isListItemNode, $isListNode } from '@lexical/list';
 import { $isLayoutContainerNode } from '../nodes/LayoutNodes';
 
 // Empty template: orient the user toward writing a pitch to media contacts.
-const EMPTY_PAGE_PLACEHOLDER = "Start your pitch — what's the story, and why should this journalist care?";
+const EMPTY_PAGE_PLACEHOLDER = "Start your pitch. What's the story, and why does it matter now?";
 const EMPTY_LINE_PLACEHOLDER = 'Keep building your pitch: add key facts, a quote, or your ask…';
 
 // One heading hint for every level.

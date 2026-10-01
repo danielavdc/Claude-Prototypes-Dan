@@ -33,9 +33,10 @@ import Picker from '@emoji-mart/react';
 import { $createVariableNode } from '../nodes/VariableNode';
 import { TbIcon } from './toolbarIcons';
 import ColorPicker from './ColorPicker';
-import { SUPPRESS_TEXT_TOOLBAR_COMMAND } from '../plugins/AddElementPlugin';
+import { $caretContext, ELEMENTS, SUPPRESS_TEXT_TOOLBAR_COMMAND, useInsertElement } from '../plugins/AddElementPlugin';
 import { $insertImageIntoCell, pickImage } from '../nodes/ImageNode';
 import { $distributeTableColumns, measureTable } from '../nodes/tableLayout';
+import { HEADER_CELL_COLOR } from '../plugins/TableControlsPlugin';
 
 /* ---------- options ---------- */
 
@@ -104,7 +105,8 @@ function $readInfo(selection) {
     linkUrl: linkNode ? linkNode.getURL() : '',
     blockKey: block ? block.getKey() : null,
     cellKey: cell ? cell.getKey() : null,
-    cellBackground: cell ? cell.getBackgroundColor() || '' : '',
+    // Header cells without their own colour show the default aqua, so the picker reflects it.
+    cellBackground: cell ? cell.getBackgroundColor() || (cell.hasHeader() ? HEADER_CELL_COLOR : '') : '',
   };
 }
 
@@ -185,6 +187,7 @@ export default function TextToolbarPlugin({ anchorElem, variant = 'floating', sl
   const [overlay, setOverlay] = useState([]);
   const [editorFocused, setEditorFocused] = useState(true);
   const [linkDraft, setLinkDraft] = useState('');
+  const [linkAnchor, setLinkAnchor] = useState(null); // selection rect (canvas coords) the link editor sits under
   const [helpKey, setHelpKey] = useState(null);
 
   const menuRef = useRef(null);
@@ -353,7 +356,16 @@ export default function TextToolbarPlugin({ anchorElem, variant = 'floating', sl
     } else {
       setOverlay([]);
     }
-    if (name === 'link') setLinkDraft(info?.linkUrl || 'https://');
+    if (name === 'link') {
+      setLinkDraft(info?.linkUrl || 'https://');
+      // Place the link editor right under the text being linked (not under the toolbar button).
+      let rect = native && native.rangeCount > 0 ? native.getRangeAt(0).getBoundingClientRect() : null;
+      if (!rect || (rect.width === 0 && rect.height === 0)) {
+        const blockKey = info?.cellKey || info?.blockKey;
+        rect = blockKey ? editor.getElementByKey(blockKey)?.getBoundingClientRect() : null;
+      }
+      setLinkAnchor(rect ? toCanvasRect(rect, anchorElem) : null);
+    }
     menuRef.current = name;
     setMenu(name);
   };
@@ -402,9 +414,20 @@ export default function TextToolbarPlugin({ anchorElem, variant = 'floating', sl
       if (cell) cell.setBackgroundColor(hex);
     }, opts);
 
-  const addCellImage = async () => {
+  const insertElement = useInsertElement();
+
+  // Inside a cell the image goes into the cell; anywhere else it's an Image element placed
+  // where the caret is (same as Add Element → Image).
+  const addImage = async () => {
     const cellKey = info?.cellKey;
-    if (!cellKey) return;
+    if (!cellKey) {
+      let ctx = { parentKey: null, afterKey: null };
+      editor.getEditorState().read(() => {
+        ctx = $caretContext();
+      });
+      insertElement(ELEMENTS.find((el) => el.key === 'image'), ctx.parentKey, ctx.afterKey);
+      return;
+    }
     const tableEl = editor.getElementByKey(cellKey)?.closest('table');
     const src = await pickImage();
     if (!src) return;
@@ -461,8 +484,11 @@ export default function TextToolbarPlugin({ anchorElem, variant = 'floating', sl
   const linkEditor = (
         <div
           ref={linkRef}
-          className={fixed ? 'te-link te-link-menu' : 'te-link'}
-          style={fixed ? undefined : { top: target.bottom + 8, left: Math.max(8, target.left - 12) }}
+          className={fixed && !linkAnchor ? 'te-link te-link-menu' : 'te-link'}
+          style={(() => {
+            const at = fixed ? linkAnchor : target;
+            return at ? { top: at.bottom + 8, left: Math.max(8, at.left - 12) } : undefined;
+          })()}
         >
           <button type="button" className="te-link-icon" data-tip="Copy link" onClick={copyLink}>
             <TbIcon name="copy" size={16} />
@@ -675,7 +701,7 @@ export default function TextToolbarPlugin({ anchorElem, variant = 'floating', sl
             <TbButton tip="Add hyperlink" active={!!info.linkUrl || (fixed && menu === 'link')} onClick={() => openMenu('link')}>
               <TbIcon name="link" />
             </TbButton>
-            {fixed && menu === 'link' && linkEditor}
+            {fixed && menu === 'link' && !linkAnchor && linkEditor}
           </div>
 
           <span className="te-tb-divider" />
@@ -737,13 +763,9 @@ export default function TextToolbarPlugin({ anchorElem, variant = 'floating', sl
 
           <span className="te-tb-divider" />
 
-          {/* Image in cell — floating: only inside a table; fixed: always shown, disabled outside cells */}
+          {/* Image — floating: only inside a table; fixed: always enabled (into the cell, or as an Image element) */}
           {(fixed || info.cellKey) && (
-            <TbButton
-              tip={info.cellKey ? 'Add image' : 'Add image (place the cursor in a table cell)'}
-              disabled={!info.cellKey}
-              onClick={addCellImage}
-            >
+            <TbButton tip={info.cellKey ? 'Add image (into cell)' : 'Add image (below cursor)'} onClick={addImage}>
               <TbIcon name="addImage" />
             </TbButton>
           )}
@@ -803,6 +825,7 @@ export default function TextToolbarPlugin({ anchorElem, variant = 'floating', sl
     return (
       <>
         {createPortal(toolbar, slotElem)}
+        {menu === 'link' && linkAnchor && createPortal(linkEditor, anchorElem)}
         {overlayRects && createPortal(overlayRects, anchorElem)}
       </>
     );

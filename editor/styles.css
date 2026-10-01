@@ -129,7 +129,7 @@ button { font-family: inherit; }
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 15px 16px 16px;
+  padding: 0 16px 16px;
   position: relative;
 }
 
@@ -140,8 +140,14 @@ button { font-family: inherit; }
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 15px;
+  padding: 15px 0;
   flex-shrink: 0;
+  /* Stays put while the template scrolls (title + Edit/Preview, and the device toggle in preview) */
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: var(--te-canvas);
+  box-shadow: -8px 0 0 var(--te-canvas), 8px 0 0 var(--te-canvas); /* hide the card's side shadow underneath */
 }
 .te-canvas-title { margin: 0; font-size: 18px; font-weight: 700; color: var(--te-text); white-space: nowrap; }
 .te-canvas-actions { display: flex; align-items: center; gap: 12px; }
@@ -174,13 +180,13 @@ button { font-family: inherit; }
   width: 100%;
   max-width: 640px;
   transition: max-width 0.25s ease;
-  min-height: 615px;
+  /* Fill the canvas height left under the "Build Your Template" bar; grows past it with content. */
+  flex: 1 0 auto;
   background: var(--te-surface);
   border-radius: 3px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18), 0 1px 1px rgba(0, 0, 0, 0.06);
-  flex-shrink: 0;
 }
-.te-card-inner { position: relative; padding: 18px 0 24px; }
+.te-card-inner { position: relative; padding: 18px 0 24px; isolation: isolate; } /* overlays scroll under the sticky bars */
 
 /* Mobile preview: a 375px email viewport, laid out the way responsive emails stack. */
 .te-card.is-mobile { max-width: 375px; }
@@ -960,7 +966,7 @@ button { font-family: inherit; }
 /* Fixed (Jira-style) variant: always-visible strip at the top of the card */
 .te-fixed-tb-slot {
   position: sticky;
-  top: 0;
+  top: var(--te-canvas-bar-h, 66px); /* right under the sticky "Build Your Template" bar */
   z-index: 20;
   border-radius: 3px 3px 0 0;
   background: var(--te-surface);
@@ -1217,6 +1223,7 @@ button { font-family: inherit; }
 .te-preview table { width: 100%; table-layout: fixed; border-collapse: collapse; margin: 4px 0 16px; }
 .te-preview td, .te-preview th { padding: 11px 16px; border: 1px solid var(--te-border); text-align: left; vertical-align: top; }
 .te-preview th { background: #dff0ef; }
+.te-preview td > p::before, .te-preview th > p::before, .te-preview td > p::after, .te-preview th > p::after { content: none !important; } /* no "Write or add image" hint in preview */
 .te-preview td img, .te-preview th img { max-width: 100%; object-fit: cover; display: block; }
 .te-preview td p, .te-preview th p { margin: 0; }
 .te-preview td img, .te-preview th img { max-width: 100%; }

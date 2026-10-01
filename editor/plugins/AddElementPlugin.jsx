@@ -32,7 +32,7 @@ import ColumnsDialog from './ColumnsDialog';
 // Lets the text toolbar stay hidden when we programmatically move the selection into a new element.
 export const SUPPRESS_TEXT_TOOLBAR_COMMAND = createCommand('SUPPRESS_TEXT_TOOLBAR_COMMAND');
 
-const ELEMENTS = [
+export const ELEMENTS = [
   {
     key: 'paragraph',
     label: 'Paragraph',
@@ -205,7 +205,13 @@ export function ElementMenu({ triggerRef, wrapRef, exclude = [], onSelect, onClo
     if (!menu || !btn) return;
     const scroller = btn.closest('.te-canvas');
     const bounds = scroller ? scroller.getBoundingClientRect() : { top: 0, bottom: window.innerHeight };
-    const top = Math.max(bounds.top, 0);
+    // The sticky bars at the top of the canvas cover that strip, so the menu can't use it.
+    let top = Math.max(bounds.top, 0);
+    if (scroller && !scroller.contains(btn.closest('.te-fixed-tb-slot') || null)) {
+      scroller.querySelectorAll(':scope > .te-canvas-bar, .te-fixed-tb-slot:not([hidden])').forEach((el) => {
+        top = Math.max(top, el.getBoundingClientRect().bottom);
+      });
+    }
     const bottom = Math.min(bounds.bottom, window.innerHeight);
     const b = btn.getBoundingClientRect();
     const needed = menu.scrollHeight;
@@ -316,7 +322,7 @@ export default function AddElementPlugin() {
 /* ---------- "Add Element" inside the fixed toolbar ---------- */
 
 // Where the caret is: the column it's in (if any) and the block to insert after.
-function $caretContext() {
+export function $caretContext() {
   const selection = $getSelection();
   if (!$isRangeSelection(selection) && !$isNodeSelection(selection)) return { parentKey: null, afterKey: null };
   const node = $isRangeSelection(selection) ? selection.anchor.getNode() : selection.getNodes()[0];

@@ -16,6 +16,8 @@ import { $distributeTableColumns, measureTable } from '../nodes/tableLayout';
 
 export const MAX_TABLE_COLUMNS = 7;
 export const MAX_TABLE_ROWS = 10;
+// Default fill of header cells (no colour of their own) — editor, picker and export.
+export const HEADER_CELL_COLOR = '#DFF0EF';
 
 export function $tableSize(table) {
   const firstRow = table.getFirstChild();

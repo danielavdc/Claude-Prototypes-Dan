@@ -22,6 +22,7 @@ import {
 import { HorizontalRulePlugin } from '@lexical/react/LexicalHorizontalRulePlugin';
 import { TablePlugin } from '@lexical/react/LexicalTablePlugin';
 import { TableCellNode, TableNode, TableRowNode } from '@lexical/table';
+import { HEADER_CELL_COLOR } from './plugins/TableControlsPlugin';
 import {
   BOLD_ITALIC_STAR,
   BOLD_ITALIC_UNDERSCORE,
@@ -58,6 +59,7 @@ import PlaceholderPlugin from './plugins/PlaceholderPlugin';
 import DraggableBlockPlugin from './plugins/DraggableBlockPlugin';
 import TextToolbarPlugin from './toolbar/TextToolbarPlugin';
 import AddElementPlugin, { ToolbarAddElement } from './plugins/AddElementPlugin';
+import BlockKeyboardPlugin from './plugins/BlockKeyboardPlugin';
 import TableControlsPlugin from './plugins/TableControlsPlugin';
 import ColumnPlaceholdersPlugin from './plugins/ColumnPlaceholdersPlugin';
 import ColumnResizePlugin from './plugins/ColumnResizePlugin';
@@ -149,13 +151,14 @@ function $initialContent() {
   root.append(heading, greeting, pitch, ask);
 }
 
-const TOOLBAR_VARIANT_KEY = 'te-toolbar-variant';
+// v2 key: Fixed became the default, so earlier saved choices (incl. test runs) don't override it.
+const TOOLBAR_VARIANT_KEY = 'te-toolbar-variant-v2';
 
 function readToolbarVariant() {
   try {
-    return localStorage.getItem(TOOLBAR_VARIANT_KEY) === 'fixed' ? 'fixed' : 'floating';
+    return localStorage.getItem(TOOLBAR_VARIANT_KEY) === 'floating' ? 'floating' : 'fixed';
   } catch {
-    return 'floating';
+    return 'fixed';
   }
 }
 
@@ -309,6 +312,24 @@ function PreviewPane() {
   return <div className="te-preview" dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
+// Cells export with the editor's look: our borders, the header's default aqua (Lexical's own
+// default is grey) and no fixed pixel widths, so the table fills the preview width (also on mobile).
+const HTML_EXPORT = new Map([
+  [
+    TableCellNode,
+    (editor, node) => {
+      const output = node.exportDOM(editor);
+      const el = output.element;
+      if (el instanceof HTMLElement) {
+        el.style.removeProperty('border');
+        el.style.removeProperty('width');
+        if (!node.getBackgroundColor() && node.hasHeader()) el.style.backgroundColor = HEADER_CELL_COLOR;
+      }
+      return output;
+    },
+  ],
+]);
+
 /* ---------- Editor card ---------- */
 
 function EditorCard({ mode, device, canvasElem, toolbarVariant }) {
@@ -331,6 +352,7 @@ function EditorCard({ mode, device, canvasElem, toolbarVariant }) {
         <ListPlugin />
         <LinkPlugin />
         <HorizontalRulePlugin />
+        <BlockKeyboardPlugin />
         <ColumnLayoutPlugin />
         <BlockMergePlugin />
         <CellPlaceholderPlugin />
@@ -406,7 +428,7 @@ export default function TemplateEditor() {
     theme,
     nodes: [HeadingNode, QuoteNode, ListNode, ListItemNode, LinkNode, HorizontalRuleNode, TableNode, TableRowNode, TableCellNode, ImageNode, BlockImageNode, LayoutContainerNode, LayoutItemNode, VariableNode],
     editorState: draft || $initialContent,
-    html: { import: HTML_IMPORT },
+    html: { import: HTML_IMPORT, export: HTML_EXPORT },
     onError(error) {
       console.error(error);
     },
