@@ -40,3 +40,7 @@ export function $isVariableNode(node) {
 }
 
 export const VARIABLE_REGEX = /\{\{\s*[a-zA-Z0-9_.]+\s*\}\}/;
+
+// Lexical keeps the node class registered at startup; a hot-swapped class no longer matches it
+// ("Type … does not match registered node"), so changes here reload the page instead.
+if (import.meta.hot) import.meta.hot.decline();

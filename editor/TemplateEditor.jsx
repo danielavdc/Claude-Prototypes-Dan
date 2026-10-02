@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
@@ -61,6 +61,7 @@ import TextToolbarPlugin from './toolbar/TextToolbarPlugin';
 import AddElementPlugin, { ToolbarAddElement } from './plugins/AddElementPlugin';
 import BlockKeyboardPlugin from './plugins/BlockKeyboardPlugin';
 import TableControlsPlugin from './plugins/TableControlsPlugin';
+import TableResizePlugin from './plugins/TableResizePlugin';
 import ColumnPlaceholdersPlugin from './plugins/ColumnPlaceholdersPlugin';
 import ColumnResizePlugin from './plugins/ColumnResizePlugin';
 import ColumnLayoutPlugin from './plugins/ColumnLayoutPlugin';
@@ -284,10 +285,40 @@ function DeviceToggle({ device, onChange }) {
   );
 }
 
+const CANVAS_COPY = {
+  edit: {
+    title: 'Build Your Template',
+    hint: 'Shape a reusable pitch with images, tables, columns and more.',
+  },
+  preview: {
+    title: 'Previewing Your Template',
+    hint: 'A close look at what your recipients will see.',
+  },
+};
+
 function CanvasBar({ mode, onModeChange, device, onDeviceChange }) {
+  const barRef = useRef(null);
+  const copy = CANVAS_COPY[mode === 'preview' ? 'preview' : 'edit'];
+
+  // The fixed toolbar sticks right under this bar, so it needs the bar's real height
+  // (the hint can wrap to two lines on narrow screens).
+  useEffect(() => {
+    const bar = barRef.current;
+    const canvas = bar?.closest('.te-canvas');
+    if (!bar || !canvas) return undefined;
+    const sync = () => canvas.style.setProperty('--te-canvas-bar-h', `${bar.offsetHeight}px`);
+    sync();
+    const observer = new ResizeObserver(sync);
+    observer.observe(bar);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="te-canvas-bar">
-      <h2 className="te-canvas-title">{mode === 'preview' ? 'Previewing Your Template' : 'Build Your Template'}</h2>
+    <div className="te-canvas-bar" ref={barRef}>
+      <div className="te-canvas-heading">
+        <h2 className="te-canvas-title">{copy.title}</h2>
+        <p className="te-canvas-hint">{copy.hint}</p>
+      </div>
       <div className="te-canvas-actions">
         {mode === 'preview' && <DeviceToggle device={device} onChange={onDeviceChange} />}
         <ModeToggle mode={mode} onChange={onModeChange} />
@@ -315,6 +346,27 @@ function PreviewPane() {
 // Cells export with the editor's look: our borders, the header's default aqua (Lexical's own
 // default is grey) and no fixed pixel widths, so the table fills the preview width (also on mobile).
 const HTML_EXPORT = new Map([
+  // Dragged column widths export as percentages, so the table keeps its proportions and still
+  // fits any width (desktop, mobile, email clients).
+  [
+    TableNode,
+    (editor, node) => {
+      const output = node.exportDOM(editor);
+      const { after } = output;
+      return {
+        ...output,
+        after: (el) => {
+          const out = after ? after(el) : el;
+          const table = out && (out.tagName === 'TABLE' ? out : out.querySelector?.('table'));
+          const cols = table ? [...table.querySelectorAll('col')] : [];
+          const widths = cols.map((c) => parseFloat(c.style.width) || 0);
+          const sum = widths.reduce((a, b) => a + b, 0);
+          if (sum > 0) cols.forEach((c, i) => (c.style.width = `${((widths[i] / sum) * 100).toFixed(2)}%`));
+          return out;
+        },
+      };
+    },
+  ],
   [
     TableCellNode,
     (editor, node) => {
@@ -366,6 +418,7 @@ function EditorCard({ mode, device, canvasElem, toolbarVariant }) {
         {anchorElem && (
           <>
             <DraggableBlockPlugin anchorElem={anchorElem} />
+            <TableResizePlugin anchorElem={anchorElem} />
             <TableControlsPlugin anchorElem={anchorElem} />
             <ColumnPlaceholdersPlugin anchorElem={anchorElem} />
             <ColumnResizePlugin anchorElem={anchorElem} />

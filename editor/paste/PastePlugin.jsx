@@ -14,7 +14,7 @@ import { $isTableCellNode, TableNode } from '@lexical/table';
 import { $findMatchingParent, mergeRegister } from '@lexical/utils';
 import { $createImageNode, ImageNode, readImageFile } from '../nodes/ImageNode';
 import { $createBlockImageNode, BlockImageNode, finishUpload } from '../nodes/BlockImageNode';
-import { $columnImageWidths } from '../nodes/tableLayout';
+import { $columnImageWidths, $hasManualColumns } from '../nodes/tableLayout';
 import { $isLayoutItemNode, LayoutContainerNode } from '../nodes/LayoutNodes';
 import { MAX_TABLE_COLUMNS, MAX_TABLE_ROWS } from '../plugins/TableControlsPlugin';
 
@@ -118,7 +118,10 @@ export default function PastePlugin() {
                 trimmed = true;
               });
           });
-          if (table.getColWidths() && $columnImageWidths(table).every((w) => !w)) table.setColWidths(undefined);
+          // (Widths the user dragged in this editor are kept.)
+          if (table.getColWidths() && !$hasManualColumns(table) && $columnImageWidths(table).every((w) => !w)) {
+            table.setColWidths(undefined);
+          }
           if (trimmed) toast(`Table trimmed to ${MAX_TABLE_COLUMNS} columns × ${MAX_TABLE_ROWS} rows`);
         }),
 

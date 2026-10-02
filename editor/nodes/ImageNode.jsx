@@ -399,3 +399,7 @@ export function $createImageNode({ src, altText = '', width = null, height = DEF
 export function $isImageNode(node) {
   return !!node && node.getType() === 'image';
 }
+
+// Lexical keeps the node class registered at startup; a hot-swapped class no longer matches it
+// ("Type … does not match registered node"), so changes here reload the page instead.
+if (import.meta.hot) import.meta.hot.decline();

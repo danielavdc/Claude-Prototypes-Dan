@@ -150,6 +150,9 @@ button { font-family: inherit; }
   box-shadow: -8px 0 0 var(--te-canvas), 8px 0 0 var(--te-canvas); /* hide the card's side shadow underneath */
 }
 .te-canvas-title { margin: 0; font-size: 18px; font-weight: 700; color: var(--te-text); white-space: nowrap; }
+.te-canvas-heading { min-width: 0; }
+/* Primary colour (not grey) so it stays readable on the canvas background */
+.te-canvas-hint { margin: 2px 0 0; font-size: 14px; line-height: 20px; color: var(--te-text); }
 .te-canvas-actions { display: flex; align-items: center; gap: 12px; }
 
 .te-toggle { display: inline-flex; }
@@ -625,6 +628,15 @@ button { font-family: inherit; }
 }
 .te-col-resize:hover::before, .te-col-resize.is-dragging::before { background: var(--te-teal); }
 
+/* Table column / row borders: drag to resize (the line turns teal on hover, like the column layout) */
+.te-tbl-resize { position: absolute; z-index: 4; touch-action: none; }
+.te-tbl-resize.is-col { cursor: col-resize; }
+.te-tbl-resize.is-row { cursor: row-resize; }
+.te-tbl-resize::before { content: ''; position: absolute; border-radius: 2px; background: transparent; transition: background 0.12s; }
+.te-tbl-resize.is-col::before { top: 0; bottom: 0; left: 50%; width: 3px; margin-left: -1.5px; }
+.te-tbl-resize.is-row::before { left: 0; right: 0; top: 50%; height: 3px; margin-top: -1.5px; }
+.te-tbl-resize:hover::before, .te-tbl-resize.is-dragging::before { background: var(--te-teal); }
+
 /* Column layout modal */
 .te-cols-modal { max-width: 420px; }
 .te-select { position: relative; margin: 6px 0 20px; }
@@ -1003,6 +1015,22 @@ button { font-family: inherit; }
 .te-tb-btn:disabled { color: #c4c4c4; cursor: not-allowed; background: transparent; }
 .te-tb-add { margin-left: 2px; }
 .te-tb-add-btn { height: 32px; margin: 0; padding: 0 8px; font-size: 12px; }
+/* "Try new features" indicator next to the toolbar's Add Element */
+.te-new-features {
+  margin-left: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 8px 0 6px;
+  border: 1px solid #a8801a;
+  border-radius: 4px;
+  background: #fdf3c9;
+  color: #5e4a0c;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
 .te-add-menu-right { left: auto; right: 0; }
 .te-link.te-link-menu { position: absolute; top: calc(100% + 8px); left: 0; z-index: 25; }
 
