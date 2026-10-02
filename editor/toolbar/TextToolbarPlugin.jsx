@@ -25,7 +25,7 @@ import {
   REMOVE_LIST_COMMAND,
 } from '@lexical/list';
 import { $isLinkNode, $toggleLink } from '@lexical/link';
-import { $isTableCellNode, $isTableNode } from '@lexical/table';
+import { $isTableCellNode, $isTableNode, $isTableSelection } from '@lexical/table';
 import { $findMatchingParent, $getNearestNodeOfType, mergeRegister } from '@lexical/utils';
 import data from '@emoji-mart/data';
 import Picker from '@emoji-mart/react';
@@ -37,6 +37,17 @@ import { $caretContext, ELEMENTS, SUPPRESS_TEXT_TOOLBAR_COMMAND, useInsertElemen
 import { $insertImageIntoCell, pickImage } from '../nodes/ImageNode';
 import { $distributeTableColumns, measureTable } from '../nodes/tableLayout';
 import { HEADER_CELL_COLOR } from '../plugins/TableControlsPlugin';
+import {
+  $bulkAlign,
+  $bulkCellColor,
+  $bulkFormatText,
+  $bulkIndent,
+  $bulkInsertText,
+  $bulkList,
+  $bulkPatchStyle,
+  $readCellsInfo,
+  $selectedCells,
+} from './cellBulk';
 
 /* ---------- options ---------- */
 
@@ -110,6 +121,25 @@ function $readInfo(selection) {
   };
 }
 
+// Several table cells selected at once: the toolbar reads (and later applies to) all of them.
+function $readTableSelectionInfo(selection) {
+  const cells = $selectedCells(selection);
+  const anchorCell = $findMatchingParent(selection.anchor.getNode(), $isTableCellNode) || cells[0];
+  return {
+    ...DEFAULT_INFO,
+    ...$readCellsInfo(cells),
+    multiCell: true,
+    cellKey: anchorCell ? anchorCell.getKey() : null,
+    cellKeys: cells.map((c) => c.getKey()),
+    cellBackground: anchorCell
+      ? anchorCell.getBackgroundColor() || (anchorCell.hasHeader() ? HEADER_CELL_COLOR : '')
+      : '',
+  };
+}
+
+const $isBulkCellSelection = (selection) =>
+  $isTableSelection(selection) && $selectedCells(selection).length > 1;
+
 function toCanvasRect(rect, canvas) {
   const c = canvas.getBoundingClientRect();
   return {
@@ -143,11 +173,20 @@ function TbButton({ tip, active, onClick, children, className = '', disabled = f
   );
 }
 
-function Swatch({ icon, color }) {
+// `cells`: the bar is split in two (side-by-side cells), in the icon's own colour, so Cell color
+// reads as a table colour and doesn't look like the text Background color (same bucket).
+function Swatch({ icon, color, cells = false }) {
   return (
     <span className="te-tb-swatch">
       <TbIcon name={icon} size={17} />
-      <span className="te-tb-swatch-bar" style={{ background: color }} />
+      {cells ? (
+        <span className="te-tb-swatch-cells">
+          <span className="te-tb-swatch-bar" style={{ background: color }} />
+          <span className="te-tb-swatch-bar" style={{ background: color }} />
+        </span>
+      ) : (
+        <span className="te-tb-swatch-bar" style={{ background: color }} />
+      )}
     </span>
   );
 }
@@ -170,6 +209,8 @@ const DEFAULT_INFO = {
   blockKey: null,
   cellKey: null,
   cellBackground: '',
+  multiCell: false,
+  cellKeys: [],
 };
 
 /**
@@ -204,6 +245,7 @@ export default function TextToolbarPlugin({ anchorElem, variant = 'floating', sl
       editor.getEditorState().read(() => {
         const selection = $getSelection();
         if ($isRangeSelection(selection)) setInfo($readInfo(selection));
+        else if ($isBulkCellSelection(selection)) setInfo($readTableSelectionInfo(selection));
       });
       return;
     }
@@ -211,6 +253,30 @@ export default function TextToolbarPlugin({ anchorElem, variant = 'floating', sl
       const selection = $getSelection();
       const root = editor.getRootElement();
       const native = window.getSelection();
+
+      // Bulk cell selection: the toolbar sits over the selected cells.
+      if ($isBulkCellSelection(selection)) {
+        if (!editor.isEditable() || mouseDown.current || suppressed.current) {
+          setTarget(null);
+          return;
+        }
+        const next = $readTableSelectionInfo(selection);
+        const rects = next.cellKeys
+          .map((key) => editor.getElementByKey(key)?.getBoundingClientRect())
+          .filter(Boolean);
+        if (rects.length === 0) {
+          setTarget(null);
+          return;
+        }
+        const top = Math.min(...rects.map((r) => r.top));
+        const bottom = Math.max(...rects.map((r) => r.bottom));
+        const left = Math.min(...rects.map((r) => r.left));
+        const right = Math.max(...rects.map((r) => r.right));
+        setInfo(next);
+        setTarget(toCanvasRect({ top, bottom, left, right, width: right - left, height: bottom - top }, anchorElem));
+        return;
+      }
+
       const visible =
         editor.isEditable() &&
         !mouseDown.current &&
@@ -348,10 +414,10 @@ export default function TextToolbarPlugin({ anchorElem, variant = 'floating', sl
     }
     editor.getEditorState().read(() => {
       const selection = $getSelection();
-      if ($isRangeSelection(selection)) saved.current = selection.clone();
+      if ($isRangeSelection(selection) || $isBulkCellSelection(selection)) saved.current = selection.clone();
     });
     const native = window.getSelection();
-    if (native && native.rangeCount > 0 && !native.isCollapsed) {
+    if (!info?.multiCell && native && native.rangeCount > 0 && !native.isCollapsed) {
       setOverlay([...native.getRangeAt(0).getClientRects()].map((r) => toCanvasRect(r, anchorElem)));
     } else {
       setOverlay([]);
@@ -392,7 +458,11 @@ export default function TextToolbarPlugin({ anchorElem, variant = 'floating', sl
   /* --- applying changes --- */
 
   // Runs `fn` against the selection captured when the menu opened.
-  const apply = (fn, { merge = false } = {}) => {
+  const apply = (fn, { merge = false, cells: cellFn = null } = {}) => {
+    if (info?.multiCell) {
+      if (cellFn) bulk(cellFn, { merge });
+      return;
+    }
     editor.update(
       () => {
         if (saved.current) $setSelection(saved.current.clone());
@@ -406,13 +476,49 @@ export default function TextToolbarPlugin({ anchorElem, variant = 'floating', sl
     );
   };
 
-  const patchStyle = (patch, opts) => apply((sel) => $patchStyleText(sel, patch), opts);
+  // Runs `fn(cells)` over every cell of the bulk table selection, then keeps that selection.
+  function bulk(fn, { merge = false } = {}) {
+    editor.update(
+      () => {
+        let selection = $getSelection();
+        if (!$isTableSelection(selection) && $isTableSelection(saved.current)) {
+          $setSelection(saved.current.clone());
+          selection = $getSelection();
+        }
+        if (!$isTableSelection(selection)) return;
+        const keep = selection.clone();
+        fn($selectedCells(selection));
+        $setSelection(keep);
+        saved.current = keep.clone();
+      },
+      merge ? { tag: 'history-merge' } : undefined,
+    );
+  }
 
-  const setCellColor = (hex, opts) =>
-    apply((sel) => {
-      const cell = $findMatchingParent(sel.anchor.getNode(), $isTableCellNode);
-      if (cell) cell.setBackgroundColor(hex);
-    }, opts);
+  const patchStyle = (patch, opts = {}) =>
+    apply((sel) => $patchStyleText(sel, patch), { ...opts, cells: (cells) => $bulkPatchStyle(cells, patch) });
+
+  const setCellColor = (hex, opts = {}) =>
+    apply(
+      (sel) => {
+        const cell = $findMatchingParent(sel.anchor.getNode(), $isTableCellNode);
+        if (cell) cell.setBackgroundColor(hex);
+      },
+      { ...opts, cells: (cells) => $bulkCellColor(cells, hex) },
+    );
+
+  const formatText = (format) => {
+    if (info?.multiCell) bulk((cells) => $bulkFormatText(cells, format));
+    else editor.dispatchCommand(FORMAT_TEXT_COMMAND, format);
+  };
+
+  const setAlign = (align) =>
+    apply(() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, align), { cells: (cells) => $bulkAlign(cells, align) });
+
+  const indent = (delta) => {
+    if (info?.multiCell) bulk((cells) => $bulkIndent(cells, delta));
+    else editor.dispatchCommand(delta > 0 ? INDENT_CONTENT_COMMAND : OUTDENT_CONTENT_COMMAND, undefined);
+  };
 
   const insertElement = useInsertElement();
 
@@ -442,6 +548,10 @@ export default function TextToolbarPlugin({ anchorElem, variant = 'floating', sl
   };
 
   const toggleList = (type, command) => {
+    if (info?.multiCell) {
+      bulk((cells) => $bulkList(cells, type, info.listType));
+      return;
+    }
     editor.dispatchCommand(info?.listType === type ? REMOVE_LIST_COMMAND : command, undefined);
   };
 
@@ -451,7 +561,7 @@ export default function TextToolbarPlugin({ anchorElem, variant = 'floating', sl
       sel.anchor.set(end.key, end.offset, end.type);
       sel.focus.set(end.key, end.offset, end.type);
       sel.insertText(emoji.native);
-    });
+    }, { cells: (cells) => $bulkInsertText(cells, emoji.native) });
     closeMenu();
     editor.focus();
   };
@@ -588,19 +698,19 @@ export default function TextToolbarPlugin({ anchorElem, variant = 'floating', sl
           </div>
 
           {/* Inline formats */}
-          <TbButton tip="Bold" active={info.bold} onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold')}>
+          <TbButton tip="Bold" active={info.bold} onClick={() => formatText('bold')}>
             <TbIcon name="bold" />
           </TbButton>
-          <TbButton tip="Italicize" active={info.italic} onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic')}>
+          <TbButton tip="Italicize" active={info.italic} onClick={() => formatText('italic')}>
             <TbIcon name="italic" size={19} />
           </TbButton>
-          <TbButton tip="Underline" active={info.underline} onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'underline')}>
+          <TbButton tip="Underline" active={info.underline} onClick={() => formatText('underline')}>
             <TbIcon name="underline" />
           </TbButton>
           <TbButton
             tip="Strike-through"
             active={info.strikethrough}
-            onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'strikethrough')}
+            onClick={() => formatText('strikethrough')}
           >
             <TbIcon name="strike" size={19} />
           </TbButton>
@@ -678,7 +788,7 @@ export default function TextToolbarPlugin({ anchorElem, variant = 'floating', sl
                 className="te-tb-drop"
                 onClick={() => openMenu('cell')}
               >
-                <TbIcon name="palette" />
+                <Swatch icon="fill" color="currentColor" cells />
                 <TbIcon name="chevron" size={16} />
               </TbButton>
               {menu === 'cell' && (
@@ -698,13 +808,19 @@ export default function TextToolbarPlugin({ anchorElem, variant = 'floating', sl
 
           {/* Link */}
           <div className="te-tb-group">
-            <TbButton tip="Add hyperlink" active={!!info.linkUrl || (fixed && menu === 'link')} onClick={() => openMenu('link')}>
+            <TbButton
+              tip={info.multiCell ? 'Add hyperlink (select text in one cell)' : 'Add hyperlink'}
+              disabled={info.multiCell}
+              active={!!info.linkUrl || (fixed && menu === 'link')}
+              onClick={() => openMenu('link')}
+            >
               <TbIcon name="link" />
             </TbButton>
             {fixed && menu === 'link' && !linkAnchor && linkEditor}
           </div>
 
-          <span className="te-tb-divider" />
+          {/* Fixed: the strip wraps here, so no divider between link and alignment */}
+          {!fixed && <span className="te-tb-divider" />}
 
           {/* Alignment */}
           <div className="te-tb-group">
@@ -721,7 +837,7 @@ export default function TextToolbarPlugin({ anchorElem, variant = 'floating', sl
                     className={`te-align-item${a.key === currentAlign.key ? ' is-active' : ''}`}
                     onMouseDown={keepFocus}
                     onClick={() => {
-                      apply(() => editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, a.key));
+                      setAlign(a.key);
                       closeMenu({ restore: true });
                     }}
                   >
@@ -733,10 +849,10 @@ export default function TextToolbarPlugin({ anchorElem, variant = 'floating', sl
             )}
           </div>
 
-          <TbButton tip="Indent" onClick={() => editor.dispatchCommand(INDENT_CONTENT_COMMAND, undefined)}>
+          <TbButton tip="Indent" onClick={() => indent(1)}>
             <TbIcon name="indent" />
           </TbButton>
-          <TbButton tip="Outdent" onClick={() => editor.dispatchCommand(OUTDENT_CONTENT_COMMAND, undefined)}>
+          <TbButton tip="Outdent" onClick={() => indent(-1)}>
             <TbIcon name="outdent" />
           </TbButton>
           <TbButton
@@ -765,7 +881,11 @@ export default function TextToolbarPlugin({ anchorElem, variant = 'floating', sl
 
           {/* Image — floating: only inside a table; fixed: always enabled (into the cell, or as an Image element) */}
           {(fixed || info.cellKey) && (
-            <TbButton tip={info.cellKey ? 'Add image (into cell)' : 'Add image (below cursor)'} onClick={addImage}>
+            <TbButton
+              tip={info.multiCell ? 'Add image (place the cursor in one cell)' : info.cellKey ? 'Add image (into cell)' : 'Add image (below cursor)'}
+              disabled={info.multiCell}
+              onClick={addImage}
+            >
               <TbIcon name="addImage" />
             </TbButton>
           )}
@@ -773,7 +893,8 @@ export default function TextToolbarPlugin({ anchorElem, variant = 'floating', sl
           {/* Placeholder */}
           <div className="te-tb-group">
             <TbButton
-              tip="Placeholder"
+              tip={info.multiCell ? 'Placeholder (place the cursor in one cell)' : 'Placeholder'}
+              disabled={info.multiCell}
               active={menu === 'placeholder'}
               className="te-tb-drop"
               onClick={() => openMenu('placeholder')}

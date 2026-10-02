@@ -314,8 +314,20 @@ button { font-family: inherit; }
 .te-table:has(tr > :nth-child(5)) .te-td { padding: 10px 10px; }
 .te-th { background: #dff0ef; font-weight: 700; }
 .te-td .te-p { margin: 0; }
-.te-td-selected { box-shadow: inset 0 0 0 2px var(--te-teal); }
-.te-td-selected::selection, .te-td-selected *::selection { background: transparent; }
+/* Caret's cell: focus outline (Notion-style, in our teal) */
+.te-td-focus { box-shadow: inset 0 0 0 2px var(--te-teal); }
+/* Bulk / row / column selection: a light tint on each cell + one outline around the whole
+   selection (.te-tbl-bulk-outline, drawn by TableControlsPlugin). */
+/* Lexical's own .te-td-selected can linger after structure changes, so only .te-td-bulk paints. */
+.te-td-bulk::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 120, 110, 0.1);
+  pointer-events: none;
+}
+.te-tbl-bulk-outline { position: absolute; z-index: 5; border: 2px solid var(--te-teal); border-radius: 2px; pointer-events: none; }
+.te-td-selected::selection, .te-td-selected *::selection, .te-td-bulk::selection, .te-td-bulk *::selection { background: transparent; }
 
 .te-table-add {
   position: absolute;
@@ -759,26 +771,28 @@ button { font-family: inherit; }
 .te-btn-primary { background: var(--te-teal); color: #fff; }
 .te-btn-primary:hover { background: var(--te-teal-hover); }
 
-/* Active-cell chevron (Lexical-style) → Delete row / Delete column */
-.te-cell-menu-wrap { position: absolute; z-index: 6; }
-.te-cell-menu-btn {
-  width: 22px;
-  height: 22px;
+/* Notion-style grips on the column's top edge / the row's left edge → select + Delete */
+.te-tbl-grip-wrap { position: absolute; z-index: 7; }
+.te-tbl-grip {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.06);
-  color: #555;
+  border: 1px solid var(--te-border-strong);
+  border-radius: 4px;
+  background: var(--te-surface); /* so it doesn't blend into the table outline */
+  color: #777;
   cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
-.te-cell-menu-btn:hover, .te-cell-menu-btn.is-open { background: rgba(0, 0, 0, 0.12); color: var(--te-text); }
+.te-tbl-grip.is-col { width: 24px; height: 14px; }
+.te-tbl-grip.is-row { width: 14px; height: 24px; }
+.te-tbl-grip:hover, .te-tbl-grip:focus-visible { background: #f3f3f3; color: var(--te-text); }
+.te-tbl-grip.is-open { background: var(--te-teal); border-color: var(--te-teal); color: #fff; }
+.te-tbl-grip:focus-visible { outline: 2px solid var(--te-teal); outline-offset: 1px; }
 .te-cell-menu {
   position: absolute;
-  top: calc(100% + 4px);
-  right: 0;
+  z-index: 8;
   width: 170px;
   padding: 6px 0;
   background: var(--te-surface);
@@ -799,6 +813,9 @@ button { font-family: inherit; }
 }
 .te-cell-menu-item:hover:not(:disabled) { background: #f3f3f3; }
 .te-cell-menu-item:disabled { color: #bdbdbd; cursor: default; }
+.te-cell-menu-item:focus-visible { outline: none; background: #f3f3f3; }
+.te-cell-menu.is-col { top: calc(100% + 4px); left: 0; }
+.te-cell-menu.is-row { top: 0; left: calc(100% + 4px); }
 
 .te-link-text { color: var(--te-teal); text-decoration: underline; cursor: text; }
 
@@ -962,6 +979,8 @@ button { font-family: inherit; }
 .te-tb-swatch { display: inline-flex; flex-direction: column; align-items: center; width: 20px; }
 .te-tb-swatch svg { margin-bottom: -1px; }
 .te-tb-swatch-bar { width: 18px; height: 4px; border-radius: 1px; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12); }
+.te-tb-swatch-cells { display: inline-flex; gap: 2px; }
+.te-tb-swatch-cells .te-tb-swatch-bar { width: 8px; box-shadow: none; }
 
 /* Fixed (Jira-style) variant: always-visible strip at the top of the card */
 .te-fixed-tb-slot {
