@@ -292,7 +292,7 @@ const CANVAS_COPY = {
     hint: 'Shape a reusable pitch with images, tables, columns and more.',
   },
   preview: {
-    title: 'Previewing Your Template',
+    title: 'Preview Your Template',
     hint: 'A close look at what your recipients will see.',
   },
 };
