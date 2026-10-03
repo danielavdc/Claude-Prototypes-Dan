@@ -58,19 +58,19 @@ export function $relayoutTable(editor, table) {
   $distributeTableColumns(table, width, padX);
 }
 
-// Six-dot grip (horizontal for a column handle, vertical for a row handle).
+// Arrow on the column / row handle: points to where its menu opens (down for a column, right for
+// a row). Not a six-dot grip — that would read as "drag to reorder", which tables don't support.
 function Grip({ vertical }) {
-  const dots = [];
-  for (let a = 0; a < 3; a += 1) {
-    for (let b = 0; b < 2; b += 1) {
-      const x = vertical ? 3 + b * 4 : 2 + a * 4;
-      const y = vertical ? 2 + a * 4 : 3 + b * 4;
-      dots.push(<circle key={`${a}-${b}`} cx={x} cy={y} r="1.1" />);
-    }
-  }
   return (
-    <svg width={vertical ? 10 : 14} height={vertical ? 14 : 10} viewBox={vertical ? '0 0 10 14' : '0 0 14 10'} fill="currentColor" aria-hidden="true">
-      {dots}
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+      style={vertical ? { transform: 'rotate(-90deg)' } : undefined}
+    >
+      <path d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6z" />
     </svg>
   );
 }
@@ -84,8 +84,8 @@ function tableElementOf(editor, key) {
  * - "+" bars to add a column (right) and a row (below) — always shown on every table, in space
  *   the table reserves for them (see .te-table in styles.css), so they never cover what follows.
  * - The cell holding the caret gets a focus outline.
- * - Notion-style handles: hovering a cell (or having the caret in it) shows a grip on the top
- *   edge of its column and on the left edge of its row. Clicking a grip selects that whole
+ * - Notion-style handles: hovering a cell (or having the caret in it) shows an arrow handle on the
+ *   top edge of its column and on the left edge of its row. Clicking a grip selects that whole
  *   column/row (so the toolbar styles it in bulk) and opens a menu to delete it.
  */
 export default function TableControlsPlugin({ anchorElem }) {

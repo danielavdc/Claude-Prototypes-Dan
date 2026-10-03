@@ -174,10 +174,67 @@ function useDropAnywhere(anchorElem, targetLineRef) {
   }, [editor, anchorElem, targetLineRef]);
 }
 
+const EDGE_ZONE = 80; // px from the visible edge where auto-scroll starts
+const MAX_SPEED = 18; // px per frame at the very edge
+
+/*
+ * While a block is being dragged, holding it near the top or bottom of the visible area scrolls
+ * the canvas, so it can be moved to a part of the template that's out of view. The top edge is
+ * the bottom of the sticky bars (title + fixed toolbar), since nothing can be dropped under them.
+ */
+function useDragAutoScroll(anchorElem) {
+  useEffect(() => {
+    const canvas = anchorElem.closest('.te-canvas');
+    if (!canvas) return undefined;
+    let speed = 0;
+    let frame = null;
+
+    const tick = () => {
+      if (speed === 0) {
+        frame = null;
+        return;
+      }
+      canvas.scrollTop += speed;
+      frame = requestAnimationFrame(tick);
+    };
+    const stop = () => {
+      speed = 0;
+      if (frame) cancelAnimationFrame(frame);
+      frame = null;
+    };
+
+    const onDragOver = (e) => {
+      if (![...(e.dataTransfer?.types || [])].includes(DRAG_DATA_FORMAT)) return;
+      const box = canvas.getBoundingClientRect();
+      let top = box.top;
+      canvas.querySelectorAll(':scope > .te-canvas-bar, .te-fixed-tb-slot:not([hidden])').forEach((el) => {
+        top = Math.max(top, el.getBoundingClientRect().bottom);
+      });
+      const bottom = Math.min(box.bottom, window.innerHeight);
+      const y = e.clientY;
+      if (y < top + EDGE_ZONE) speed = -Math.ceil(MAX_SPEED * Math.min(1, (top + EDGE_ZONE - y) / EDGE_ZONE));
+      else if (y > bottom - EDGE_ZONE) speed = Math.ceil(MAX_SPEED * Math.min(1, (y - (bottom - EDGE_ZONE)) / EDGE_ZONE));
+      else speed = 0;
+      if (speed !== 0 && !frame) frame = requestAnimationFrame(tick);
+    };
+
+    document.addEventListener('dragover', onDragOver);
+    document.addEventListener('drop', stop);
+    document.addEventListener('dragend', stop);
+    return () => {
+      stop();
+      document.removeEventListener('dragover', onDragOver);
+      document.removeEventListener('drop', stop);
+      document.removeEventListener('dragend', stop);
+    };
+  }, [anchorElem]);
+}
+
 export default function DraggableBlockPlugin({ anchorElem }) {
   const menuRef = useRef(null);
   const targetLineRef = useRef(null);
   useDropAnywhere(anchorElem, targetLineRef);
+  useDragAutoScroll(anchorElem);
 
   return (
     <>
