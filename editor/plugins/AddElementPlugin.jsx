@@ -195,7 +195,7 @@ export function useInsertElement() {
 // Element picker shared by the page-level button and the empty-column boxes.
 // Stays inside the visible area: opens downward if it fits, else upward, else
 // toward the roomier side with internal scrolling.
-export function ElementMenu({ triggerRef, wrapRef, exclude = [], onSelect, onClose, className = '' }) {
+export function ElementMenu({ triggerRef, wrapRef, exclude = [], onSelect, onClose, className = '', autoFocus = false }) {
   const menuRef = useRef(null);
   const [placement, setPlacement] = useState({ up: false, maxHeight: null });
 
@@ -234,6 +234,21 @@ export function ElementMenu({ triggerRef, wrapRef, exclude = [], onSelect, onClo
     };
   }, [place, triggerRef]);
 
+  // Opened from the keyboard: focus lands on the first option; ↑ / ↓ move between options.
+  useEffect(() => {
+    if (autoFocus) menuRef.current?.querySelector('.te-add-item:not(:disabled)')?.focus();
+  }, [autoFocus]);
+
+  const onMenuKeyDown = (e) => {
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    const items = [...menuRef.current.querySelectorAll('.te-add-item:not(:disabled)')];
+    if (items.length === 0) return;
+    e.preventDefault();
+    const i = items.indexOf(document.activeElement);
+    const next = e.key === 'ArrowDown' ? (i + 1) % items.length : (i - 1 + items.length) % items.length;
+    items[i < 0 ? 0 : next].focus();
+  };
+
   useEffect(() => {
     const onDown = (e) => {
       if (!wrapRef.current?.contains(e.target)) onClose();
@@ -254,6 +269,7 @@ export function ElementMenu({ triggerRef, wrapRef, exclude = [], onSelect, onClo
       ref={menuRef}
       className={`te-add-menu${placement.up ? ' is-up' : ''} ${className}`}
       role="menu"
+      onKeyDown={onMenuKeyDown}
       style={placement.maxHeight ? { maxHeight: placement.maxHeight, overflowY: 'auto' } : undefined}
     >
       {ELEMENTS.filter((el) => !exclude.includes(el.key)).map((el) => {

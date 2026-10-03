@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { $getNodeByKey, $getSelection, $isRangeSelection, $setSelection } from 'lexical';
+import { $getNodeByKey, $getSelection, $isNodeSelection, $isRangeSelection, $setSelection, COMMAND_PRIORITY_LOW } from 'lexical';
 import { $dfs, $findMatchingParent, mergeRegister } from '@lexical/utils';
 import { $isLayoutItemEmpty, $isLayoutItemNode, $isTextOnlyItem } from '../nodes/LayoutNodes';
 import { ElementMenu, useInsertElement } from './AddElementPlugin';
 import { Icon } from '../icons';
+import { OPEN_COLUMN_MENU_COMMAND } from './KeyboardNavPlugin';
 
-function PlaceholderBox({ itemKey, rect, open, onToggle, onClose }) {
+function PlaceholderBox({ itemKey, rect, open, focused, onToggle, onClose }) {
+  const [editor] = useLexicalComposerContext();
   const insert = useInsertElement();
   const wrapRef = useRef(null);
   const triggerRef = useRef(null);
@@ -21,7 +23,7 @@ function PlaceholderBox({ itemKey, rect, open, onToggle, onClose }) {
       <button
         ref={triggerRef}
         type="button"
-        className={`te-col-empty-btn${open ? ' is-open' : ''}`}
+        className={`te-col-empty-btn${open ? ' is-open' : ''}${focused ? ' is-focused' : ''}`}
         title="Add Element"
         aria-haspopup="menu"
         aria-expanded={open}
@@ -36,7 +38,14 @@ function PlaceholderBox({ itemKey, rect, open, onToggle, onClose }) {
           wrapRef={wrapRef}
           exclude={['columns']} // column layouts can't be nested
           className="te-add-menu-centered"
-          onClose={onClose}
+          autoFocus={focused}
+          onClose={() => {
+            // Closed while focus was in the menu (keyboard): hand focus back to the editor, where
+            // the column is still selected.
+            const hadFocus = wrapRef.current?.contains(document.activeElement);
+            onClose();
+            if (hadFocus) setTimeout(() => editor.getRootElement()?.focus({ preventScroll: true }), 0);
+          }}
           onSelect={(el) => {
             onClose();
             insert(el, itemKey);
@@ -52,6 +61,7 @@ export default function ColumnPlaceholdersPlugin({ anchorElem }) {
   const [editor] = useLexicalComposerContext();
   const [boxes, setBoxes] = useState([]); // [{ key, rect }]
   const [openKey, setOpenKey] = useState(null);
+  const [focusKey, setFocusKey] = useState(null); // empty column selected from the keyboard
 
   // Columns emptied by deleting text keep their caret (and text placeholder) until the caret leaves.
   const held = useRef(new Set());
@@ -63,8 +73,13 @@ export default function ColumnPlaceholdersPlugin({ anchorElem }) {
       const emptiness = []; // [domKey, isEmpty] for every column, to style layouts with no content yet
       let release = false;
 
+      let focused = null;
       state.read(() => {
         const selection = $getSelection();
+        if ($isNodeSelection(selection)) {
+          const [node] = selection.getNodes();
+          if ($isLayoutItemNode(node)) focused = node.getKey();
+        }
         const caretItem =
           $isRangeSelection(selection) ? $findMatchingParent(selection.anchor.getNode(), $isLayoutItemNode) : null;
         const caretKey = caretItem ? caretItem.getKey() : null;
@@ -104,6 +119,7 @@ export default function ColumnPlaceholdersPlugin({ anchorElem }) {
       // The box covers the column, so the caret must not stay hidden underneath it.
       if (release) editor.update(() => $setSelection(null));
 
+      setFocusKey(focused);
       const a = anchorElem.getBoundingClientRect();
       setBoxes(
         keys
@@ -123,12 +139,25 @@ export default function ColumnPlaceholdersPlugin({ anchorElem }) {
     const remeasure = () => measure();
     remeasure();
     window.addEventListener('resize', remeasure);
+    // Content above can change height without an editor update (e.g. an image finishing loading).
+    const observer = new ResizeObserver(remeasure);
+    const root = editor.getRootElement();
+    if (root) observer.observe(root);
     const unregister = mergeRegister(
       editor.registerUpdateListener((payload) => measure(payload)),
       editor.registerEditableListener(remeasure),
+      editor.registerCommand(
+        OPEN_COLUMN_MENU_COMMAND,
+        (key) => {
+          setOpenKey(key);
+          return true;
+        },
+        COMMAND_PRIORITY_LOW,
+      ),
     );
     return () => {
       unregister();
+      observer.disconnect();
       window.removeEventListener('resize', remeasure);
     };
   }, [editor, measure]);
@@ -147,6 +176,7 @@ export default function ColumnPlaceholdersPlugin({ anchorElem }) {
           itemKey={b.key}
           rect={b.rect}
           open={openKey === b.key}
+          focused={focusKey === b.key}
           onToggle={() => setOpenKey((k) => (k === b.key ? null : b.key))}
           onClose={() => setOpenKey((k) => (k === b.key ? null : k))}
         />

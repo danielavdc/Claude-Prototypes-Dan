@@ -60,6 +60,7 @@ import DraggableBlockPlugin from './plugins/DraggableBlockPlugin';
 import TextToolbarPlugin from './toolbar/TextToolbarPlugin';
 import AddElementPlugin, { ToolbarAddElement } from './plugins/AddElementPlugin';
 import BlockKeyboardPlugin from './plugins/BlockKeyboardPlugin';
+import KeyboardNavPlugin from './plugins/KeyboardNavPlugin';
 import TableControlsPlugin from './plugins/TableControlsPlugin';
 import TableResizePlugin from './plugins/TableResizePlugin';
 import ColumnPlaceholdersPlugin from './plugins/ColumnPlaceholdersPlugin';
@@ -405,6 +406,7 @@ function EditorCard({ mode, device, canvasElem, toolbarVariant }) {
         <LinkPlugin />
         <HorizontalRulePlugin />
         <BlockKeyboardPlugin />
+        <KeyboardNavPlugin />
         <ColumnLayoutPlugin />
         <BlockMergePlugin />
         <CellPlaceholderPlugin />

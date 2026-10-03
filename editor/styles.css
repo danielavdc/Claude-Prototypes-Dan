@@ -560,6 +560,7 @@ button { font-family: inherit; }
 
 /* ---------- Column layouts ---------- */
 .te-columns { display: grid; gap: 16px; margin: 4px 0 14px; }
+.te-table.te-node-focus { outline: 2px solid var(--te-teal); outline-offset: 3px; border-radius: 2px; }
 .te-columns.is-selected { outline: 2px solid var(--te-teal); outline-offset: 4px; border-radius: 4px; background: rgba(0, 130, 127, 0.04); }
 .te-column {
   position: relative;
@@ -605,6 +606,9 @@ button { font-family: inherit; }
   transition: background 0.12s, border-color 0.12s;
 }
 .te-col-empty-btn:hover, .te-col-empty-btn.is-open { background: #f4fbfa; border-color: var(--te-teal); }
+/* Empty column reached with the keyboard (Enter opens its menu) */
+.te-col-empty-btn.is-focused { border: 2px solid var(--te-teal); background: #f4fbfa; color: var(--te-teal); }
+.te-add-item:focus-visible { outline: none; background: #f3f3f3; }
 .te-add-menu-centered { left: 50%; translate: -50% 0; } /* translate, not transform: the pop animation owns transform */
 
 /* Draggable divider between layout columns (min 60px per column) */
