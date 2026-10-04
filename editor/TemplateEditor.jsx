@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import emptyTemplateIllustration from './assets/empty-template.svg';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
@@ -42,6 +43,7 @@ import {
   $createParagraphNode,
   $createTextNode,
   $getRoot,
+  $isElementNode,
   CAN_REDO_COMMAND,
   CAN_UNDO_COMMAND,
   COMMAND_PRIORITY_LOW,
@@ -328,12 +330,31 @@ function CanvasBar({ mode, onModeChange, device, onDeviceChange }) {
   );
 }
 
+// Nothing written yet: only blank paragraphs / headings / quotes (no text, image, table, divider…).
+const $isTemplateEmpty = () =>
+  $getRoot()
+    .getChildren()
+    .every((block) => $isElementNode(block) && !block.isInline() && ['paragraph', 'heading', 'quote'].includes(block.getType()) && block.getChildrenSize() === 0);
+
+// Shown in Preview when the template has no content yet: explains why it's blank.
+function PreviewEmptyState() {
+  return (
+    <div className="te-preview-empty">
+      <img src={emptyTemplateIllustration} width="160" height="160" alt="" aria-hidden="true" />
+      <h3 className="te-preview-empty-title">Nothing to Preview Yet</h3>
+      <p className="te-preview-empty-text">Your template is empty. Start writing your outreach in Edit mode to see how it will look.</p>
+    </div>
+  );
+}
+
 function PreviewPane() {
   const [editor] = useLexicalComposerContext();
   const [html, setHtml] = useState('');
+  const [empty, setEmpty] = useState(false);
 
   useEffect(() => {
     editor.getEditorState().read(() => {
+      setEmpty($isTemplateEmpty());
       const raw = $generateHtmlFromNodes(editor, null);
       setHtml(
         raw.replace(/\{\{\s*([a-zA-Z0-9_.]+)\s*\}\}/g, (m, key) => SAMPLE_VALUES[key] ?? m),
@@ -341,6 +362,7 @@ function PreviewPane() {
     });
   }, [editor]);
 
+  if (empty) return <PreviewEmptyState />;
   return <div className="te-preview" dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
