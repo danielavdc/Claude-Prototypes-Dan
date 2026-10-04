@@ -57,9 +57,10 @@ export const FONT_FAMILIES = [
   { label: 'Courier New', value: '"Courier New", Courier, monospace' },
   { label: 'Georgia', value: 'Georgia, serif' },
   { label: 'Helvetica', value: '"Helvetica Neue", Helvetica, Arial, sans-serif' },
+  { label: 'Impact', value: 'Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif' },
+  { label: 'Lucida', value: '"Lucida Sans Unicode", "Lucida Grande", "Lucida Sans", sans-serif' },
   { label: 'Tahoma', value: 'Tahoma, Geneva, sans-serif' },
   { label: 'Times New Roman', value: '"Times New Roman", Times, serif' },
-  { label: 'Trebuchet MS', value: '"Trebuchet MS", Helvetica, sans-serif' },
   { label: 'Verdana', value: 'Verdana, Geneva, sans-serif' },
 ];
 
