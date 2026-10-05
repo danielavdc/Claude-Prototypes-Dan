@@ -17,7 +17,6 @@ import { $dfs, $findMatchingParent } from '@lexical/utils';
 import { $distributeTableColumns, measureTable } from '../nodes/tableLayout';
 
 export const MAX_TABLE_COLUMNS = 7;
-export const MAX_TABLE_ROWS = 10;
 // Default fill of header cells (no colour of their own) — editor, picker and export.
 export const HEADER_CELL_COLOR = '#DFF0EF';
 
@@ -204,7 +203,7 @@ export default function TableControlsPlugin({ anchorElem }) {
   const addRow = (key) => {
     editor.update(() => {
       const table = $getNodeByKey(key);
-      if (!$isTableNode(table) || $tableSize(table).rows >= MAX_TABLE_ROWS) return;
+      if (!$isTableNode(table)) return; // rows are unlimited
       const existing = new Set($cellKeys(table));
       $insertTableRowAtNode(table.getLastChild().getFirstChild(), true);
       $labelNewCells(table, existing);
@@ -336,7 +335,6 @@ export default function TableControlsPlugin({ anchorElem }) {
     <>
       {tables.map((t) => {
         const colsFull = t.cols >= MAX_TABLE_COLUMNS;
-        const rowsFull = t.rows >= MAX_TABLE_ROWS;
         return (
           <div key={t.key}>
             <button
@@ -355,8 +353,7 @@ export default function TableControlsPlugin({ anchorElem }) {
               type="button"
               className="te-table-add te-table-add-row"
               style={{ top: t.rect.top + t.rect.height + 6, left: t.rect.left, width: t.rect.width }}
-              disabled={rowsFull}
-              data-tip={rowsFull ? `Maximum ${MAX_TABLE_ROWS} rows` : `Add row (${t.rows}/${MAX_TABLE_ROWS})`}
+              data-tip="Add row"
               aria-label="Add row"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => addRow(t.key)}

@@ -16,7 +16,7 @@ import { $createImageNode, ImageNode, readImageFile } from '../nodes/ImageNode';
 import { $createBlockImageNode, BlockImageNode, finishUpload } from '../nodes/BlockImageNode';
 import { $columnImageWidths, $hasManualColumns } from '../nodes/tableLayout';
 import { $isLayoutItemNode, LayoutContainerNode } from '../nodes/LayoutNodes';
-import { MAX_TABLE_COLUMNS, MAX_TABLE_ROWS } from '../plugins/TableControlsPlugin';
+import { MAX_TABLE_COLUMNS } from '../plugins/TableControlsPlugin';
 
 export const TOAST_EVENT = 'te-toast';
 const toast = (message) => window.dispatchEvent(new CustomEvent(TOAST_EVENT, { detail: message }));
@@ -101,15 +101,11 @@ export default function PastePlugin() {
           if (['h4', 'h5', 'h6'].includes(node.getTag())) node.replace($createHeadingNode('h3'), true);
         }),
 
-        // Pasted tables respect the 7 × 10 limit and never keep the source's fixed pixel widths.
+        // Pasted tables respect the 7-column limit (rows are unlimited) and never keep the source's fixed pixel widths.
         editor.registerNodeTransform(TableNode, (table) => {
           let trimmed = false;
           const rows = table.getChildren();
-          rows.slice(MAX_TABLE_ROWS).forEach((row) => {
-            row.remove();
-            trimmed = true;
-          });
-          rows.slice(0, MAX_TABLE_ROWS).forEach((row) => {
+          rows.forEach((row) => {
             row
               .getChildren()
               .slice(MAX_TABLE_COLUMNS)
@@ -122,7 +118,7 @@ export default function PastePlugin() {
           if (table.getColWidths() && !$hasManualColumns(table) && $columnImageWidths(table).every((w) => !w)) {
             table.setColWidths(undefined);
           }
-          if (trimmed) toast(`Table trimmed to ${MAX_TABLE_COLUMNS} columns × ${MAX_TABLE_ROWS} rows`);
+          if (trimmed) toast(`Table trimmed to ${MAX_TABLE_COLUMNS} columns`);
         }),
 
         // Column layouts can't be nested — a layout pasted into a column is flattened into it.
