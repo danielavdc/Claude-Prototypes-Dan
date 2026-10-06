@@ -5,7 +5,7 @@ import { $getNodeByKey } from 'lexical';
 import { $dfs } from '@lexical/utils';
 import { $isLayoutContainerNode } from '../nodes/LayoutNodes';
 
-export const MIN_LAYOUT_COLUMN = 60;
+export const MIN_LAYOUT_COLUMN = 30; // narrow enough for a social icon (signatures)
 const HANDLE_WIDTH = 10;
 
 // Draggable dividers between the columns of a column layout. Dragging moves width from one
