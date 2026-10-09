@@ -1019,22 +1019,6 @@ button { font-family: inherit; }
 .te-tb-btn:disabled { color: #c4c4c4; cursor: not-allowed; background: transparent; }
 .te-tb-add { margin-left: 2px; }
 .te-tb-add-btn { height: 32px; margin: 0; padding: 0 8px; font-size: 12px; }
-/* "Try new features" indicator next to the toolbar's Add Element */
-.te-new-features {
-  margin-left: 8px;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  height: 22px;
-  padding: 0 8px 0 6px;
-  border: 1px solid #a8801a;
-  border-radius: 4px;
-  background: #fdf3c9;
-  color: #5e4a0c;
-  font-size: 12px;
-  font-weight: 700;
-  white-space: nowrap;
-}
 .te-add-menu-right { left: auto; right: 0; }
 .te-link.te-link-menu { position: absolute; top: calc(100% + 8px); left: 0; z-index: 25; }
 
