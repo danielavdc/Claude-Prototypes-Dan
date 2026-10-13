@@ -1,4 +1,4 @@
-import { Box, Typography, Paper, Divider, IconButton, ToggleButton, ToggleButtonGroup } from '@mui/material'
+import { Box, Typography, Paper, Divider, IconButton } from '@mui/material'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
@@ -10,9 +10,19 @@ import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt'
 import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder'
+import ShowChartIcon from '@mui/icons-material/ShowChart'
+import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined'
+import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined'
+import AnchorNav, { SectionTitle } from './AnchorNav'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined'
 import { useState, useRef, useEffect } from 'react'
+
+const COV_NAV = [
+  { id: 'cov-volume',    label: 'Volume',    Icon: ShowChartIcon          },
+  { id: 'cov-locations', label: 'Locations', Icon: LocationOnOutlinedIcon },
+  { id: 'cov-sources',   label: 'Sources',   Icon: ArticleOutlinedIcon    },
+]
 
 const TEAL   = '#1D9F9F'
 const PURPLE = '#9C4DD6'
@@ -21,12 +31,6 @@ const ORANGE = '#FF9800'
 const BLUE   = '#2196F3'
 const GREEN  = '#4CAF50'
 const RED    = '#F44336'
-
-const NAV_SECTIONS = [
-  { id: 'volume',    label: 'Volume'    },
-  { id: 'locations', label: 'Locations' },
-  { id: 'sources',   label: 'Sources'   },
-]
 
 const X_LABELS = ['Aug 25', 'Aug 26', 'Aug 27', 'Aug 28', 'Aug 29', 'Aug 30', 'Aug 31']
 
@@ -273,68 +277,9 @@ function MiniSparkline({ data, up }) {
 
 // ── sticky segment nav ────────────────────────────────────────────────────────
 
-function StickySegmentNav({ items, value, onChange }) {
-  const [isSticky, setIsSticky] = useState(false)
-  const ref = useRef(null)
-
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    let parent = el.parentElement
-    while (parent && parent !== document.body) {
-      const s = window.getComputedStyle(parent)
-      if (s.overflow === 'auto' || s.overflowY === 'auto' || s.overflow === 'scroll' || s.overflowY === 'scroll') break
-      parent = parent.parentElement
-    }
-    if (!parent || parent === document.body) return
-    const check = () => {
-      const r = el.getBoundingClientRect()
-      const p = parent.getBoundingClientRect()
-      setIsSticky(r.top <= p.top + 1)
-    }
-    parent.addEventListener('scroll', check, { passive: true })
-    return () => parent.removeEventListener('scroll', check)
-  }, [])
-
-  return (
-    <Box ref={ref} sx={{
-      position: 'sticky', top: 0, zIndex: 10,
-      bgcolor: '#F5F5F5', py: 1.25,
-      boxShadow: isSticky ? '0 2px 8px rgba(0,0,0,0.10)' : 'none',
-      transition: 'box-shadow 0.2s ease',
-    }}>
-      <ToggleButtonGroup
-        value={value} exclusive
-        onChange={(_, val) => { if (val) onChange(val) }}
-        sx={{
-          '& .MuiToggleButton-root': {
-            py: 0.75, px: 2, fontSize: 14, fontWeight: 400,
-            textTransform: 'none', letterSpacing: 0,
-            color: '#212121', bgcolor: 'transparent', borderColor: '#9E9E9E', borderRadius: 0,
-            whiteSpace: 'nowrap',
-            '&:first-of-type': { borderRadius: '4px 0 0 4px' },
-            '&:last-of-type':  { borderRadius: '0 4px 4px 0' },
-            '&.Mui-selected': {
-              bgcolor: 'rgba(29,159,159,0.12)', color: '#212121', borderColor: '#00827F',
-              '&:hover': { bgcolor: 'rgba(29,159,159,0.18)' },
-            },
-            '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' },
-          },
-        }}
-      >
-        {items.map(item => (
-          <ToggleButton key={item.id} value={item.id} disableRipple={false}>
-            {item.label}
-          </ToggleButton>
-        ))}
-      </ToggleButtonGroup>
-    </Box>
-  )
-}
-
 // ── shared ai insight ─────────────────────────────────────────────────────────
 
-function AIInsightWidget() {
+export function AIInsightWidget() {
   return (
     <Box sx={{ p: '1.5px', borderRadius: 2, background: 'linear-gradient(135deg, #9C4DD6 0%, #CF2D8A 40%, #1D9F9F 100%)' }}>
       <Box sx={{ bgcolor: 'background.paper', borderRadius: '6px', p: 2 }}>
@@ -372,8 +317,6 @@ function MentionsContent() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
 
-      <AIInsightWidget />
-
       <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2 }}>
         <WidgetHeader title="Mentions Trend" />
         <Box sx={{ display: 'flex', gap: 4, mb: 2 }}>
@@ -403,7 +346,7 @@ function MentionsContent() {
 
 // ── engagement tab ────────────────────────────────────────────────────────────
 
-function EngagementContent() {
+export function EngagementContent() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
 
@@ -838,30 +781,44 @@ function TrendingContent() {
 // ── main export ───────────────────────────────────────────────────────────────
 
 export default function CoverageTabContent({ onDashboardSave, loading, targetSubTab, subTabTrigger }) {
-  const [activeTab, setActiveTab] = useState('volume')
-  useEffect(() => { if (subTabTrigger > 0 && targetSubTab) setActiveTab(targetSubTab) }, [subTabTrigger])
+  useEffect(() => {
+    if (subTabTrigger > 0 && targetSubTab) {
+      document.getElementById(`cov-${targetSubTab}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [subTabTrigger])
+
   if (loading) return null
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-      <StickySegmentNav items={NAV_SECTIONS} value={activeTab} onChange={setActiveTab} />
-      {activeTab === 'volume' && (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <MentionsContent />
-          <EngagementContent />
-        </Box>
-      )}
-      {activeTab === 'locations' && (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+      <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 3 }}>
+
+        <Box id="cov-volume">
           <AIInsightWidget />
-          <LocationsContent />
+          <SectionTitle>Volume</SectionTitle>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            <MentionsContent />
+            <EngagementContent />
+          </Box>
         </Box>
-      )}
-      {activeTab === 'sources' && (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+
+        <Box id="cov-locations">
           <AIInsightWidget />
-          <TrendingContent />
+          <SectionTitle>Locations</SectionTitle>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            <LocationsContent />
+          </Box>
         </Box>
-      )}
+
+        <Box id="cov-sources">
+          <AIInsightWidget />
+          <SectionTitle>Sources</SectionTitle>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            <TrendingContent />
+          </Box>
+        </Box>
+
+      </Box>
+      <AnchorNav items={COV_NAV} />
     </Box>
   )
 }

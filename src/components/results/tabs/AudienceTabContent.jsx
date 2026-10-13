@@ -1,4 +1,8 @@
 import { Box, Typography, IconButton, Checkbox } from '@mui/material'
+import AnchorNav, { SectionTitle } from './AnchorNav'
+import ArticleOutlinedIcon from '@mui/icons-material/ArticleOutlined'
+import ShowChartIcon from '@mui/icons-material/ShowChart'
+import NewspaperOutlinedIcon from '@mui/icons-material/NewspaperOutlined'
 import WidgetCard from './WidgetCard'
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt'
@@ -27,11 +31,10 @@ const GREEN  = '#4CAF50'
 const DARK   = '#212121'
 const YELLOW = '#FFC107'
 
-const NAV_TABS = [
-  { id: 'authors-list',  label: 'Authors List'  },
-  { id: 'journalists',   label: 'Journalists'   },
-  { id: 'x-authors',     label: 'X Authors'     },
-  { id: 'news-coverage', label: 'News Coverage' },
+const AUD_NAV = [
+  { id: 'aud-social-authors', label: 'Social Authors', Icon: ShowChartIcon          },
+  { id: 'aud-journalists',    label: 'Journalists',    Icon: ArticleOutlinedIcon   },
+  { id: 'aud-news-sources',   label: 'News Sources',   Icon: NewspaperOutlinedIcon },
 ]
 
 // ── shared ui ─────────────────────────────────────────────────────────────────
@@ -164,49 +167,6 @@ function Pagination({ text }) {
   )
 }
 
-function StickySegmentNav({ value, onChange }) {
-  const [isSticky, setIsSticky] = useState(false)
-  const ref = useRef(null)
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    let parent = el.parentElement
-    while (parent && parent !== document.body) {
-      const s = window.getComputedStyle(parent)
-      if (s.overflow === 'auto' || s.overflowY === 'auto') break
-      parent = parent.parentElement
-    }
-    if (!parent) return
-    const check = () => setIsSticky(el.getBoundingClientRect().top <= parent.getBoundingClientRect().top + 1)
-    parent.addEventListener('scroll', check, { passive: true })
-    return () => parent.removeEventListener('scroll', check)
-  }, [])
-  return (
-    <Box ref={ref} sx={{ position: 'sticky', top: 0, zIndex: 10, bgcolor: '#F5F5F5', py: 1.25, boxShadow: isSticky ? '0 2px 8px rgba(0,0,0,0.10)' : 'none', transition: 'box-shadow 0.2s' }}>
-      <Box sx={{ display: 'flex', gap: 0 }}>
-        {NAV_TABS.map(tab => (
-          <Box
-            key={tab.id}
-            onClick={() => onChange(tab.id)}
-            sx={{
-              px: 2, py: 0.75, fontSize: 14, cursor: 'pointer', whiteSpace: 'nowrap',
-              border: '1px solid', userSelect: 'none',
-              borderColor: value === tab.id ? '#00827F' : '#9E9E9E',
-              bgcolor: value === tab.id ? 'rgba(29,159,159,0.12)' : 'transparent',
-              color: '#212121',
-              '&:first-of-type': { borderRadius: '4px 0 0 4px' },
-              '&:last-of-type':  { borderRadius: '0 4px 4px 0' },
-              '&:not(:first-of-type)': { borderLeft: 'none' },
-              '&:hover': { bgcolor: value === tab.id ? 'rgba(29,159,159,0.18)' : 'rgba(0,0,0,0.04)' },
-            }}
-          >
-            {tab.label}
-          </Box>
-        ))}
-      </Box>
-    </Box>
-  )
-}
 
 // ── NEWS COVERAGE ─────────────────────────────────────────────────────────────
 
@@ -237,7 +197,7 @@ const SECHO_SOURCES = [
   { name: 'NPR',             fb: 200,  x: 100  },
 ]
 
-function NewsCoverageContent() {
+function NewsCoverageContent({ title }) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <AIInsight bullets={[
@@ -245,6 +205,7 @@ function NewsCoverageContent() {
         'Social Echo reached 52.1k total, driven primarily by Facebook (35.8%) and X (25.5%), suggesting high cross-platform amplification of key articles. 3, 4',
         'CNN and USA Today account for the largest social echo share by source, with combined reach exceeding 5.8k in the period — signaling strong mainstream amplification. 5, 6…',
       ]} />
+      {title && <SectionTitle>{title}</SectionTitle>}
 
       {/* 6 KPI cards 2x3 */}
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
@@ -618,7 +579,7 @@ const J_REACH_TREND = [
   { label: 'Alexandra Bird', color: PINK,  data: [8,  12, 18, 22, 14, 12, 14] },
 ]
 
-function JournalistsContent() {
+function JournalistsContent({ title }) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <AIInsight bullets={[
@@ -626,6 +587,7 @@ function JournalistsContent() {
         'Total Reach of 33.3k reflects a broad distribution of coverage, with top journalists averaging 8 Relevant Mentions each and strong social presence across X, LinkedIn and Instagram. 3, 4',
         'Matt Roush leads Reach Breakdown at 52.1k, followed by Lindsey Barr at 38.3k — together accounting for over 54% of total journalist-driven reach in the period. 5…',
       ]} />
+      {title && <SectionTitle>{title}</SectionTitle>}
 
       {/* 3 KPI sparkline cards */}
       <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
@@ -827,7 +789,7 @@ const XA_BIO_KW = [
 ]
 const BIO_COLORS = [TEAL, BLUE, '#9C4DD6', '#FF9800', '#CF2D8A']
 
-function XAuthorsContent() {
+function XAuthorsContent({ title }) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <AIInsight bullets={[
@@ -835,6 +797,7 @@ function XAuthorsContent() {
         'United States dominates location with 903 authors, followed by Canada (823) and Ivory Coast (522) — indicating significant international reach beyond North America. 3, 4',
         'Travel and Science are the top interests at 50% each, while English and Spanish are the leading languages — useful for tailoring content strategy across X campaigns. 5…',
       ]} />
+      {title && <SectionTitle>{title}</SectionTitle>}
 
       {/* Info banner */}
       <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2, display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -1068,7 +1031,7 @@ function SentimentBar({ positive = 70, negative = 10, neutral = 20 }) {
   )
 }
 
-function AuthorsListContent() {
+function AuthorsListContent({ title }) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
       <AIInsight bullets={[
@@ -1076,6 +1039,7 @@ function AuthorsListContent() {
         'Spanish and English are the leading languages, each at 60% share, suggesting strong bilingual reach. French and Arabic represent growth opportunities in underserved markets. 3, 4',
         'Reddit.com/r/apple and Sports Illustrated show the highest engagement growth at +85.4% and +21.9% respectively — signaling high-value communities for targeted amplification. 5…',
       ]} />
+      {title && <SectionTitle>{title}</SectionTitle>}
 
       {/* Author Gender + Author Demographic */}
       <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
@@ -1256,16 +1220,24 @@ function AuthorsListContent() {
 // ── main export ───────────────────────────────────────────────────────────────
 
 export default function AudienceTabContent({ loading, targetSubTab, subTabTrigger }) {
-  const [activeTab, setActiveTab] = useState('authors-list')
-  useEffect(() => { if (subTabTrigger > 0 && targetSubTab) setActiveTab(targetSubTab) }, [subTabTrigger])
+  useEffect(() => {
+    if (subTabTrigger > 0 && targetSubTab) {
+      document.getElementById(`aud-${targetSubTab}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [subTabTrigger])
+
   if (loading) return null
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-      <StickySegmentNav value={activeTab} onChange={setActiveTab} />
-      {activeTab === 'authors-list'  && <AuthorsListContent />}
-      {activeTab === 'journalists'   && <JournalistsContent />}
-      {activeTab === 'x-authors'     && <XAuthorsContent />}
-      {activeTab === 'news-coverage' && <NewsCoverageContent />}
+    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+      <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 3 }}>
+        <Box id="aud-social-authors">
+          <XAuthorsContent    title="Social Authors" />
+          <AuthorsListContent />
+        </Box>
+        <Box id="aud-journalists"> <JournalistsContent  title="Journalists"  /></Box>
+        <Box id="aud-news-sources"><NewsCoverageContent title="News Sources"  /></Box>
+      </Box>
+      <AnchorNav items={AUD_NAV} />
     </Box>
   )
 }

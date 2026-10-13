@@ -110,11 +110,11 @@ function SearchPanel({
   const [tabMenuTabIndex, setTabMenuTabIndex] = useState(null)
   const [tabSetMode, setTabSetMode] = useState('focus')
   const CLASSIC_TABS = [
-    { label: 'Overview',        description: '' },
-    { label: 'Analytics',       description: '' },
+    { label: 'Overview',        description: ''        },
+    { label: 'Analytics',       description: ''       },
     { label: 'Topic Analytics', description: '' },
-    { label: 'X Insight',       description: '' },
-    { label: 'Authors',         description: '' },
+    { label: 'X Insight',       description: ''       },
+    { label: 'Authors',         description: ''         },
     { label: 'Media Relations', description: '' },
   ]
   const [tabs, setTabs] = useState(() =>
@@ -814,27 +814,22 @@ function SearchPanel({
                   </Typography>
                 </Box>
               )
+              const ON_DEMAND_DESC = { 'Visual Analysis': "What's the Visual Story?", 'Social Media Insights': "What's Trending?" }
               return available.map(item => (
                 <MenuItem key={item} onClick={() => {
-                  const ON_DEMAND_DESC = { 'Visual Analysis': "What's the Visual Story?", 'Social Media Insights': "What's Trending?" }
                   setTabs(prev => [...prev, { label: item, description: ON_DEMAND_DESC[item] || '' }])
                   setPinTabAnchor(null)
                   triggerSave()
-                }} sx={{ px: 2, py: 1.25, fontSize: 15, color: 'text.primary' }}>
-                  {item}
+                }} sx={{ px: 2, py: 1.25, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                  <Typography sx={{ fontSize: 15, color: 'text.primary', lineHeight: 1.3 }}>{item}</Typography>
+                  {ON_DEMAND_DESC[item] && <Typography sx={{ fontSize: 12, color: 'text.secondary', lineHeight: 1.3 }}>{ON_DEMAND_DESC[item]}</Typography>}
                 </MenuItem>
               ))
             })()}
-            <Divider sx={{ my: 0.5 }} />
-            {[
-              { label: 'Create tab with AI',  Icon: AutoAwesomeIcon },
-              { label: 'Create custom tab',   Icon: TuneIcon        },
-            ].map(({ label, Icon }) => (
-              <Box key={label} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 2, py: 1.25, cursor: 'default' }}>
-                <Icon sx={{ fontSize: 18, color: '#616161', flexShrink: 0 }} />
-                <Typography sx={{ fontSize: 15, color: '#212121' }}>{label}</Typography>
-              </Box>
-            ))}
+            <Box sx={{ px: 2, py: 1.25, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+              <Typography sx={{ fontSize: 15, color: 'text.primary', lineHeight: 1.3 }}>Audience</Typography>
+              <Typography sx={{ fontSize: 12, color: 'text.secondary', lineHeight: 1.3 }}>Who is Consuming?</Typography>
+            </Box>
             {removedTabs.length > 0 && <Divider />}
             {removedTabs.map((tab, i) => {
               const label = typeof tab === 'string' ? tab : tab.label
@@ -859,52 +854,6 @@ function SearchPanel({
           )}
         </Box>{/* end scrollable tabs area */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, pr: 1.5, flexShrink: 0 }}>
-          {/* Focus / Tab Set dropdown */}
-          <Box
-            onClick={(e) => setTabSetMenuAnchor(e.currentTarget)}
-            sx={{ display: 'flex', alignItems: 'center', gap: 0.5, px: 1.25, py: 0.5, borderRadius: 0.75, cursor: 'pointer', bgcolor: tabSetMenuAnchor ? alpha('#000', 0.04) : 'transparent', '&:hover': { bgcolor: alpha('#000', 0.04) } }}
-          >
-            <Typography sx={{ fontSize: 13, fontWeight: 600, color: 'text.primary', whiteSpace: 'nowrap' }}>{tabSetMode === 'classic' ? 'Classic' : 'Focus'}</Typography>
-            <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M11 6.25V3.73C11 3.52 11.07 3.35 11.21 3.21C11.35 3.07 11.52 3 11.73 3H16.26C16.48 3 16.65 3.07 16.79 3.21C16.93 3.35 17 3.52 17 3.73V6.25C17 6.46 16.93 6.64 16.79 6.78C16.65 6.93 16.48 7 16.27 7H11.74C11.52 7 11.35 6.93 11.21 6.78C11.07 6.64 11 6.46 11 6.25ZM3 10.27V3.73C3 3.52 3.07 3.35 3.22 3.21C3.36 3.07 3.54 3 3.75 3H8.27C8.47 3 8.64 3.07 8.78 3.21C8.93 3.35 9 3.52 9 3.73V10.27C9 10.47 8.93 10.64 8.78 10.78C8.64 10.93 8.47 11 8.27 11H3.75C3.54 11 3.36 10.93 3.22 10.78C3.07 10.64 3 10.47 3 10.27ZM11 16.25V9.75C11 9.54 11.07 9.36 11.21 9.22C11.35 9.07 11.52 9 11.73 9H16.26C16.48 9 16.65 9.07 16.79 9.22C16.93 9.36 17 9.54 17 9.75V16.25C17 16.46 16.93 16.64 16.79 16.78C16.65 16.93 16.48 17 16.27 17H11.74C11.52 17 11.35 16.93 11.21 16.78C11.07 16.64 11 16.46 11 16.25ZM3 16.25V13.71C3 13.5 3.07 13.33 3.22 13.19C3.36 13.05 3.54 12.98 3.75 12.98H8.27C8.47 12.98 8.64 13.05 8.78 13.19C8.93 13.33 9 13.5 9 13.71V16.25C9 16.46 8.93 16.64 8.78 16.78C8.64 16.93 8.47 17 8.27 17H3.75C3.54 17 3.36 16.93 3.22 16.78C3.07 16.64 3 16.46 3 16.25ZM4.5 9.5H7.5V4.5H4.5V9.5ZM12.5 15.5H15.5V10.5H12.5V15.5ZM12.5 5.52H15.5V4.5H12.5V5.52ZM4.5 15.5H7.5V14.48H4.5V15.5Z" fill="#616161"/></svg>
-            <ArrowDropDownIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
-          </Box>
-          <Menu
-            anchorEl={tabSetMenuAnchor}
-            open={Boolean(tabSetMenuAnchor)}
-            onClose={() => setTabSetMenuAnchor(null)}
-            PaperProps={{ elevation: 4, sx: { width: 350, borderRadius: 1, mt: 0.5 } }}
-            transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-          >
-            <Box sx={{ px: 2.5, pt: 2, pb: 1 }}>
-              <Typography sx={{ fontSize: 14, fontWeight: 700, color: 'text.primary' }}>Tab Set</Typography>
-            </Box>
-            {[
-              { mode: 'focus',   label: 'Focus',   desc: 'Tabs for targeted insights and specific questions' },
-              { mode: 'classic', label: 'Classic', desc: 'General analytic tabs that range in use cases'      },
-            ].map(opt => {
-              const isActive = tabSetMode === opt.mode
-              return (
-              <Box key={opt.mode} onClick={() => {
-                if (isActive) { setTabSetMenuAnchor(null); return }
-                setTabSetMode(opt.mode)
-                setActiveTab(0)
-                setRemovedTabs([])
-                if (opt.mode === 'classic') {
-                  setTabs(CLASSIC_TABS)
-                } else {
-                  setTabs(TABS.map(t => ({ label: t.label, description: t.description })))
-                }
-                setTabSetMenuAnchor(null)
-                triggerSave()
-              }}
-                sx={{ px: 2.5, py: 1.5, cursor: 'pointer', bgcolor: isActive ? '#E5F7F7' : 'transparent', '&:hover': { bgcolor: isActive ? '#D6F0F0' : alpha('#000', 0.03) } }}>
-                <Typography sx={{ fontSize: 14, fontWeight: isActive ? 700 : 400, color: 'text.primary' }}>{opt.label}</Typography>
-                <Typography sx={{ fontSize: 14, color: 'text.secondary', mt: 0.25 }}>{opt.desc}</Typography>
-              </Box>
-              )
-            })}
-          </Menu>
           <IconButton size="small">
             <Box component="img" src="/add-tab.svg" alt="Add Tab" sx={{ width: 36, height: 36 }} />
           </IconButton>
