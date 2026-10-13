@@ -7,6 +7,8 @@ import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt'
 import ThumbDownOffAltIcon from '@mui/icons-material/ThumbDownOffAlt'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import WidgetCard, { HBar } from './WidgetCard'
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 
 // ── mock data ─────────────────────────────────────────────────────────────────
 
@@ -69,40 +71,19 @@ const TYPE_COLORS = {
 }
 
 const EMERGING_KW = [
-  { text: 'Living rooms', size: 18 }, { text: 'Backyards', size: 16 },
-  { text: 'Rug', size: 13 }, { text: 'Natural landscapes', size: 20 },
-  { text: 'Real Estate Ma...', size: 12 }, { text: 'Nationwide Advisory...', size: 12 },
-  { text: 'Furniture', size: 15 }, { text: 'Tables', size: 14 }, { text: 'Desks', size: 14 },
-  { text: 'Trees and leaves', size: 13 }, { text: 'Lago', size: 12 }, { text: 'Knoll', size: 12 },
-  { text: 'Logitech', size: 12 }, { text: 'aesthetic contrast', size: 13 },
-  { text: 'PR Newswire', size: 12 }, { text: 'FitzFelt', size: 12 },
-  { text: 'Hansem', size: 12 }, { text: 'Joshua Slack', size: 12 },
-  { text: 'value', size: 14 }, { text: 'Chairs', size: 17 }, { text: 'Interiors', size: 13 },
-  { text: 'Nature', size: 13 }, { text: 'Home Interiors', size: 22 },
-  { text: 'Office spaces', size: 14 }, { text: 'Game rooms', size: 16 },
-  { text: 'Woven Baskets', size: 13 }, { text: 'Books stacking', size: 12 },
-  { text: 'The Verge', size: 12 }, { text: 'Amazon Ebay', size: 12 },
-  { text: 'Leather goods', size: 12 }, { text: 'Computers', size: 16 },
-  { text: 'Microsoft', size: 15 }, { text: 'entire line', size: 12 },
-  { text: 'Figma', size: 12 }, { text: 'Lego', size: 12 },
+  { name: 'Garden Designs',     mentions: '98.2k',  pct: 50, trend: -3 },
+  { name: 'Office Spaces',      mentions: '76.5k',  pct: 45, trend: -5 },
+  { name: 'Kitchen Remodeling', mentions: '115.8k', pct: 55, trend: -6 },
+  { name: 'Bathroom Upgrades',  mentions: '90.1k',  pct: 48, trend: -2 },
+  { name: 'Outdoor Living',     mentions: '67.4k',  pct: 40, trend: -4 },
 ]
 
 const EMERGING_HT = [
-  { text: '#Livingroom', size: 14 }, { text: '#Backyards', size: 18 },
-  { text: '#Trees and leaves', size: 14 }, { text: '#Backyards', size: 16 },
-  { text: '#MindHome', size: 12 }, { text: '#Real Estate Ma...', size: 12 },
-  { text: '#BackYards', size: 13 }, { text: '#Furniture', size: 14 },
-  { text: '#Desks', size: 20 }, { text: '#Trees and lawn', size: 13 },
-  { text: '#Rugs', size: 13 }, { text: '#Real Estate Ma...', size: 12 },
-  { text: '#Home Interiors', size: 22 }, { text: '#Natural landscapes', size: 13 },
-  { text: '#Nature', size: 14 }, { text: '#Interiors', size: 13 },
-  { text: '#Desks', size: 16 }, { text: '#Computers', size: 18 },
-  { text: '#Gaming', size: 17 }, { text: '#Woven Baskets', size: 13 },
-  { text: '#FitzFelt', size: 12 }, { text: '#Real Estate Ma...', size: 12 },
-  { text: '#Lego', size: 12 }, { text: '#Wood finishes', size: 14 },
-  { text: '#Office Sp...', size: 14 }, { text: '#Natural landscapes', size: 14 },
-  { text: '#Computers', size: 20 }, { text: '#Microsoft', size: 16 },
-  { text: '#entire line', size: 12 }, { text: '#value', size: 13 },
+  { name: 'Cooking',            mentions: '98.2k',  pct: 50, trend: -3 },
+  { name: 'Culinary Workshops', mentions: '75.4k',  pct: 45, trend: -4 },
+  { name: 'Artisanal Crafts',   mentions: '120.1k', pct: 55, trend: -5 },
+  { name: 'Fitness Regimens',   mentions: '85.7k',  pct: 60, trend: -6 },
+  { name: 'Sustainable Living', mentions: '110.3k', pct: 70, trend: -7 },
 ]
 
 const SCENES = [
@@ -250,10 +231,10 @@ function Pagination({ text }) {
 export default function NarrativeTabContent({ loading }) {
   if (loading) return null
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, flexShrink: 0 }}>
 
       {/* AI Insight */}
-      <Box sx={{ p: '1.5px', borderRadius: 2, background: 'linear-gradient(135deg, #9C4DD6 0%, #CF2D8A 40%, #1D9F9F 100%)' }}>
+      <Box sx={{ p: '1.5px', borderRadius: 2, background: 'linear-gradient(135deg, #9C4DD6 0%, #CF2D8A 40%, #1D9F9F 100%)', mt: 2 }}>
         <Box sx={{ bgcolor: 'background.paper', borderRadius: '6px', p: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
@@ -372,24 +353,34 @@ export default function NarrativeTabContent({ loading }) {
 
       {/* Emerging Keywords + Emerging Hashtags */}
       <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
-        <WidgetCard title="Emerging Keywords">
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, lineHeight: 2 }}>
-            {EMERGING_KW.map((kw, i) => (
-              <Typography key={i} sx={{ fontSize: kw.size, color: ['#1D9F9F', '#2196F3', '#9C4DD6', '#CF2D8A'][i % 4], cursor: 'pointer', fontWeight: kw.size >= 18 ? 700 : 400 }}>
-                {kw.text}
-              </Typography>
+        {[{ title: 'Emerging Keywords', rows: EMERGING_KW }, { title: 'Emerging Hashtags', rows: EMERGING_HT }].map(({ title, rows }) => (
+          <WidgetCard key={title} title={title}>
+            <Box sx={{ display: 'flex', pb: 0.75, borderBottom: '1px solid #e0e0e0', mb: 0.25 }}>
+              <Typography sx={{ fontSize: 12, fontWeight: 700, color: 'text.secondary', flex: 1 }}>Name</Typography>
+              <Typography sx={{ fontSize: 12, fontWeight: 700, color: 'text.secondary', width: 110, textAlign: 'right' }}>Mentions</Typography>
+              <Typography sx={{ fontSize: 12, fontWeight: 700, color: 'text.secondary', width: 60, textAlign: 'right' }}>Trend</Typography>
+            </Box>
+            {rows.map((row, i) => (
+              <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 1, borderBottom: i < rows.length - 1 ? '1px solid #f5f5f5' : 'none' }}>
+                <Typography sx={{ fontSize: 13, color: 'text.secondary', width: 16, flexShrink: 0 }}>{i + 1}</Typography>
+                <Typography sx={{ fontSize: 14, fontWeight: 700, color: '#212121', flex: 1 }}>{row.name}</Typography>
+                <Typography sx={{ fontSize: 13, color: '#424242', width: 110, textAlign: 'right', flexShrink: 0 }}>
+                  {row.mentions} ({row.pct}%)
+                </Typography>
+                <Box sx={{ width: 60, display: 'flex', justifyContent: 'flex-end', flexShrink: 0 }}>
+                  <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.25, bgcolor: '#FFEBEE', color: '#C62828', fontSize: 11, fontWeight: 700, px: 0.75, py: 0.25, borderRadius: 1 }}>
+                    ↓ {Math.abs(row.trend)}%
+                  </Box>
+                </Box>
+              </Box>
             ))}
-          </Box>
-        </WidgetCard>
-        <WidgetCard title="Emerging Hashtags">
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, lineHeight: 2 }}>
-            {EMERGING_HT.map((ht, i) => (
-              <Typography key={i} sx={{ fontSize: ht.size, fontWeight: ht.size >= 18 ? 700 : 400, color: ['#CF2D8A', '#FF9800', '#9C4DD6', '#1D9F9F'][i % 4], cursor: 'pointer' }}>
-                {ht.text}
-              </Typography>
-            ))}
-          </Box>
-        </WidgetCard>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mt: 1, pt: 1, borderTop: '1px solid #f5f5f5' }}>
+              <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>1 - 5 of 30</Typography>
+              <IconButton size="small" disabled><ChevronLeftIcon sx={{ fontSize: 18 }} /></IconButton>
+              <IconButton size="small"><ChevronRightIcon sx={{ fontSize: 18, color: '#212121' }} /></IconButton>
+            </Box>
+          </WidgetCard>
+        ))}
       </Box>
 
       {/* Top Scenes and Objects */}

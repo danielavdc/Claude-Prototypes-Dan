@@ -12,6 +12,9 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined'
+import LocationOnIcon from '@mui/icons-material/LocationOn'
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import { useState, useRef, useEffect } from 'react'
 
 const TEAL   = '#1D9F9F'
@@ -23,9 +26,8 @@ const GREEN  = '#4CAF50'
 const RED    = '#F44336'
 
 const NAV_SECTIONS = [
-  { id: 'volume',    label: 'Volume'    },
-  { id: 'locations', label: 'Locations' },
-  { id: 'sources',   label: 'Sources'   },
+  { id: 'volume',  label: 'Volume'  },
+  { id: 'sources', label: 'Sources' },
 ]
 
 const X_LABELS = ['Aug 25', 'Aug 26', 'Aug 27', 'Aug 28', 'Aug 29', 'Aug 30', 'Aug 31']
@@ -64,6 +66,25 @@ const TOP_CITIES = [
   { city: 'Bangkok',   flag: '🇹🇭', mentions: '132.4k', pct: 60, delta: '-5.3%', down: true },
   { city: 'London',    flag: '🇬🇧', mentions: '132.4k', pct: 60, delta: '-5.3%', down: true },
   { city: 'Paris',     flag: '🇫🇷', mentions: '132.4k', pct: 60, delta: '-5.3%', down: true },
+]
+
+const TOP_CITIES_TABLE = [
+  { name: 'Singapore, Singapore',  value: 134, max: 134 },
+  { name: 'Hong Kong, Hong Kong',  value: 98,  max: 134 },
+  { name: 'Cape Town, South Africa', value: 88, max: 134 },
+  { name: 'Delhi, India',          value: 54,  max: 134 },
+  { name: 'Kuala Lumpur, Malaysia', value: 44, max: 134 },
+  { name: 'London, England',       value: 34,  max: 134 },
+  { name: 'Sydney, Australia',     value: 28,  max: 134 },
+]
+const TOP_COUNTRIES_TABLE = [
+  { name: 'Singapore, Singapore',  value: 134, max: 134 },
+  { name: 'Hong Kong, Hong Kong',  value: 98,  max: 134 },
+  { name: 'Cape Town, South Africa', value: 88, max: 134 },
+  { name: 'Delhi, India',          value: 54,  max: 134 },
+  { name: 'Kuala Lumpur, Malaysia', value: 44, max: 134 },
+  { name: 'London, England',       value: 34,  max: 134 },
+  { name: 'Sydney, Australia',     value: 28,  max: 134 },
 ]
 
 const TOP_LOCATIONS = [
@@ -149,27 +170,19 @@ const FORUMS = [
 ]
 
 const EMERGING_ACCOUNTS = [
-  { handle: '@Lingtree', size: 16, color: TEAL },
-  { handle: '#NaturalLandscape', size: 20, color: BLUE },
-  { handle: '@HomeInteriors', size: 18, color: PURPLE },
-  { handle: '#Chars', size: 13, color: PINK },
-  { handle: '@theNaturallandscape', size: 22, color: ORANGE },
-  { handle: '#HomeInteriors', size: 17, color: TEAL },
-  { handle: '@Computers', size: 14, color: BLUE },
-  { handle: '#LingtreeNaturallandscape', size: 24, color: PURPLE },
-  { handle: '@theNaturalLandscape', size: 15, color: GREEN },
-  { handle: '#Computers', size: 13, color: RED },
+  { rank: 1, name: 'Home Interior',    handle: '@home_interiors', mentions: '132.4k', pct: 60, trend: -4,  platform: 'x'  },
+  { rank: 2, name: 'Office',           handle: '@Office1',        mentions: '132.4k', pct: 60, trend: 180, platform: 'fb' },
+  { rank: 3, name: 'Home',             handle: '@Home2',          mentions: '150.2k', pct: 75, trend: 200, platform: 'ig' },
+  { rank: 4, name: 'Remote',           handle: '@Remote3',        mentions: '95.5k',  pct: 45, trend: 160, platform: 'ig' },
+  { rank: 5, name: 'Co-Working Space', handle: '@CoWorking4',     mentions: '115.8k', pct: 55, trend: 175, platform: 'fb' },
 ]
 
 const TOP_ACCOUNTS = [
-  { handle: '@Lingtree', size: 20, color: TEAL },
-  { handle: '#NaturalLandscape', size: 18, color: BLUE },
-  { handle: '@HomeInteriors', size: 22, color: PURPLE },
-  { handle: '@theNatural landscape', size: 24, color: PINK },
-  { handle: '#Chars', size: 15, color: ORANGE },
-  { handle: '@Computers', size: 16, color: TEAL },
-  { handle: '#HomeInteriors', size: 19, color: BLUE },
-  { handle: '@LingtreeNatural', size: 14, color: GREEN },
+  { rank: 2, name: 'Outdoor Spaces',      handle: '@outdoor_designs',    mentions: '98.7k',  pct: 45, trend: -3, platform: 'x'  },
+  { rank: 3, name: 'Kitchen Innovations', handle: '@kitchen_ideas',      mentions: '156.3k', pct: 70, trend: 6,  platform: 'fb' },
+  { rank: 4, name: 'Modern Furniture',    handle: '@modern_furnishings', mentions: '210.5k', pct: 80, trend: 5,  platform: 'ig' },
+  { rank: 5, name: 'Sustainable Living',  handle: '@eco_living',         mentions: '75.2k',  pct: 50, trend: 2,  platform: 'x'  },
+  { rank: 6, name: 'Lighting Solutions',  handle: '@light_designs',      mentions: '45.8k',  pct: 30, trend: 1,  platform: 'fb' },
 ]
 
 const HEATMAP_DATA = Array.from({ length: 7 }, (_, r) =>
@@ -274,7 +287,8 @@ function MiniSparkline({ data, up }) {
 // ── sticky segment nav ────────────────────────────────────────────────────────
 
 function StickySegmentNav({ items, value, onChange }) {
-  const [isSticky, setIsSticky] = useState(false)
+  const [isScrolling, setIsScrolling] = useState(false)
+  const scrollTimerRef = useRef(null)
   const ref = useRef(null)
 
   useEffect(() => {
@@ -287,22 +301,18 @@ function StickySegmentNav({ items, value, onChange }) {
       parent = parent.parentElement
     }
     if (!parent || parent === document.body) return
-    const check = () => {
-      const r = el.getBoundingClientRect()
-      const p = parent.getBoundingClientRect()
-      setIsSticky(r.top <= p.top + 1)
+    const onScroll = () => {
+      setIsScrolling(true)
+      clearTimeout(scrollTimerRef.current)
+      scrollTimerRef.current = setTimeout(() => setIsScrolling(false), 200)
     }
-    parent.addEventListener('scroll', check, { passive: true })
-    return () => parent.removeEventListener('scroll', check)
+    parent.addEventListener('scroll', onScroll, { passive: true })
+    return () => { parent.removeEventListener('scroll', onScroll); clearTimeout(scrollTimerRef.current) }
   }, [])
 
   return (
-    <Box ref={ref} sx={{
-      position: 'sticky', top: 0, zIndex: 10,
-      bgcolor: '#F5F5F5', py: 1.25,
-      boxShadow: isSticky ? '0 2px 8px rgba(0,0,0,0.10)' : 'none',
-      transition: 'box-shadow 0.2s ease',
-    }}>
+    <Box ref={ref} sx={{ position: 'sticky', top: 0, zIndex: 10, bgcolor: 'transparent', py: 1.25, pl: 2 }}>
+      <Box sx={{ display: 'inline-flex', boxShadow: isScrolling ? '0 4px 16px rgba(0,0,0,0.10)' : 'none', borderRadius: '4px', transition: 'box-shadow 0.2s ease' }}>
       <ToggleButtonGroup
         value={value} exclusive
         onChange={(_, val) => { if (val) onChange(val) }}
@@ -310,15 +320,16 @@ function StickySegmentNav({ items, value, onChange }) {
           '& .MuiToggleButton-root': {
             py: 0.75, px: 2, fontSize: 14, fontWeight: 400,
             textTransform: 'none', letterSpacing: 0,
-            color: '#212121', bgcolor: 'transparent', borderColor: '#9E9E9E', borderRadius: 0,
+            color: '#212121', bgcolor: '#F0F0F0', borderColor: '#9E9E9E', borderRadius: 0,
             whiteSpace: 'nowrap',
             '&:first-of-type': { borderRadius: '4px 0 0 4px' },
             '&:last-of-type':  { borderRadius: '0 4px 4px 0' },
             '&.Mui-selected': {
-              bgcolor: 'rgba(29,159,159,0.12)', color: '#212121', borderColor: '#00827F',
-              '&:hover': { bgcolor: 'rgba(29,159,159,0.18)' },
+              background: 'linear-gradient(rgba(29,159,159,0.18),rgba(29,159,159,0.18)) #F0F0F0',
+              color: '#212121', borderColor: '#00827F',
+              '&:hover': { background: 'linear-gradient(rgba(29,159,159,0.25),rgba(29,159,159,0.25)) #F0F0F0' },
             },
-            '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' },
+            '&:hover': { bgcolor: '#E0E0E0' },
           },
         }}
       >
@@ -328,6 +339,7 @@ function StickySegmentNav({ items, value, onChange }) {
           </ToggleButton>
         ))}
       </ToggleButtonGroup>
+      </Box>
     </Box>
   )
 }
@@ -366,13 +378,43 @@ function AIInsightWidget() {
   )
 }
 
+// ── heatmap data ──────────────────────────────────────────────────────────────
+
+const ACTIVITY_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+const ACTIVITY_HOURS = Array.from({ length: 24 }, (_, i) => {
+  if (i === 0) return '12am'
+  if (i < 12) return `${i}am`
+  if (i === 12) return '12pm'
+  return `${i - 12}pm`
+})
+const ACTIVITY_DATA = Array.from({ length: 7 }, (_, d) =>
+  Array.from({ length: 24 }, (_, h) => {
+    const peak = h >= 6 && h <= 10 ? Math.random() * 90 + 60 : Math.random() * 60 + 10
+    return Math.round(peak * (d === 2 || d === 3 || d === 4 ? 1.3 : 0.85))
+  })
+)
+const HEAT_RANGES = [
+  { label: '26–50',   color: '#BBDEFB' },
+  { label: '51–100',  color: '#90CAF9' },
+  { label: '101–125', color: '#64B5F6' },
+  { label: '126–150', color: '#2196F3' },
+  { label: '151+',    color: '#1565C0' },
+]
+function heatColor(v) {
+  if (v <= 50)  return '#BBDEFB'
+  if (v <= 100) return '#90CAF9'
+  if (v <= 125) return '#64B5F6'
+  if (v <= 150) return '#2196F3'
+  return '#1565C0'
+}
+
 // ── mentions tab ──────────────────────────────────────────────────────────────
 
 function MentionsContent() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
 
-      <AIInsightWidget />
+      <Box sx={{ pt: 2 }}><AIInsightWidget /></Box>
 
       <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2 }}>
         <WidgetHeader title="Mentions Trend" />
@@ -387,14 +429,44 @@ function MentionsContent() {
 
       <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2 }}>
         <WidgetHeader title="Mentions Trend by Source Type" />
-        <Box sx={{ display: 'flex', gap: 4, mb: 2 }}>
-          <MetricKpi label="Total Mentions" value="358.2k" delta={5.6} />
-          <Divider orientation="vertical" flexItem />
-          <MetricKpi label="Daily Average" value="1.46k" delta={7.8} />
-        </Box>
         <ChartLegend datasets={MENTION_SOURCES} />
         <MultiLineChart datasets={MENTION_SOURCES} height={160} />
         <XLabels />
+      </Paper>
+
+      {/* Mentions Average Activity heatmap */}
+      <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2 }}>
+        <WidgetHeader title="Mentions Average Activity" />
+        <Box sx={{ overflowX: 'auto' }}>
+          <Box sx={{ minWidth: 600 }}>
+            {/* Hour labels */}
+            <Box sx={{ display: 'flex', ml: '40px', mb: 0.5 }}>
+              {ACTIVITY_HOURS.map((h, i) => (
+                <Box key={i} sx={{ flex: 1, textAlign: 'center' }}>
+                  <Typography sx={{ fontSize: 10, color: 'text.secondary', whiteSpace: 'nowrap' }}>{h}</Typography>
+                </Box>
+              ))}
+            </Box>
+            {/* Grid rows */}
+            {ACTIVITY_DATA.map((row, ri) => (
+              <Box key={ri} sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                <Typography sx={{ fontSize: 12, color: 'text.secondary', width: 40, flexShrink: 0 }}>{ACTIVITY_DAYS[ri]}</Typography>
+                {row.map((val, ci) => (
+                  <Box key={ci} sx={{ flex: 1, mx: '2px', height: 28, bgcolor: heatColor(val), borderRadius: '6px' }} />
+                ))}
+              </Box>
+            ))}
+            {/* Legend */}
+            <Box sx={{ display: 'flex', gap: 2, mt: 2, ml: '40px' }}>
+              {HEAT_RANGES.map((r, i) => (
+                <Box key={i} sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
+                  <Box sx={{ width: '100%', height: 16, bgcolor: r.color, borderRadius: '4px' }} />
+                  <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>{r.label}</Typography>
+                </Box>
+              ))}
+            </Box>
+          </Box>
+        </Box>
       </Paper>
 
     </Box>
@@ -406,25 +478,6 @@ function MentionsContent() {
 function EngagementContent() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-
-      <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2 }}>
-        <WidgetHeader
-          title="Engagement Trend"
-          action={
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, border: '1px solid #e0e0e0', borderRadius: 0.5, px: 1, py: 0.5, cursor: 'pointer' }}>
-              <Typography sx={{ fontSize: 12, color: '#424242' }}>Engagement type</Typography>
-              <ArrowDownwardIcon sx={{ fontSize: 12, color: 'text.secondary' }} />
-            </Box>
-          }
-        />
-        <Box sx={{ display: 'flex', gap: 4, mb: 2 }}>
-          <MetricKpi label="Total Engagement" value="17.6k" delta={7.8} />
-          <Divider orientation="vertical" flexItem />
-          <MetricKpi label="Daily Average" value="2.52k" delta={7.8} />
-        </Box>
-        <LineChart data={ENGAGEMENT_TREND} color={TEAL} height={160} />
-        <XLabels />
-      </Paper>
 
       <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2 }}>
         <WidgetHeader title="Engagement Trend by Source Type" />
@@ -469,9 +522,18 @@ function EngagementContent() {
 
 // ── locations tab ─────────────────────────────────────────────────────────────
 
-function LocationsContent() {
+export function LocationsContent() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+
+      <Box sx={{ pt: 2 }}><AIInsightWidget /></Box>
+
+      <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2 }}>
+        <WidgetHeader title="Countries Trend" />
+        <ChartLegend datasets={COUNTRIES_TREND} />
+        <MultiLineChart datasets={COUNTRIES_TREND} height={160} />
+        <XLabels />
+      </Paper>
 
       <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2 }}>
         <WidgetHeader title="Countries by Mentions" />
@@ -578,13 +640,6 @@ function LocationsContent() {
         )
       })()}
 
-      <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2 }}>
-        <WidgetHeader title="Countries Trend" />
-        <ChartLegend datasets={COUNTRIES_TREND} />
-        <MultiLineChart datasets={COUNTRIES_TREND} height={160} />
-        <XLabels />
-      </Paper>
-
       <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
 
         {[{ title: 'Top Regions', data: TOP_REGIONS, barColor: TEAL }, { title: 'Top States', data: TOP_STATES, barColor: BLUE }].map(({ title, data, barColor }) => (
@@ -616,6 +671,37 @@ function LocationsContent() {
           </Paper>
         ))}
 
+      </Box>
+
+      {/* Top Cities + Top Countries */}
+      <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+        {[{ title: 'Top Cities', rows: TOP_CITIES_TABLE }, { title: 'Top Countries', rows: TOP_COUNTRIES_TABLE }].map(({ title, rows }) => (
+          <Paper key={title} elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2, flex: 1, minWidth: 260 }}>
+            <WidgetHeader title={title} />
+            <Box sx={{ display: 'flex', pb: 0.75, borderBottom: '1px solid #e0e0e0', mb: 0.25 }}>
+              <Typography sx={{ fontSize: 12, fontWeight: 700, color: 'text.secondary', flex: 1 }}>Top Cities</Typography>
+              <Typography sx={{ fontSize: 12, fontWeight: 700, color: 'text.secondary' }}>Mentions</Typography>
+            </Box>
+            {rows.map((row, i) => (
+              <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.875, borderBottom: i < rows.length - 1 ? '1px solid #f5f5f5' : 'none' }}>
+                <Typography sx={{ fontSize: 13, color: 'text.secondary', width: 16, flexShrink: 0 }}>{i + 1}</Typography>
+                <Box sx={{ width: 28, height: 28, borderRadius: '50%', bgcolor: '#E3F2FD', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <LocationOnIcon sx={{ fontSize: 16, color: '#2196F3' }} />
+                </Box>
+                <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#212121', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.name}</Typography>
+                <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#212121', flexShrink: 0, mr: 1 }}>{row.value}k</Typography>
+                <Box sx={{ width: 80, height: 10, bgcolor: '#f0f0f0', borderRadius: 1, overflow: 'hidden', flexShrink: 0 }}>
+                  <Box sx={{ width: `${Math.round((row.value / row.max) * 100)}%`, height: '100%', bgcolor: '#2196F3', borderRadius: 1 }} />
+                </Box>
+              </Box>
+            ))}
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1, mt: 1, pt: 1, borderTop: '1px solid #f5f5f5' }}>
+              <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>1 - 10 of 30</Typography>
+              <IconButton size="small" disabled><ChevronLeftIcon sx={{ fontSize: 18 }} /></IconButton>
+              <IconButton size="small"><ChevronRightIcon sx={{ fontSize: 18, color: '#212121' }} /></IconButton>
+            </Box>
+          </Paper>
+        ))}
       </Box>
 
     </Box>
@@ -776,92 +862,282 @@ function TrendingContent() {
         </Paper>
       </Box>
 
-      <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2 }}>
-        <WidgetHeader title="Emerging Mentioned Accounts" />
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 0.5, minHeight: 80 }}>
-          {EMERGING_ACCOUNTS.map((a, i) => (
-            <Typography key={i} sx={{ fontSize: a.size, fontWeight: a.size >= 18 ? 700 : 500, color: a.color, cursor: 'pointer', lineHeight: 1.4, '&:hover': { opacity: 0.75 } }}>
-              {a.handle}
-            </Typography>
-          ))}
-        </Box>
-      </Paper>
+      <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+        {[{ title: 'Emerging Mentioned Accounts', rows: EMERGING_ACCOUNTS }, { title: 'Top Mentioned Accounts', rows: TOP_ACCOUNTS }].map(({ title, rows }) => (
+          <Paper key={title} elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2, flex: 1, minWidth: 280 }}>
+            <WidgetHeader title={title} />
+            <Box sx={{ display: 'flex', pb: 0.75, borderBottom: '1px solid #e0e0e0', mb: 0.25 }}>
+              <Typography sx={{ fontSize: 12, fontWeight: 700, color: 'text.secondary', flex: 1 }}>Name</Typography>
+              <Typography sx={{ fontSize: 12, fontWeight: 700, color: 'text.secondary', width: 110, textAlign: 'right' }}>Mentions</Typography>
+              <Typography sx={{ fontSize: 12, fontWeight: 700, color: 'text.secondary', width: 70, textAlign: 'right' }}>Trend</Typography>
+            </Box>
+            {rows.map((row, i) => (
+              <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 1, borderBottom: i < rows.length - 1 ? '1px solid #f5f5f5' : 'none' }}>
+                <Typography sx={{ fontSize: 13, color: 'text.secondary', width: 16, flexShrink: 0 }}>{row.rank}</Typography>
+                <Box sx={{ position: 'relative', flexShrink: 0 }}>
+                  <Box sx={{ width: 40, height: 40, borderRadius: '50%', bgcolor: '#E0E0E0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Typography sx={{ fontSize: 12, color: '#757575' }}>👤</Typography>
+                  </Box>
+                  <Box sx={{
+                    position: 'absolute', bottom: -2, right: -2, width: 18, height: 18, borderRadius: '50%', border: '1.5px solid white',
+                    bgcolor: row.platform === 'x' ? '#000' : row.platform === 'fb' ? '#1877F2' : '#E1306C',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <Typography sx={{ fontSize: 8, fontWeight: 900, color: 'white', lineHeight: 1 }}>
+                      {row.platform === 'x' ? '𝕏' : row.platform === 'fb' ? 'f' : '◎'}
+                    </Typography>
+                  </Box>
+                </Box>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#212121', lineHeight: 1.2 }}>{row.name}</Typography>
+                  <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>{row.handle}</Typography>
+                </Box>
+                <Typography sx={{ fontSize: 12, color: '#424242', width: 110, textAlign: 'right', flexShrink: 0 }}>
+                  {row.mentions} ({row.pct}%)
+                </Typography>
+                <Box sx={{ width: 70, display: 'flex', justifyContent: 'flex-end', flexShrink: 0 }}>
+                  <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.25, bgcolor: row.trend > 0 ? '#E8F5E9' : '#FFEBEE', color: row.trend > 0 ? '#2E7D32' : '#C62828', fontSize: 11, fontWeight: 700, px: 0.75, py: 0.25, borderRadius: 1 }}>
+                    {row.trend > 0 ? '↑' : '↓'} {Math.abs(row.trend)}%
+                  </Box>
+                </Box>
+              </Box>
+            ))}
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mt: 1, pt: 1, borderTop: '1px solid #f5f5f5' }}>
+              <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>1 - 5 of 30</Typography>
+              <IconButton size="small" disabled><ChevronLeftIcon sx={{ fontSize: 18 }} /></IconButton>
+              <IconButton size="small"><ChevronRightIcon sx={{ fontSize: 18, color: '#212121' }} /></IconButton>
+            </Box>
+          </Paper>
+        ))}
+      </Box>
 
-      <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2 }}>
-        <WidgetHeader title="Top Mentioned Accounts" />
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 0.5, minHeight: 80 }}>
-          {TOP_ACCOUNTS.map((a, i) => (
-            <Typography key={i} sx={{ fontSize: a.size, fontWeight: a.size >= 18 ? 700 : 500, color: a.color, cursor: 'pointer', lineHeight: 1.4, '&:hover': { opacity: 0.75 } }}>
-              {a.handle}
-            </Typography>
-          ))}
-        </Box>
-      </Paper>
+    </Box>
+  )
+}
 
-      <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, overflow: 'hidden' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2, pt: 1.5, pb: 1 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-            <Typography sx={{ fontSize: 16, fontWeight: 700, color: '#212121' }}>Mentions Average Activity</Typography>
-            <InfoOutlinedIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+// ── news coverage tab ─────────────────────────────────────────────────────────
+
+const NC_DATA     = [8, 46, 22, 18, 36, 12, 32]
+const NC_PREV     = [12, 24, 18, 22, 28, 22, 18]
+const NC_AVE_DATA = [10, 52, 28, 14, 40, 8, 28]
+const NC_X_TICKS  = ['Aug 25', 'Aug 27', 'Aug 29', 'Aug 31']
+const NC_ECHO_ALL = [20, 55, 10, 5, 10, 25, 30]
+const NC_ECHO_FB  = [14, 20, 8, 5, 8, 14, 18]
+const NC_ECHO_X   = [5, 8, 4, 3, 4, 5, 8]
+const NC_SOURCES  = [
+  { name: 'CNN',            fb: 3100, x: 200  },
+  { name: 'USA Today',      fb: 2000, x: 1500 },
+  { name: 'New York Times', fb: 1500, x: 1200 },
+  { name: 'The Guardian',   fb: 500,  x: 300  },
+  { name: 'Mountain Weekly',fb: 480,  x: 0    },
+  { name: 'Dallas Mavericks',fb: 280, x: 0    },
+  { name: 'Associate Press',fb: 180,  x: 0    },
+  { name: 'NPR',            fb: 100,  x: 80   },
+]
+
+function NCLineChart({ data, prevData, height = 160 }) {
+  const w = 400, h = height, padL = 36, padB = 22, padT = 8, padR = 8
+  const cW = w - padL - padR, cH = h - padB - padT, maxV = 60
+  const pt = (v, i) => `${padL + (i / (data.length - 1)) * cW},${padT + (1 - v / maxV) * cH}`
+  const pts = data.map(pt).join(' ')
+  const prev = prevData.map(pt).join(' ')
+  const fill = `${padL},${padT + cH} ${pts} ${padL + cW},${padT + cH}`
+  return (
+    <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" style={{ display: 'block' }}>
+      {[0, 20, 40, 60].map(v => {
+        const y = padT + (1 - v / 60) * cH
+        return <g key={v}>
+          <line x1={padL} y1={y} x2={w - padR} y2={y} stroke="#f0f0f0" strokeWidth="1" />
+          <text x={padL - 4} y={y + 3} textAnchor="end" fontSize="9" fill="#9E9E9E">{v ? `${v}k` : '0'}</text>
+        </g>
+      })}
+      <polygon points={fill} fill="#2196F3" fillOpacity="0.08" />
+      <polyline points={prev} fill="none" stroke="#BDBDBD" strokeWidth="1.5" strokeDasharray="4 2" strokeLinejoin="round" />
+      <polyline points={pts} fill="none" stroke="#2196F3" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+      {NC_X_TICKS.map((label, i) => {
+        const idx = i * 2
+        const x = padL + (idx / (data.length - 1)) * cW
+        return <text key={i} x={x} y={h - 4} textAnchor="middle" fontSize="9" fill="#9E9E9E">{label}</text>
+      })}
+    </svg>
+  )
+}
+
+function NCTrendWidget({ title, metricLabel, value, data = NC_DATA }) {
+  return (
+    <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2, flex: 1, minWidth: 240 }}>
+      <WidgetHeader title={title} />
+      <Typography sx={{ fontSize: 12, color: 'text.secondary', mb: 0.25 }}>{metricLabel}</Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.25 }}>
+        <Typography sx={{ fontSize: 28, fontWeight: 700, color: '#212121', lineHeight: 1.1 }}>{value}</Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25, bgcolor: '#E8F5E9', color: '#2E7D32', fontSize: 11, fontWeight: 700, px: 0.75, py: 0.25, borderRadius: 1 }}>
+          <ArrowUpwardIcon sx={{ fontSize: 11 }} />37%
+        </Box>
+      </Box>
+      <Typography sx={{ fontSize: 11, color: 'text.secondary', mb: 1.25 }}>Previously 2.97M</Typography>
+      <Box sx={{ display: 'flex', gap: 2, mb: 1 }}>
+        {[{ label: 'All', color: '#2196F3' }, { label: 'Previous Period', color: '#BDBDBD' }].map(l => (
+          <Box key={l.label} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: l.color }} />
+            <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>{l.label}</Typography>
           </Box>
-          <IconButton size="small"><MoreVertIcon sx={{ fontSize: 18, color: 'text.secondary' }} /></IconButton>
+        ))}
+      </Box>
+      <NCLineChart data={data} prevData={NC_PREV} />
+    </Paper>
+  )
+}
+
+export function NewsCoverageContent() {
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+
+      <Box sx={{ pt: 2 }}><AIInsightWidget /></Box>
+
+      <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+        <NCTrendWidget title="Mentions Trend"   metricLabel="Total Mentions"   value="35.2k" />
+        <NCTrendWidget title="Engagement Trend" metricLabel="Total Engagement" value="35.2k" />
+      </Box>
+
+      <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+        <NCTrendWidget title="Reach Trend" metricLabel="Total Reach" value="35.2k" />
+        <NCTrendWidget title="Views Trend" metricLabel="Total Views" value="35.2k" />
+      </Box>
+
+      <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+        <NCTrendWidget title="AVE Trend"         metricLabel="Total AVE"         value="52.1k" data={NC_AVE_DATA} />
+        <NCTrendWidget title="Social Echo Trend" metricLabel="Total Social Echo" value="52.1k" data={NC_AVE_DATA} />
+      </Box>
+
+      {/* Social Echo Breakdown Trend */}
+      <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2 }}>
+        <WidgetHeader title="Social Echo Breakdown Trend" />
+        <Box sx={{ display: 'flex', gap: 2, mb: 1.25 }}>
+          {[{ label: 'All', color: '#E91E63', val: '10.7k' }, { label: 'Facebook', color: '#2196F3', val: '10.7k' }, { label: 'X', color: '#212121', val: '10.7k' }].map(l => (
+            <Box key={l.label} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: l.color }} />
+              <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>{l.label}</Typography>
+              <Typography sx={{ fontSize: 11, fontWeight: 700, color: '#212121' }}>{l.val}</Typography>
+            </Box>
+          ))}
         </Box>
-        <Box sx={{ px: 2, pb: 2 }}>
-          <Box sx={{ display: 'flex', mt: 0.5 }}>
-            <Box sx={{ width: 32, flexShrink: 0 }} />
-            {Array.from({ length: 24 }, (_, h) => (
-              <Box key={h} sx={{ flex: 1, textAlign: 'center' }}>
-                {h % 6 === 0 && <Typography sx={{ fontSize: 9, color: 'text.secondary' }}>{h}h</Typography>}
+        {(() => {
+          const w = 800, h = 200, padL = 40, padB = 22, padT = 8, padR = 8
+          const cW = w - padL - padR, cH = h - padB - padT, maxV = 60
+          const pt = (arr) => arr.map((v, i) => `${padL + (i / (arr.length - 1)) * cW},${padT + (1 - v / maxV) * cH}`).join(' ')
+          const fillPts = `${padL},${padT + cH} ${pt(NC_ECHO_ALL)} ${padL + cW},${padT + cH}`
+          return (
+            <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" style={{ display: 'block' }}>
+              {[0, 20, 40, 60].map(v => {
+                const y = padT + (1 - v / 60) * cH
+                return <g key={v}>
+                  <line x1={padL} y1={y} x2={w - padR} y2={y} stroke="#f0f0f0" strokeWidth="1" />
+                  <text x={padL - 4} y={y + 3} textAnchor="end" fontSize="10" fill="#9E9E9E">{v ? `${v}k` : '0'}</text>
+                </g>
+              })}
+              <polygon points={fillPts} fill="#E91E63" fillOpacity="0.06" />
+              <polyline points={pt(NC_ECHO_ALL)} fill="none" stroke="#E91E63" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+              <polyline points={pt(NC_ECHO_FB)} fill="none" stroke="#2196F3" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+              <polyline points={pt(NC_ECHO_X)} fill="none" stroke="#212121" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+              {NC_X_TICKS.map((label, i) => {
+                const x = padL + (i * 2 / (NC_ECHO_ALL.length - 1)) * cW
+                return <text key={i} x={x} y={h - 4} textAnchor="middle" fontSize="10" fill="#9E9E9E">{label}</text>
+              })}
+            </svg>
+          )
+        })()}
+      </Paper>
+
+      {/* Social Echo by News Source + Social Echo Breakdown */}
+      <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+
+        <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2, flex: 2, minWidth: 300 }}>
+          <WidgetHeader title="Social Echo by News Source" />
+          <Box sx={{ display: 'flex', gap: 2, mb: 1.25 }}>
+            {[{ label: 'Facebook', color: '#2196F3' }, { label: 'X', color: '#212121' }].map(l => (
+              <Box key={l.label} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: l.color }} />
+                <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>{l.label}</Typography>
               </Box>
             ))}
           </Box>
-          {HEATMAP_DATA.map((row, ri) => (
-            <Box key={ri} sx={{ display: 'flex', alignItems: 'center', mb: 0.25 }}>
-              <Typography sx={{ fontSize: 10, color: 'text.secondary', width: 32, flexShrink: 0 }}>{DAYS[ri]}</Typography>
-              {row.map((val, ci) => (
-                <Box key={ci} sx={{ flex: 1, height: 16, bgcolor: `rgba(29,159,159,${val / 100})`, borderRadius: '2px', mx: '1px' }} />
-              ))}
-            </Box>
-          ))}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1, justifyContent: 'flex-end' }}>
-            <Typography sx={{ fontSize: 10, color: 'text.secondary' }}>Low</Typography>
-            {[0.1, 0.3, 0.5, 0.7, 0.9].map(o => <Box key={o} sx={{ width: 14, height: 14, bgcolor: `rgba(29,159,159,${o})`, borderRadius: '2px' }} />)}
-            <Typography sx={{ fontSize: 10, color: 'text.secondary' }}>High</Typography>
-          </Box>
-        </Box>
-      </Paper>
+          {(() => {
+            const maxVal = 3200, barH = 16, gap = 6, padL = 110, padR = 40
+            return (
+              <Box>
+                {NC_SOURCES.map((src, i) => (
+                  <Box key={i} sx={{ display: 'flex', alignItems: 'center', mb: `${gap}px` }}>
+                    <Typography sx={{ fontSize: 12, color: '#424242', width: padL, flexShrink: 0, textAlign: 'right', pr: 1.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{src.name}</Typography>
+                    <Box sx={{ flex: 1 }}>
+                      <Box sx={{ height: barH, bgcolor: '#2196F3', borderRadius: '0 2px 2px 0', width: `${(src.fb / maxVal) * 100}%`, mb: '2px' }} />
+                      <Box sx={{ height: barH, bgcolor: '#212121', borderRadius: '0 2px 2px 0', width: `${(src.x / maxVal) * 100}%` }} />
+                    </Box>
+                  </Box>
+                ))}
+                <Box sx={{ display: 'flex', pl: `${padL}px`, mt: 0.5 }}>
+                  {[0, 1000, 2000, 3000].map(v => (
+                    <Box key={v} sx={{ flex: v === 0 ? 0 : 1, textAlign: v === 0 ? 'left' : 'center' }}>
+                      <Typography sx={{ fontSize: 10, color: 'text.secondary' }}>{v === 0 ? '0' : `${v / 1000}k`}</Typography>
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+            )
+          })()}
+        </Paper>
 
+        <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2, flex: 1, minWidth: 220 }}>
+          <WidgetHeader title="Social Echo Breakdown" />
+          {(() => {
+            const size = 180, cx = 90, cy = 90, r = 72, ir = 44
+            const segs = [
+              { pct: 58.3, color: '#2196F3', label: 'Facebook', disp: '35.8%', count: '1.9k' },
+              { pct: 41.7, color: '#212121', label: 'X',        disp: '25.5%', count: '1.4k' },
+            ]
+            let cum = -90
+            const paths = segs.map(seg => {
+              const s = (cum * Math.PI) / 180
+              cum += (seg.pct / 100) * 360
+              const e = (cum * Math.PI) / 180
+              const large = seg.pct > 50 ? 1 : 0
+              const d = `M ${cx + r * Math.cos(s)} ${cy + r * Math.sin(s)} A ${r} ${r} 0 ${large} 1 ${cx + r * Math.cos(e)} ${cy + r * Math.sin(e)} L ${cx + ir * Math.cos(e)} ${cy + ir * Math.sin(e)} A ${ir} ${ir} 0 ${large} 0 ${cx + ir * Math.cos(s)} ${cy + ir * Math.sin(s)} Z`
+              return { ...seg, d }
+            })
+            return (
+              <Box>
+                <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1.5 }}>
+                  <svg width={size} height={size} style={{ display: 'block' }}>
+                    {paths.map((p, i) => <path key={i} d={p.d} fill={p.color} stroke="white" strokeWidth="2" />)}
+                    <circle cx={cx} cy={cy} r={ir} fill="white" />
+                  </svg>
+                </Box>
+                {segs.map((s, i) => (
+                  <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.75 }}>
+                    <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: s.color, flexShrink: 0 }} />
+                    <Typography sx={{ fontSize: 13, flex: 1, color: '#212121' }}>{s.label}</Typography>
+                    <Typography sx={{ fontSize: 13, color: '#424242' }}>{s.disp}</Typography>
+                    <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#212121', width: 36, textAlign: 'right' }}>{s.count}</Typography>
+                  </Box>
+                ))}
+              </Box>
+            )
+          })()}
+        </Paper>
+
+      </Box>
     </Box>
   )
 }
 
 // ── main export ───────────────────────────────────────────────────────────────
 
-export default function CoverageTabContent({ onDashboardSave, loading, targetSubTab, subTabTrigger }) {
-  const [activeTab, setActiveTab] = useState('volume')
-  useEffect(() => { if (subTabTrigger > 0 && targetSubTab) setActiveTab(targetSubTab) }, [subTabTrigger])
+export default function CoverageTabContent({ onDashboardSave, loading }) {
   if (loading) return null
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-      <StickySegmentNav items={NAV_SECTIONS} value={activeTab} onChange={setActiveTab} />
-      {activeTab === 'volume' && (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <MentionsContent />
-          <EngagementContent />
-        </Box>
-      )}
-      {activeTab === 'locations' && (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <AIInsightWidget />
-          <LocationsContent />
-        </Box>
-      )}
-      {activeTab === 'sources' && (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          <AIInsightWidget />
-          <TrendingContent />
-        </Box>
-      )}
+      <MentionsContent />
+      <EngagementContent />
+      <TrendingContent />
     </Box>
   )
 }

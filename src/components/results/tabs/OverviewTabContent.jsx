@@ -7,6 +7,7 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd'
 import MentionsTrendChart from '../MentionsTrendChart'
 import TopKeywordsChart from '../TopKeywordsChart'
+import TopicClustersChart from '../TopicClustersChart'
 import LocationsChart from '../LocationsChart'
 import SentimentChart from '../SentimentChart'
 
@@ -400,7 +401,10 @@ export default function OverviewTabContent({ loading, onDashboardSave, onWidgetI
       </Paper>
       <EngagementTrendChart  onVFA={() => nav(1, 'volume')} />
       <NewsBySearchesTable   onVFA={() => nav(4, 'news-coverage')} />
-      <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2 }}>
+      <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2, flexShrink: 0 }}>
+        <TopicClustersChart onDashboardSave={onDashboardSave} onDataPointClick={onFilteredMentions} onWidgetInsight={onWidgetInsight} />
+      </Paper>
+      <Paper elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, p: 2, flexShrink: 0 }}>
         <TopKeywordsChart showViewFullAnalysis onViewFullAnalysis={() => nav(2)} onDashboardSave={onDashboardSave} onDataPointClick={onFilteredMentions} onWidgetInsight={onWidgetInsight} />
       </Paper>
       <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>

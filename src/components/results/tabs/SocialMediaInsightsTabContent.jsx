@@ -283,7 +283,7 @@ function KpiCard({ title, value, delta, sub, data, color }) {
 
 function AIWidget({ bullets }) {
   return (
-    <Box sx={{ p: '1.5px', borderRadius: 2, background: 'linear-gradient(135deg, #9C4DD6 0%, #CF2D8A 40%, #1D9F9F 100%)' }}>
+    <Box sx={{ p: '1.5px', borderRadius: 2, background: 'linear-gradient(135deg, #9C4DD6 0%, #CF2D8A 40%, #1D9F9F 100%)', mt: 2 }}>
       <Box sx={{ bgcolor: 'background.paper', borderRadius: '6px', p: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
@@ -310,7 +310,8 @@ function AIWidget({ bullets }) {
 }
 
 function StickySegmentNav({ value, onChange }) {
-  const [isSticky, setIsSticky] = useState(false)
+  const [isScrolling, setIsScrolling] = useState(false)
+  const scrollTimerRef = useRef(null)
   const ref = useRef(null)
   useEffect(() => {
     const el = ref.current
@@ -322,22 +323,22 @@ function StickySegmentNav({ value, onChange }) {
       parent = parent.parentElement
     }
     if (!parent) return
-    const check = () => setIsSticky(el.getBoundingClientRect().top <= parent.getBoundingClientRect().top + 1)
-    parent.addEventListener('scroll', check, { passive: true })
-    return () => parent.removeEventListener('scroll', check)
+    const onScroll = () => { setIsScrolling(true); clearTimeout(scrollTimerRef.current); scrollTimerRef.current = setTimeout(() => setIsScrolling(false), 200) }
+    parent.addEventListener('scroll', onScroll, { passive: true })
+    return () => { parent.removeEventListener('scroll', onScroll); clearTimeout(scrollTimerRef.current) }
   }, [])
   return (
-    <Box ref={ref} sx={{ position: 'sticky', top: 0, zIndex: 10, bgcolor: '#F5F5F5', py: 1.25, boxShadow: isSticky ? '0 2px 8px rgba(0,0,0,0.10)' : 'none', transition: 'box-shadow 0.2s' }}>
-      <Box sx={{ display: 'flex' }}>
+    <Box ref={ref} sx={{ position: 'sticky', top: 0, zIndex: 10, bgcolor: 'transparent', pl: 2, py: 1.25 }}>
+      <Box sx={{ display: 'inline-flex', boxShadow: isScrolling ? '0 4px 16px rgba(0,0,0,0.10)' : 'none', borderRadius: '4px', transition: 'box-shadow 0.2s' }}>
         {SOCIAL_TABS.map(tab => (
           <Box key={tab.id} onClick={() => onChange(tab.id)} sx={{
             px: 2, py: 0.75, fontSize: 14, cursor: 'pointer', whiteSpace: 'nowrap', userSelect: 'none',
             border: '1px solid', borderColor: value === tab.id ? '#00827F' : '#9E9E9E',
-            bgcolor: value === tab.id ? 'rgba(29,159,159,0.12)' : 'transparent', color: '#212121',
+            background: value === tab.id ? 'linear-gradient(rgba(29,159,159,0.18),rgba(29,159,159,0.18)) #F0F0F0' : '#F0F0F0', color: '#212121',
             '&:first-of-type': { borderRadius: '4px 0 0 4px' },
             '&:last-of-type': { borderRadius: '0 4px 4px 0' },
             '&:not(:first-of-type)': { borderLeft: 'none' },
-            '&:hover': { bgcolor: value === tab.id ? 'rgba(29,159,159,0.18)' : 'rgba(0,0,0,0.04)' },
+            '&:hover': { background: value === tab.id ? 'linear-gradient(rgba(29,159,159,0.25),rgba(29,159,159,0.25)) #E0E0E0' : '#E0E0E0' },
           }}>
             {tab.label}
           </Box>
@@ -463,25 +464,6 @@ function XContent() {
             </Typography>
           ))}
         </Box>
-      </Box>
-
-      {/* Authors By Authority Level */}
-      <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2 }}>
-        <WH title="Authors By Authority Level" />
-        {(() => {
-          const bars = [{ label: 'Low (0-3)', v: 52.1, color: BLUE }, { label: 'Medium (4-6)', v: 38.3, color: YELLOW }, { label: 'High (7-9)', v: 30.9, color: PINK }]
-          return (
-            <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 2, height: 130, pt: 1 }}>
-              {bars.map((b, i) => (
-                <Box key={i} sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <Typography sx={{ fontSize: 12, fontWeight: 700, color: '#212121', mb: 0.25 }}>{b.v}k</Typography>
-                  <Box sx={{ width: '60%', height: `${(b.v / 55) * 100}px`, bgcolor: b.color, borderRadius: '2px 2px 0 0' }} />
-                  <Typography sx={{ fontSize: 11, color: '#616161', mt: 0.25, textAlign: 'center' }}>{b.label}</Typography>
-                </Box>
-              ))}
-            </Box>
-          )
-        })()}
       </Box>
 
       {/* Most Reposted Content */}
@@ -672,66 +654,6 @@ function YoutubeContent() {
                 {X_LABELS_APR.map((d, i) => (
                   <text key={i} x={padL + i * (cW / (X_LABELS_APR.length - 1))} y={h - 6} textAnchor="middle" fontSize="8" fill="#9E9E9E">{d}</text>
                 ))}
-              </svg>
-            )
-          })()}
-        </Box>
-      </Box>
-
-      {/* Searches by Mentions + Mentions Trend by Searches */}
-      <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
-        <Box sx={{ flex: 1, minWidth: 240, border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2 }}>
-          <WH title="Searches by Mentions" />
-          <Box sx={{ display: 'flex', pb: 0.75, borderBottom: '1px solid #e0e0e0', mb: 0.5 }}>
-            <Typography sx={{ fontSize: 11, fontWeight: 700, color: 'text.secondary', width: 20 }}>  </Typography>
-            <Typography sx={{ fontSize: 11, fontWeight: 700, color: 'text.secondary', flex: 1 }}>Name</Typography>
-            <Typography sx={{ fontSize: 11, fontWeight: 700, color: 'text.secondary', width: 100 }}>Mentions</Typography>
-            <Typography sx={{ fontSize: 11, fontWeight: 700, color: 'text.secondary', width: 52, textAlign: 'right' }}>Trend</Typography>
-          </Box>
-          {YT_SEARCHES.map((row, i) => (
-            <Box key={i} sx={{ display: 'flex', alignItems: 'center', py: 0.875, borderBottom: i < YT_SEARCHES.length - 1 ? '1px solid #f5f5f5' : 'none' }}>
-              <Typography sx={{ fontSize: 12, color: 'text.secondary', width: 20 }}>{i + 1}</Typography>
-              <Typography sx={{ fontSize: 13, flex: 1, color: '#212121', fontWeight: 600 }}>{row.name}</Typography>
-              <Box sx={{ width: 100, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <Typography sx={{ fontSize: 12 }}>{row.mentions}</Typography>
-                <Box sx={{ width: 24, height: 6, bgcolor: '#f0f0f0', borderRadius: 1, overflow: 'hidden' }}>
-                  <Box sx={{ width: `${row.pct}%`, height: '100%', bgcolor: row.barColor }} />
-                </Box>
-              </Box>
-              <Box sx={{ width: 52, display: 'flex', justifyContent: 'flex-end' }}>
-                {row.up === null
-                  ? <Box sx={{ fontSize: 11, fontWeight: 700, bgcolor: '#F5F5F5', color: '#757575', px: 0.75, py: 0.2, borderRadius: 1 }}>→ 0%</Box>
-                  : <Box sx={{ fontSize: 11, fontWeight: 700, bgcolor: row.up ? '#E8F5E9' : '#FFEBEE', color: row.up ? '#2E7D32' : '#C62828', px: 0.75, py: 0.2, borderRadius: 1 }}>
-                      {row.up ? '↑' : '↓'} {row.delta}
-                    </Box>
-                }
-              </Box>
-            </Box>
-          ))}
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mt: 1, pt: 1, borderTop: '1px solid #f5f5f5' }}>
-            <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>1-5 of 10</Typography>
-            <Typography sx={{ fontSize: 12, color: '#bdbdbd', cursor: 'pointer' }}>{'<'}</Typography>
-            <Typography sx={{ fontSize: 12, color: TEAL, cursor: 'pointer' }}>{'>'}</Typography>
-          </Box>
-        </Box>
-        <Box sx={{ flex: 2, minWidth: 300, border: '1px solid #e0e0e0', borderRadius: 0.5, bgcolor: 'white', p: 2 }}>
-          <WH title="Mentions Trend by Searches" />
-          <Legend datasets={YT_TREND_SEARCHES} />
-          {(() => {
-            const w = 600, h = 160, padL = 40, padB = 28, padT = 8, cW = w - padL - 8, cH = h - padB - padT
-            const allVals = YT_TREND_SEARCHES.flatMap(d => d.data), maxVal = Math.max(...allVals)
-            const xL = ['Aug 1','Aug 4','Aug 7','Aug 10','Aug 13','Aug 16','Aug 19','Aug 21','Aug 24','Aug 27','Aug 31']
-            return (
-              <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="xMidYMid meet" style={{ display: 'block' }}>
-                {[0, 10000, 20000, 30000, 40000, 50000, 60000].map(v => {
-                  const y = padT + (1 - v / maxVal) * cH
-                  return <g key={v}><line x1={padL} y1={y} x2={w - 8} y2={y} stroke="#f0f0f0" strokeWidth="1" /><text x={padL - 4} y={y + 3} textAnchor="end" fontSize="8" fill="#9E9E9E">{v === 0 ? '0' : `${v / 1000}k`}</text></g>
-                })}
-                {YT_TREND_SEARCHES.map((ds, di) => {
-                  const pts = ds.data.map((v, i) => `${padL + (i / (ds.data.length - 1)) * cW},${padT + (1 - v / maxVal) * cH}`).join(' ')
-                  return <polyline key={di} points={pts} fill="none" stroke={ds.color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
-                })}
-                {xL.map((d, i) => <text key={i} x={padL + (i / (xL.length - 1)) * cW} y={h - 6} textAnchor="middle" fontSize="8" fill="#9E9E9E">{d}</text>)}
               </svg>
             )
           })()}
@@ -1021,10 +943,21 @@ function WeiboContent() {
 
 export default function SocialMediaInsightsTabContent({ loading }) {
   const [activeTab, setActiveTab] = useState('x')
+  const boxRef = useRef(null)
+
+  const scrollToTop = () => {
+    let el = boxRef.current?.parentElement
+    while (el && el !== document.body) {
+      const s = window.getComputedStyle(el)
+      if (s.overflow === 'auto' || s.overflowY === 'auto') { el.scrollTo({ top: 0, behavior: 'smooth' }); break }
+      el = el?.parentElement
+    }
+  }
+
   if (loading) return null
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-      <StickySegmentNav value={activeTab} onChange={setActiveTab} />
+    <Box ref={boxRef} sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+      <StickySegmentNav value={activeTab} onChange={(val) => { setActiveTab(val); scrollToTop() }} />
       {activeTab === 'x'       && <XContent />}
       {activeTab === 'youtube' && <YoutubeContent />}
       {activeTab === 'weibo'   && <WeiboContent />}
