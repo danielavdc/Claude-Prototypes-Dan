@@ -149,17 +149,6 @@ function $initialContent() {
   root.append(heading, greeting, pitch, ask);
 }
 
-// v2 key: Fixed became the default, so earlier saved choices (incl. test runs) don't override it.
-const TOOLBAR_VARIANT_KEY = 'te-toolbar-variant-v2';
-
-function readToolbarVariant() {
-  try {
-    return localStorage.getItem(TOOLBAR_VARIANT_KEY) === 'floating' ? 'floating' : 'fixed';
-  } catch {
-    return 'fixed';
-  }
-}
-
 function readDraft() {
   try {
     return localStorage.getItem(STORAGE_KEY);
@@ -249,15 +238,20 @@ const CANVAS_COPY = {
     title: 'Build Your Template',
     hint: 'Shape a reusable pitch with images, tables, columns and more',
   },
+  // Create Outreach, step 1: the editor sits in the "Default Message" card
+  outreach: {
+    title: 'Default Message',
+    hint: null,
+  },
   preview: {
     title: 'Preview Your Template',
     hint: 'A close look at what your recipients will see',
   },
 };
 
-function CanvasBar({ mode, onModeChange, device, onDeviceChange }) {
+function CanvasBar({ flow, mode, onModeChange, device, onDeviceChange }) {
   const barRef = useRef(null);
-  const copy = CANVAS_COPY[mode === 'preview' ? 'preview' : 'edit'];
+  const copy = CANVAS_COPY[flow === 'outreach' ? 'outreach' : mode === 'preview' ? 'preview' : 'edit'];
 
   // The fixed toolbar sticks right under this bar, so it needs the bar's real height
   // (the hint can wrap to two lines on narrow screens).
@@ -276,7 +270,7 @@ function CanvasBar({ mode, onModeChange, device, onDeviceChange }) {
     <div className="te-canvas-bar" ref={barRef}>
       <div className="te-canvas-heading">
         <h2 className="te-canvas-title">{copy.title}</h2>
-        <p className="te-canvas-hint">{copy.hint}</p>
+        {copy.hint && <p className="te-canvas-hint">{copy.hint}</p>}
       </div>
       <div className="te-canvas-actions">
         {mode === 'preview' && <DeviceToggle device={device} onChange={onDeviceChange} />}
@@ -374,18 +368,94 @@ function SelectTemplateButton() {
   );
 }
 
+/* ---------- Create Outreach (step 1) ---------- */
+
+const OUTREACH_STEPS = ['Compose Message', 'Add Recipients', 'Personalize (Optional)', 'Review'];
+
+function Stepper({ current = 0 }) {
+  return (
+    <nav className="te-stepper" aria-label="Outreach steps">
+      <ol>
+        {OUTREACH_STEPS.map((label, i) => (
+          <li key={label} className={i === current ? 'is-current' : ''} aria-current={i === current ? 'step' : undefined}>
+            <span className="te-step-num">{i + 1}</span>
+            {label}
+          </li>
+        ))}
+      </ol>
+    </nav>
+  );
+}
+
+const SUBJECT_MAX = 320;
+const SENDERS = ['Press Team', 'Media Relations', 'Communications Desk'];
+
+// Collapsible card with the sender and subject of the outreach.
+function MessageSettings() {
+  const [open, setOpen] = useState(true);
+  const [sender, setSender] = useState('');
+  const [subject, setSubject] = useState('');
+
+  return (
+    <section className={`te-frame te-settings${open ? '' : ' is-collapsed'}`}>
+      <button
+        type="button"
+        className={`te-settings-head${open ? ' is-open' : ''}`}
+        aria-expanded={open}
+        aria-controls="te-settings-body"
+        onClick={() => setOpen((v) => !v)}
+      >
+        <h2 className="te-canvas-title">Message Settings</h2>
+        <Icon name="chevron" size={18} />
+      </button>
+      {open && (
+        <div className="te-settings-body" id="te-settings-body">
+          <label className={`te-field te-field-select${sender ? '' : ' is-empty'}`}>
+            <span className="te-sr-only">Sender</span>
+            <select value={sender} onChange={(e) => setSender(e.target.value)}>
+              <option value="" disabled>
+                Select Sender
+              </option>
+              {SENDERS.map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
+            </select>
+            <Icon name="caret" size={20} />
+          </label>
+          <div>
+            <label className="te-field">
+              <span className="te-sr-only">Subject</span>
+              <input
+                type="text"
+                placeholder="Subject"
+                maxLength={SUBJECT_MAX}
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+              />
+            </label>
+            <div className="te-field-count">
+              {subject.length}/{SUBJECT_MAX}
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
 /* ---------- Editor card ---------- */
 
-function EditorCard({ mode, device, canvasElem, toolbarVariant }) {
+function EditorCard({ mode, device, canvasElem }) {
   const [anchorElem, setAnchorElem] = useState(null);
   const [slotElem, setSlotElem] = useState(null);
   const mobile = mode === 'preview' && device === 'mobile';
-  const fixedToolbar = toolbarVariant === 'fixed';
 
   return (
     <div className={`te-card${mobile ? ' is-mobile' : ''}`}>
       {/* Fixed (Jira-style) toolbar lives in this sticky strip at the top of the card */}
-      {fixedToolbar && <div className="te-fixed-tb-slot" ref={setSlotElem} hidden={mode !== 'edit'} />}
+      <div className="te-fixed-tb-slot" ref={setSlotElem} hidden={mode !== 'edit'} />
       <div className="te-card-inner" ref={setAnchorElem} hidden={mode !== 'edit'}>
         <RichTextPlugin
           contentEditable={<ContentEditable className="te-content" aria-label="Template body" />}
@@ -417,25 +487,19 @@ function EditorCard({ mode, device, canvasElem, toolbarVariant }) {
             <ColumnResizePlugin anchorElem={anchorElem} />
           </>
         )}
-        {canvasElem &&
-          (fixedToolbar ? (
-            slotElem && (
-              <TextToolbarPlugin
-                key="fixed"
-                variant="fixed"
-                anchorElem={canvasElem}
-                slotElem={slotElem}
-                trailing={
-                  <>
-                    <SelectTemplateButton />
-                    <ToolbarAddElement />
-                  </>
-                }
-              />
-            )
-          ) : (
-            <TextToolbarPlugin key="floating" anchorElem={canvasElem} />
-          ))}
+        {canvasElem && slotElem && (
+          <TextToolbarPlugin
+            variant="fixed"
+            anchorElem={canvasElem}
+            slotElem={slotElem}
+            trailing={
+              <>
+                <SelectTemplateButton />
+                <ToolbarAddElement />
+              </>
+            }
+          />
+        )}
         <AddElementPlugin />
       </div>
       {mode === 'preview' && <PreviewPane />}
@@ -448,16 +512,9 @@ function EditorCard({ mode, device, canvasElem, toolbarVariant }) {
 export default function TemplateEditor() {
   const [mode, setMode] = useState('edit');
   const [device, setDevice] = useState('desktop');
-  const [toolbarVariant, setToolbarVariant] = useState(readToolbarVariant);
-
-  const chooseToolbarVariant = (v) => {
-    setToolbarVariant(v);
-    try {
-      localStorage.setItem(TOOLBAR_VARIANT_KEY, v);
-    } catch {
-      /* storage unavailable — the choice just won't be remembered */
-    }
-  };
+  // Prototype switch: "Create Outreach Template" (default) or step 1 of "Create Outreach"
+  const [flow, setFlow] = useState('template');
+  const outreach = flow === 'outreach';
   const [toast, setToast] = useState(null);
   const [canvasElem, setCanvasElem] = useState(null);
 
@@ -487,26 +544,24 @@ export default function TemplateEditor() {
 
   return (
     <LexicalComposer initialConfig={initialConfig}>
-      <div className="te-page">
+      <div className={`te-page${outreach ? ' is-outreach' : ''}`}>
         <header className="te-header">
           <div className="te-title">
             <Icon name="logo" size={34} />
-            <h1>Create Outreach Template</h1>
+            <h1>{outreach ? 'Create Outreach' : 'Create Outreach Template'}</h1>
           </div>
           <div className="te-header-right">
-            {/* Prototype switch to compare the two toolbar experiences */}
-            <div className="te-variant" role="group" aria-label="Toolbar version">
-              <span className="te-variant-label">Proposals Switch</span>
+            <div className="te-variant" role="group" aria-label="Prototype flow">
               {[
-                { key: 'floating', label: 'Floating' },
-                { key: 'fixed', label: 'Fixed' },
+                { key: 'template', label: 'Template' },
+                { key: 'outreach', label: 'Outreach' },
               ].map((v) => (
                 <button
                   key={v.key}
                   type="button"
-                  aria-pressed={toolbarVariant === v.key}
-                  className={toolbarVariant === v.key ? 'is-active' : ''}
-                  onClick={() => chooseToolbarVariant(v.key)}
+                  aria-pressed={flow === v.key}
+                  className={flow === v.key ? 'is-active' : ''}
+                  onClick={() => setFlow(v.key)}
                 >
                   {v.label}
                 </button>
@@ -518,19 +573,35 @@ export default function TemplateEditor() {
           </div>
         </header>
 
+        {outreach && <Stepper current={0} />}
+
         <main className="te-canvas" ref={setCanvasElem}>
-          <section className="te-frame">
-            <CanvasBar mode={mode} onModeChange={setMode} device={device} onDeviceChange={setDevice} />
-            <EditorCard mode={mode} device={device} canvasElem={canvasElem} toolbarVariant={toolbarVariant} />
+          {outreach && <MessageSettings />}
+          <section className="te-frame te-message">
+            <CanvasBar flow={flow} mode={mode} onModeChange={setMode} device={device} onDeviceChange={setDevice} />
+            <EditorCard mode={mode} device={device} canvasElem={canvasElem} />
           </section>
         </main>
 
         {/* Page actions, centred at the bottom */}
         <footer className="te-toolbar">
-          <button type="button" className="te-text-btn">
-            <Icon name="send" size={18} /> Send Test Email
-          </button>
-          <SaveButton onSaved={() => setToast('Template saved')} />
+          {outreach ? (
+            <>
+              <button type="button" className="te-btn-outline" onClick={() => setToast('Draft saved')}>
+                Save Draft
+              </button>
+              <button type="button" className="te-btn-primary">
+                Next
+              </button>
+            </>
+          ) : (
+            <>
+              <button type="button" className="te-text-btn">
+                <Icon name="send" size={18} /> Send Test Email
+              </button>
+              <SaveButton onSaved={() => setToast('Template saved')} />
+            </>
+          )}
         </footer>
 
         {toast && <div className="te-toast">{toast}</div>}

@@ -7,9 +7,10 @@ const PATHS = {
   caret: 'M7 10l5 5 5-5z',
   pencil: 'M4 20h4L18.5 9.5a2.12 2.12 0 0 0-4-4L4 16v4zM13.5 6.5l4 4',
   plus: 'M12 5v14M5 12h14',
+  chevron: 'm6 9 6 6 6-6',
 };
 
-const STROKED = new Set(['undo', 'redo', 'send', 'pencil', 'plus']);
+const STROKED = new Set(['undo', 'redo', 'send', 'pencil', 'plus', 'chevron']);
 
 export function Icon({ name, size = 20 }) {
   if (name === 'logo') {

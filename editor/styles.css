@@ -44,13 +44,8 @@ button { font-family: inherit; }
 .te-title h1 { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.1px; }
 
 .te-header-right { display: flex; align-items: center; gap: 16px; }
-.te-variant {
-  display: inline-flex;
-  align-items: center;
-  gap: 0;
-  font-size: 12px;
-}
-.te-variant-label { margin-right: 8px; color: var(--te-text-2); font-weight: 700; }
+/* Prototype switch: Template / Outreach */
+.te-variant { display: inline-flex; align-items: center; font-size: 12px; }
 .te-variant button {
   height: 28px;
   padding: 0 10px;
@@ -64,6 +59,99 @@ button { font-family: inherit; }
 .te-variant button:first-of-type { border-radius: 3px 0 0 3px; }
 .te-variant button + button { border-left: 0; border-radius: 0 3px 3px 0; }
 .te-variant button.is-active { background: var(--te-teal-tint); border-color: var(--te-teal); box-shadow: -1px 0 0 var(--te-teal); color: var(--te-text); font-weight: 700; }
+
+/* ---------- Create Outreach: stepper ---------- */
+.te-stepper {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  padding: 0 24px;
+  background: var(--te-surface);
+  border-bottom: 1px solid var(--te-border);
+}
+.te-stepper ol { display: flex; align-items: center; margin: 0; padding: 0; list-style: none; height: 60px; }
+.te-stepper li { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #9e9e9e; white-space: nowrap; }
+.te-stepper li + li::before {
+  content: '';
+  width: 72px;
+  height: 1px;
+  margin: 0 16px;
+  background: var(--te-border-strong);
+}
+.te-stepper li.is-current { color: var(--te-text); }
+.te-step-num {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #9e9e9e;
+  color: #fff;
+  font-size: 13px;
+}
+.te-stepper li.is-current .te-step-num { background: var(--te-teal); }
+
+/* ---------- Create Outreach: Message Settings card ---------- */
+.te-page.is-outreach .te-frame { flex: 0 0 auto; padding: 0 16px 16px; }
+.te-page.is-outreach .te-card { flex: 0 0 auto; }
+.te-page.is-outreach .te-canvas-title { font-size: 16px; }
+.te-page.is-outreach .te-canvas-bar { padding: 16px 0; box-shadow: -16px 0 0 var(--te-surface), 16px 0 0 var(--te-surface); }
+.te-page.is-outreach .te-canvas { padding-bottom: 16px; }
+.te-page.is-outreach .te-toolbar { gap: 8px; }
+.te-settings-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 8px 18px 0;
+  border: 0;
+  background: none;
+  color: var(--te-text);
+  font-family: inherit;
+  cursor: pointer;
+}
+.te-page.is-outreach .te-settings.is-collapsed { padding-bottom: 0; } /* just the header row */
+.te-settings-head svg { transition: transform 0.15s; transform: rotate(-90deg); } /* collapsed: points right */
+.te-settings-head.is-open svg { transform: none; } /* open: points down, as in the design */
+.te-settings-head:focus-visible { outline: 2px solid var(--te-teal); outline-offset: 2px; border-radius: 4px; }
+.te-settings-body { width: 100%; display: flex; flex-direction: column; gap: 16px; padding-bottom: 0; }
+.te-field { position: relative; display: block; }
+.te-field input, .te-field select {
+  width: 100%;
+  height: 56px;
+  padding: 0 15px;
+  border: 1px solid var(--te-border-strong);
+  border-radius: 4px;
+  background: var(--te-surface);
+  color: var(--te-text);
+  font-family: inherit;
+  font-size: 16px;
+  outline: none;
+  appearance: none;
+}
+.te-field input::placeholder { color: #666; }
+.te-field input:hover, .te-field select:hover { border-color: var(--te-text); }
+.te-field input:focus, .te-field select:focus { border-color: var(--te-teal); box-shadow: inset 0 0 0 1px var(--te-teal); }
+.te-field-select.is-empty select { color: #666; }
+.te-field-select svg { position: absolute; right: 12px; top: 18px; pointer-events: none; color: #555; }
+.te-field-count { margin-top: 4px; text-align: right; font-size: 12px; color: #666; padding-right: 14px; }
+.te-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Footer buttons (Create Outreach) */
+.te-btn-outline, .te-btn-primary {
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.te-btn-outline { border: 1px solid var(--te-teal); background: var(--te-surface); color: var(--te-teal); }
+.te-btn-outline:hover { background: var(--te-teal-tint); }
+.te-btn-primary { border: 0; background: var(--te-teal); color: #fff; }
+.te-btn-primary:hover { background: var(--te-teal-hover); }
 
 /* ---------- Page actions (bottom bar) ---------- */
 .te-toolbar {
@@ -1014,7 +1102,12 @@ button { font-family: inherit; }
   position: sticky;
   top: var(--te-canvas-bar-h, 66px); /* right under the sticky "Build Your Template" bar */
   z-index: 20;
-  border-radius: 7px 7px 0 0; /* inside the card's 8px corner */
+  /* Own top/side border laid exactly over the card's, so the toolbar keeps its outline
+     once it sticks and the card's top edge has scrolled away */
+  margin: -1px -1px 0;
+  border: 1px solid var(--te-border);
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
   background: var(--te-surface);
 }
 .te-tb.te-tb-fixed {
