@@ -44,13 +44,7 @@ import {
   $createTextNode,
   $getRoot,
   $isElementNode,
-  CAN_REDO_COMMAND,
-  CAN_UNDO_COMMAND,
-  COMMAND_PRIORITY_LOW,
-  REDO_COMMAND,
-  UNDO_COMMAND,
 } from 'lexical';
-import { mergeRegister } from '@lexical/utils';
 
 import { VariableNode, $createVariableNode } from './nodes/VariableNode';
 import { ImageNode } from './nodes/ImageNode';
@@ -175,44 +169,6 @@ function readDraft() {
 }
 
 /* ---------- Top chrome ---------- */
-
-function HistoryButtons() {
-  const [editor] = useLexicalComposerContext();
-  const [canUndo, setCanUndo] = useState(false);
-  const [canRedo, setCanRedo] = useState(false);
-
-  useEffect(
-    () =>
-      mergeRegister(
-        editor.registerCommand(CAN_UNDO_COMMAND, (v) => (setCanUndo(v), false), COMMAND_PRIORITY_LOW),
-        editor.registerCommand(CAN_REDO_COMMAND, (v) => (setCanRedo(v), false), COMMAND_PRIORITY_LOW),
-      ),
-    [editor],
-  );
-
-  return (
-    <>
-      <button
-        type="button"
-        className="te-icon-btn"
-        title="Undo (⌘Z)"
-        disabled={!canUndo}
-        onClick={() => editor.dispatchCommand(UNDO_COMMAND, undefined)}
-      >
-        <Icon name="undo" size={18} />
-      </button>
-      <button
-        type="button"
-        className="te-icon-btn"
-        title="Redo (⇧⌘Z)"
-        disabled={!canRedo}
-        onClick={() => editor.dispatchCommand(REDO_COMMAND, undefined)}
-      >
-        <Icon name="redo" size={18} />
-      </button>
-    </>
-  );
-}
 
 function SaveButton({ onSaved }) {
   const [editor] = useLexicalComposerContext();
@@ -562,28 +518,20 @@ export default function TemplateEditor() {
           </div>
         </header>
 
-        <div className="te-toolbar">
-          <div className="te-toolbar-left">
-            <button type="button" className="te-icon-btn" aria-label="Back">
-              <Icon name="back" size={20} />
-            </button>
-            <span className="te-vdivider" />
-            <HistoryButtons />
-          </div>
-          <div className="te-toolbar-right">
-            <button type="button" className="te-text-btn">
-              <Icon name="send" size={18} /> Send Test Email
-            </button>
-            <SaveButton onSaved={() => setToast('Template saved')} />
-          </div>
-        </div>
-
         <main className="te-canvas" ref={setCanvasElem}>
           <section className="te-frame">
             <CanvasBar mode={mode} onModeChange={setMode} device={device} onDeviceChange={setDevice} />
             <EditorCard mode={mode} device={device} canvasElem={canvasElem} toolbarVariant={toolbarVariant} />
           </section>
         </main>
+
+        {/* Page actions, centred at the bottom */}
+        <footer className="te-toolbar">
+          <button type="button" className="te-text-btn">
+            <Icon name="send" size={18} /> Send Test Email
+          </button>
+          <SaveButton onSaved={() => setToast('Template saved')} />
+        </footer>
 
         {toast && <div className="te-toast">{toast}</div>}
       </div>
