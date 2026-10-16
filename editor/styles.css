@@ -1123,6 +1123,10 @@ button { font-family: inherit; }
 .te-tb-btn:disabled { color: #c4c4c4; cursor: not-allowed; background: transparent; }
 .te-tb-add { margin-left: 2px; }
 .te-tb-add-btn { height: 32px; margin: 0; padding: 0 8px; font-size: 12px; }
+/* Toolbar Select Template / Add Element: "inherit grey" (primary text, secondary icon) */
+.te-tb .te-tb-add-btn { color: var(--te-text); }
+.te-tb .te-tb-add-btn svg { color: var(--te-text-2); }
+.te-tb .te-tb-add-btn:not(.te-select-template):hover, .te-tb .te-tb-add-btn.is-open { background: #f0f0f0; }
 /* Select Template: visual only for now (no interaction) */
 .te-select-template { margin-left: 2px; cursor: default; }
 .te-select-template:hover { background: transparent; }
