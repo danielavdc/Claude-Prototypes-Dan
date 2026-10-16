@@ -207,7 +207,7 @@ function useDragAutoScroll(anchorElem) {
       if (![...(e.dataTransfer?.types || [])].includes(DRAG_DATA_FORMAT)) return;
       const box = canvas.getBoundingClientRect();
       let top = box.top;
-      canvas.querySelectorAll(':scope > .te-canvas-bar, .te-fixed-tb-slot:not([hidden])').forEach((el) => {
+      canvas.querySelectorAll('.te-canvas-bar, .te-fixed-tb-slot:not([hidden])').forEach((el) => {
         top = Math.max(top, el.getBoundingClientRect().bottom);
       });
       const bottom = Math.min(box.bottom, window.innerHeight);

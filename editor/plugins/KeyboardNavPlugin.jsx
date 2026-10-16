@@ -172,7 +172,7 @@ function reveal(editor, key) {
     const canvas = el?.closest('.te-canvas');
     if (!el || !canvas) return;
     let top = canvas.getBoundingClientRect().top;
-    canvas.querySelectorAll(':scope > .te-canvas-bar, .te-fixed-tb-slot:not([hidden])').forEach((bar) => {
+    canvas.querySelectorAll('.te-canvas-bar, .te-fixed-tb-slot:not([hidden])').forEach((bar) => {
       top = Math.max(top, bar.getBoundingClientRect().bottom);
     });
     const bottom = Math.min(canvas.getBoundingClientRect().bottom, window.innerHeight);

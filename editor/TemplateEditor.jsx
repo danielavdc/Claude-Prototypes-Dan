@@ -291,11 +291,11 @@ function DeviceToggle({ device, onChange }) {
 const CANVAS_COPY = {
   edit: {
     title: 'Build Your Template',
-    hint: 'Shape a reusable pitch with images, tables, columns and more.',
+    hint: 'Shape a reusable pitch with images, tables, columns and more',
   },
   preview: {
     title: 'Preview Your Template',
-    hint: 'A close look at what your recipients will see.',
+    hint: 'A close look at what your recipients will see',
   },
 };
 
@@ -405,6 +405,19 @@ const HTML_EXPORT = new Map([
   ],
 ]);
 
+// Placeholder for the template picker: shown in the toolbar, no interaction yet.
+function SelectTemplateButton() {
+  return (
+    <span className="te-add-element te-tb-add-btn te-select-template">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+        <rect x="4" y="4" width="16" height="16" rx="1" />
+        <path d="M10 4v16M10 12h10" />
+      </svg>
+      Select Template
+    </span>
+  );
+}
+
 /* ---------- Editor card ---------- */
 
 function EditorCard({ mode, device, canvasElem, toolbarVariant }) {
@@ -456,7 +469,12 @@ function EditorCard({ mode, device, canvasElem, toolbarVariant }) {
                 variant="fixed"
                 anchorElem={canvasElem}
                 slotElem={slotElem}
-                trailing={<ToolbarAddElement />}
+                trailing={
+                  <>
+                    <SelectTemplateButton />
+                    <ToolbarAddElement />
+                  </>
+                }
               />
             )
           ) : (
@@ -561,8 +579,10 @@ export default function TemplateEditor() {
         </div>
 
         <main className="te-canvas" ref={setCanvasElem}>
-          <CanvasBar mode={mode} onModeChange={setMode} device={device} onDeviceChange={setDevice} />
-          <EditorCard mode={mode} device={device} canvasElem={canvasElem} toolbarVariant={toolbarVariant} />
+          <section className="te-frame">
+            <CanvasBar mode={mode} onModeChange={setMode} device={device} onDeviceChange={setDevice} />
+            <EditorCard mode={mode} device={device} canvasElem={canvasElem} toolbarVariant={toolbarVariant} />
+          </section>
         </main>
 
         {toast && <div className="te-toast">{toast}</div>}

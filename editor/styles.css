@@ -133,25 +133,38 @@ button { font-family: inherit; }
   position: relative;
 }
 
+/* White frame holding the "Build Your Template" heading, the toggles and the editor card */
+.te-frame {
+  width: 100%;
+  max-width: 676px;
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 16px;
+  padding: 0 18px 18px;
+  background: var(--te-surface);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+
 .te-canvas-bar {
   width: 100%;
-  max-width: 640px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 15px 0;
+  padding: 20px 0 16px;
   flex-shrink: 0;
   /* Stays put while the template scrolls (title + Edit/Preview, and the device toggle in preview) */
   position: sticky;
   top: 0;
   z-index: 30;
-  background: var(--te-canvas);
-  box-shadow: -8px 0 0 var(--te-canvas), 8px 0 0 var(--te-canvas); /* hide the card's side shadow underneath */
+  background: var(--te-surface);
+  box-shadow: -18px 0 0 var(--te-surface), 18px 0 0 var(--te-surface); /* cover the frame's side padding */
 }
 .te-canvas-title { margin: 0; font-size: 18px; font-weight: 700; color: var(--te-text); white-space: nowrap; }
 .te-canvas-heading { min-width: 0; }
-/* Primary colour (not grey) so it stays readable on the canvas background */
 .te-canvas-hint { margin: 2px 0 0; font-size: 14px; line-height: 20px; color: var(--te-text); }
 .te-canvas-actions { display: flex; align-items: center; gap: 12px; }
 
@@ -186,8 +199,8 @@ button { font-family: inherit; }
   /* Fill the canvas height left under the "Build Your Template" bar; grows past it with content. */
   flex: 1 0 auto;
   background: var(--te-surface);
-  border-radius: 3px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18), 0 1px 1px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--te-border);
+  border-radius: 8px;
 }
 .te-card-inner { position: relative; padding: 18px 0 24px; isolation: isolate; } /* overlays scroll under the sticky bars */
 
@@ -1003,7 +1016,7 @@ button { font-family: inherit; }
   position: sticky;
   top: var(--te-canvas-bar-h, 66px); /* right under the sticky "Build Your Template" bar */
   z-index: 20;
-  border-radius: 3px 3px 0 0;
+  border-radius: 7px 7px 0 0; /* inside the card's 8px corner */
   background: var(--te-surface);
 }
 .te-tb.te-tb-fixed {
@@ -1012,13 +1025,16 @@ button { font-family: inherit; }
   row-gap: 4px;
   padding: 8px 12px;
   border-bottom: 1px solid var(--te-border);
-  border-radius: 3px 3px 0 0;
+  border-radius: 7px 7px 0 0;
   box-shadow: none;
   animation: none;
 }
 .te-tb-btn:disabled { color: #c4c4c4; cursor: not-allowed; background: transparent; }
 .te-tb-add { margin-left: 2px; }
 .te-tb-add-btn { height: 32px; margin: 0; padding: 0 8px; font-size: 12px; }
+/* Select Template: visual only for now (no interaction) */
+.te-select-template { margin-left: 2px; cursor: default; }
+.te-select-template:hover { background: transparent; }
 .te-add-menu-right { left: auto; right: 0; }
 .te-link.te-link-menu { position: absolute; top: calc(100% + 8px); left: 0; z-index: 25; }
 

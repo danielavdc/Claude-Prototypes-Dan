@@ -208,7 +208,7 @@ export function ElementMenu({ triggerRef, wrapRef, exclude = [], onSelect, onClo
     // The sticky bars at the top of the canvas cover that strip, so the menu can't use it.
     let top = Math.max(bounds.top, 0);
     if (scroller && !scroller.contains(btn.closest('.te-fixed-tb-slot') || null)) {
-      scroller.querySelectorAll(':scope > .te-canvas-bar, .te-fixed-tb-slot:not([hidden])').forEach((el) => {
+      scroller.querySelectorAll('.te-canvas-bar, .te-fixed-tb-slot:not([hidden])').forEach((el) => {
         top = Math.max(top, el.getBoundingClientRect().bottom);
       });
     }
