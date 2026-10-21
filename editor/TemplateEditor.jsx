@@ -273,8 +273,13 @@ function CanvasBar({ flow, mode, onModeChange, device, onDeviceChange }) {
         {copy.hint && <p className="te-canvas-hint">{copy.hint}</p>}
       </div>
       <div className="te-canvas-actions">
-        {mode === 'preview' && <DeviceToggle device={device} onChange={onDeviceChange} />}
-        <ModeToggle mode={mode} onChange={onModeChange} />
+        {/* Outreach step 1 has no Edit / Preview: it's always the editor */}
+        {flow !== 'outreach' && (
+          <>
+            {mode === 'preview' && <DeviceToggle device={device} onChange={onDeviceChange} />}
+            <ModeToggle mode={mode} onChange={onModeChange} />
+          </>
+        )}
       </div>
     </div>
   );
@@ -515,6 +520,7 @@ export default function TemplateEditor() {
   // Prototype switch: "Create Outreach Template" (default) or step 1 of "Create Outreach"
   const [flow, setFlow] = useState('template');
   const outreach = flow === 'outreach';
+  const editorMode = outreach ? 'edit' : mode; // Outreach has no preview toggle
   const [toast, setToast] = useState(null);
   const [canvasElem, setCanvasElem] = useState(null);
 
@@ -578,8 +584,8 @@ export default function TemplateEditor() {
         <main className="te-canvas" ref={setCanvasElem}>
           {outreach && <MessageSettings />}
           <section className="te-frame te-message">
-            <CanvasBar flow={flow} mode={mode} onModeChange={setMode} device={device} onDeviceChange={setDevice} />
-            <EditorCard mode={mode} device={device} canvasElem={canvasElem} />
+            <CanvasBar flow={flow} mode={editorMode} onModeChange={setMode} device={device} onDeviceChange={setDevice} />
+            <EditorCard mode={editorMode} device={device} canvasElem={canvasElem} />
           </section>
         </main>
 
