@@ -96,7 +96,7 @@ button { font-family: inherit; }
 .te-page.is-outreach .te-frame { flex: 0 0 auto; padding: 0 16px 16px; }
 .te-page.is-outreach .te-card { flex: 0 0 auto; }
 .te-page.is-outreach .te-canvas-title { font-size: 16px; }
-.te-page.is-outreach .te-canvas-bar { padding: 16px 0; box-shadow: -16px 0 0 var(--te-surface), 16px 0 0 var(--te-surface); }
+.te-page.is-outreach .te-canvas-bar { width: calc(100% + 32px); margin: 0 -16px; padding: 16px; }
 .te-page.is-outreach .te-canvas { padding-bottom: 16px; }
 .te-page.is-outreach .te-toolbar { gap: 8px; }
 .te-settings-head {
@@ -235,19 +235,34 @@ button { font-family: inherit; }
 }
 
 .te-canvas-bar {
-  width: 100%;
+  /* Spans the frame's full width (over its side padding) with the frame's rounded top */
+  width: calc(100% + 36px);
+  margin: 0 -18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 20px 0 16px;
+  padding: 20px 18px 16px;
   flex-shrink: 0;
-  /* Stays put while the template scrolls (title + Edit/Preview, and the device toggle in preview) */
+  /* Stays put while the template scrolls (title + Edit/Preview, and the device toggle in preview),
+     16px below the top so the frame keeps its gap instead of touching the edge */
   position: sticky;
-  top: 0;
+  top: 16px;
   z-index: 30;
   background: var(--te-surface);
-  box-shadow: -18px 0 0 var(--te-surface), 18px 0 0 var(--te-surface); /* cover the frame's side padding */
+  border-radius: 8px 8px 0 0;
+}
+/* Canvas-coloured strip behind the bar: hides what scrolls through the 16px gap and shows the
+   rounded corners. Unstuck it only covers the canvas margin and the frame's own corners. */
+.te-canvas-bar::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: -16px;
+  left: 0;
+  right: 0;
+  height: 24px;
+  background: var(--te-canvas);
 }
 .te-canvas-title { margin: 0; font-size: 18px; font-weight: 700; color: var(--te-text); white-space: nowrap; }
 .te-canvas-heading { min-width: 0; }
@@ -1100,7 +1115,7 @@ button { font-family: inherit; }
 /* Fixed (Jira-style) variant: always-visible strip at the top of the card */
 .te-fixed-tb-slot {
   position: sticky;
-  top: var(--te-canvas-bar-h, 66px); /* right under the sticky "Build Your Template" bar */
+  top: calc(var(--te-canvas-bar-h, 66px) + 16px); /* right under the sticky "Build Your Template" bar */
   z-index: 20;
   /* Own top/side border laid exactly over the card's, so the toolbar keeps its outline
      once it sticks and the card's top edge has scrolled away */
