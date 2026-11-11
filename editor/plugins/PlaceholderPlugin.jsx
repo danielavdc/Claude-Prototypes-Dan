@@ -9,6 +9,10 @@ import { $isLayoutContainerNode } from '../nodes/LayoutNodes';
 const EMPTY_PAGE_PLACEHOLDER = "Start your pitch. What's the story, and why does it matter now?";
 const EMPTY_LINE_PLACEHOLDER = 'Keep building your pitch: add key facts, a quote, or your ask…';
 
+// Trial: only the empty-page hint ("Start your pitch…"); no hints on empty paragraphs,
+// headings, quotes or list items once the page has content. false = the previous behaviour.
+const EMPTY_PAGE_ONLY = true;
+
 // One heading hint for every level.
 const HEADING_PLACEHOLDER = 'Add a clear section heading';
 
@@ -51,7 +55,13 @@ export default function PlaceholderPlugin() {
       const next = new Map();
       editorState.read(() => {
         const isEmptyPage = $getRoot().getTextContent().trim() === '';
-        $collectEmptyBlocks().forEach((node) => {
+        const blocks = $collectEmptyBlocks();
+        const hinted = !EMPTY_PAGE_ONLY
+          ? blocks
+          : isEmptyPage && $isParagraphNode(blocks[0]) && blocks[0].getParent() === $getRoot()
+            ? [blocks[0]] // just the first line of a blank page
+            : [];
+        hinted.forEach((node) => {
           const text = placeholderFor(node, isEmptyPage);
           const el = text && editor.getElementByKey(node.getKey());
           if (el) next.set(el, text);
