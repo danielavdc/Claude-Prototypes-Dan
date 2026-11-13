@@ -222,7 +222,7 @@ button { font-family: inherit; }
 /* White frame holding the "Build Your Template" heading, the toggles and the editor card */
 .te-frame {
   width: 100%;
-  max-width: 836px; /* 800px card + side padding */
+  max-width: calc(var(--te-email-w, 800px) + 36px); /* card + side padding */
   flex: 1 0 auto;
   display: flex;
   flex-direction: column;
@@ -295,7 +295,7 @@ button { font-family: inherit; }
 
 .te-card {
   width: 100%;
-  max-width: 800px; /* email max width (see InboxSimulator EMAIL_MAX_WIDTH) */
+  max-width: var(--te-email-w, 800px); /* email max width (640/800 switch in the header) */
   transition: max-width 0.25s ease;
   /* Fill the canvas height left under the "Build Your Template" bar; grows past it with content. */
   flex: 1 0 auto;

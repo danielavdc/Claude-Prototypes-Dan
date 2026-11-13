@@ -3,12 +3,12 @@ import { Icon } from './icons';
 
 /*
  * "Send" simulation: the composed email as a recipient would open it in Gmail, Outlook and Yahoo
- * (web on desktop, app on mobile). The email body is fluid with a max width (EMAIL_MAX_WIDTH), the
+ * (web on desktop, app on mobile). The email body is fluid with a max width (--te-email-w), the
  * same constraint as the composer, so we can judge whether that width reads like a normal message
  * or like an email-marketing layout. Client chrome is a simplified mock, not the real product UI.
  */
 
-export const EMAIL_MAX_WIDTH = 800;
+export const EMAIL_WIDTHS = [640, 800]; // compared with the header switch; the page sets --te-email-w
 
 const CLIENTS = [
   { key: 'gmail', label: 'Gmail' },
@@ -37,7 +37,7 @@ const initials = (name) =>
 
 /* ---------- Shared pieces ---------- */
 
-// The email itself: fluid up to EMAIL_MAX_WIDTH. Reports its rendered width for the readout.
+// The email itself: fluid up to the email max width (--te-email-w). Reports its rendered width for the readout.
 function EmailBody({ html, mobile, onMeasure }) {
   const ref = useRef(null);
   useLayoutEffect(() => {
@@ -54,7 +54,7 @@ function EmailBody({ html, mobile, onMeasure }) {
     <div
       ref={ref}
       className={`te-mail-email te-preview${mobile ? ' is-mobile' : ''}`}
-      style={{ maxWidth: EMAIL_MAX_WIDTH }}
+      style={{ maxWidth: 'var(--te-email-w, 800px)' }}
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );
@@ -277,7 +277,7 @@ const DESKTOP = { gmail: GmailDesktop, outlook: OutlookDesktop, yahoo: YahooDesk
 
 /* ---------- Simulator ---------- */
 
-export default function InboxSimulator({ html, sender, subject, onBack }) {
+export default function InboxSimulator({ html, sender, subject, maxWidth, onBack }) {
   const [client, setClient] = useState('gmail');
   const [device, setDevice] = useState('desktop');
   const [screen, setScreen] = useState('fit');
@@ -353,7 +353,7 @@ export default function InboxSimulator({ html, sender, subject, onBack }) {
         )}
         {sizes && (
           <span className="te-sim-readout">
-            Email {Math.round(sizes.email)}px <span>·</span> max {EMAIL_MAX_WIDTH}px <span>·</span> reading area{' '}
+            Email {Math.round(sizes.email)}px <span>·</span> max {maxWidth}px <span>·</span> reading area{' '}
             {Math.round(sizes.pane)}px
           </span>
         )}

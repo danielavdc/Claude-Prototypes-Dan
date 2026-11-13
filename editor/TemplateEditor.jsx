@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import emptyTemplateIllustration from './assets/empty-template.svg';
-import InboxSimulator from './InboxSimulator';
+import InboxSimulator, { EMAIL_WIDTHS } from './InboxSimulator';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
@@ -376,10 +376,10 @@ function SelectTemplateButton() {
 }
 
 // "Send": the composed email as received in Gmail / Outlook / Yahoo.
-function SendSimulation({ sender, subject, onBack }) {
+function SendSimulation({ sender, subject, maxWidth, onBack }) {
   const [editor] = useLexicalComposerContext();
   const [html] = useState(() => editor.getEditorState().read(() => $recipientHtml(editor)));
-  return <InboxSimulator html={html} sender={sender} subject={subject} onBack={onBack} />;
+  return <InboxSimulator html={html} sender={sender} subject={subject} maxWidth={maxWidth} onBack={onBack} />;
 }
 
 /* ---------- Create Outreach (step 1) ---------- */
@@ -528,6 +528,7 @@ export default function TemplateEditor() {
   const [flow, setFlow] = useState('template');
   const outreach = flow === 'outreach';
   const [sending, setSending] = useState(false); // "Send" simulation open
+  const [emailWidth, setEmailWidth] = useState(800); // composer + email max width, 640 vs 800
   const [sender, setSender] = useState('');
   const [subject, setSubject] = useState('');
   const editorMode = outreach ? 'edit' : mode; // Outreach has no preview toggle
@@ -560,7 +561,7 @@ export default function TemplateEditor() {
 
   return (
     <LexicalComposer initialConfig={initialConfig}>
-      <div className={`te-page${outreach ? ' is-outreach' : ''}`}>
+      <div className={`te-page${outreach ? ' is-outreach' : ''}`} style={{ '--te-email-w': `${emailWidth}px` }}>
         <header className="te-header">
           <div className="te-title">
             <Icon name="logo" size={34} />
@@ -583,6 +584,19 @@ export default function TemplateEditor() {
                 </button>
               ))}
             </div>
+            <div className="te-variant" role="group" aria-label="Email width">
+              {EMAIL_WIDTHS.map((w) => (
+                <button
+                  key={w}
+                  type="button"
+                  aria-pressed={emailWidth === w}
+                  className={emailWidth === w ? 'is-active' : ''}
+                  onClick={() => setEmailWidth(w)}
+                >
+                  {w}px
+                </button>
+              ))}
+            </div>
             <button
               type="button"
               className={`te-send-btn${sending ? ' is-active' : ''}`}
@@ -599,7 +613,7 @@ export default function TemplateEditor() {
 
         {outreach && !sending && <Stepper current={0} />}
 
-        {sending && <SendSimulation sender={sender} subject={subject} onBack={() => setSending(false)} />}
+        {sending && <SendSimulation sender={sender} subject={subject} maxWidth={emailWidth} onBack={() => setSending(false)} />}
 
         {/* Kept mounted (hidden) during the Send simulation so the editor keeps its state */}
         <main className="te-canvas" ref={setCanvasElem} hidden={sending}>
