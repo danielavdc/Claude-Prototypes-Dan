@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import emptyTemplateIllustration from './assets/empty-template.svg';
+import InboxSimulator from './InboxSimulator';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
@@ -302,6 +303,10 @@ function PreviewEmptyState() {
   );
 }
 
+// The template as recipients get it: exported HTML with variables filled with sample values.
+const $recipientHtml = (editor) =>
+  $generateHtmlFromNodes(editor, null).replace(/\{\{\s*([a-zA-Z0-9_.]+)\s*\}\}/g, (m, key) => SAMPLE_VALUES[key] ?? m);
+
 function PreviewPane() {
   const [editor] = useLexicalComposerContext();
   const [html, setHtml] = useState('');
@@ -310,10 +315,7 @@ function PreviewPane() {
   useEffect(() => {
     editor.getEditorState().read(() => {
       setEmpty($isTemplateEmpty());
-      const raw = $generateHtmlFromNodes(editor, null);
-      setHtml(
-        raw.replace(/\{\{\s*([a-zA-Z0-9_.]+)\s*\}\}/g, (m, key) => SAMPLE_VALUES[key] ?? m),
-      );
+      setHtml($recipientHtml(editor));
     });
   }, [editor]);
 
@@ -373,6 +375,13 @@ function SelectTemplateButton() {
   );
 }
 
+// "Send": the composed email as received in Gmail / Outlook / Yahoo.
+function SendSimulation({ sender, subject, onBack }) {
+  const [editor] = useLexicalComposerContext();
+  const [html] = useState(() => editor.getEditorState().read(() => $recipientHtml(editor)));
+  return <InboxSimulator html={html} sender={sender} subject={subject} onBack={onBack} />;
+}
+
 /* ---------- Create Outreach (step 1) ---------- */
 
 const OUTREACH_STEPS = ['Compose Message', 'Add Recipients', 'Personalize (Optional)', 'Review'];
@@ -396,10 +405,8 @@ const SUBJECT_MAX = 320;
 const SENDERS = ['Press Team', 'Media Relations', 'Communications Desk'];
 
 // Collapsible card with the sender and subject of the outreach.
-function MessageSettings() {
+function MessageSettings({ sender, setSender, subject, setSubject }) {
   const [open, setOpen] = useState(true);
-  const [sender, setSender] = useState('');
-  const [subject, setSubject] = useState('');
 
   return (
     <section className={`te-frame te-settings${open ? '' : ' is-collapsed'}`}>
@@ -520,6 +527,9 @@ export default function TemplateEditor() {
   // Prototype switch: "Create Outreach Template" (default) or step 1 of "Create Outreach"
   const [flow, setFlow] = useState('template');
   const outreach = flow === 'outreach';
+  const [sending, setSending] = useState(false); // "Send" simulation open
+  const [sender, setSender] = useState('');
+  const [subject, setSubject] = useState('');
   const editorMode = outreach ? 'edit' : mode; // Outreach has no preview toggle
   const [toast, setToast] = useState(null);
   const [canvasElem, setCanvasElem] = useState(null);
@@ -573,16 +583,27 @@ export default function TemplateEditor() {
                 </button>
               ))}
             </div>
+            <button
+              type="button"
+              className={`te-send-btn${sending ? ' is-active' : ''}`}
+              aria-pressed={sending}
+              onClick={() => setSending((v) => !v)}
+            >
+              <Icon name="send" size={14} /> Send
+            </button>
             <button type="button" className="te-icon-btn" aria-label="Close">
               <Icon name="close" size={20} />
             </button>
           </div>
         </header>
 
-        {outreach && <Stepper current={0} />}
+        {outreach && !sending && <Stepper current={0} />}
 
-        <main className="te-canvas" ref={setCanvasElem}>
-          {outreach && <MessageSettings />}
+        {sending && <SendSimulation sender={sender} subject={subject} onBack={() => setSending(false)} />}
+
+        {/* Kept mounted (hidden) during the Send simulation so the editor keeps its state */}
+        <main className="te-canvas" ref={setCanvasElem} hidden={sending}>
+          {outreach && <MessageSettings sender={sender} setSender={setSender} subject={subject} setSubject={setSubject} />}
           <section className="te-frame te-message">
             <CanvasBar flow={flow} mode={editorMode} onModeChange={setMode} device={device} onDeviceChange={setDevice} />
             <EditorCard mode={editorMode} device={device} canvasElem={canvasElem} />
@@ -590,7 +611,7 @@ export default function TemplateEditor() {
         </main>
 
         {/* Page actions, centred at the bottom */}
-        <footer className="te-toolbar">
+        <footer className="te-toolbar" hidden={sending}>
           {outreach ? (
             <>
               <button type="button" className="te-btn-outline" onClick={() => setToast('Draft saved')}>
