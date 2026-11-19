@@ -521,10 +521,13 @@ function EditorCard({ mode, device, canvasElem }) {
 
 /* ---------- Page ---------- */
 
+// Prototype-only controls in the header (Template/Outreach, 640/800, Send). Hidden for the demo.
+const SHOW_PROTOTYPE_CONTROLS = false;
+
 export default function TemplateEditor() {
   const [mode, setMode] = useState('edit');
   const [device, setDevice] = useState('desktop');
-  // Prototype switch: "Create Outreach Template" (default) or step 1 of "Create Outreach"
+  // Prototype switch: "Template Studio" (default) or step 1 of "Create Outreach"
   const [flow, setFlow] = useState('template');
   const outreach = flow === 'outreach';
   const [sending, setSending] = useState(false); // "Send" simulation open
@@ -565,46 +568,50 @@ export default function TemplateEditor() {
         <header className="te-header">
           <div className="te-title">
             <Icon name="logo" size={34} />
-            <h1>{outreach ? 'Create Outreach' : 'Create Outreach Template'}</h1>
+            <h1>{outreach ? 'Create Outreach' : 'Template Studio'}</h1>
           </div>
           <div className="te-header-right">
-            <div className="te-variant" role="group" aria-label="Prototype flow">
-              {[
-                { key: 'template', label: 'Template' },
-                { key: 'outreach', label: 'Outreach' },
-              ].map((v) => (
+            {SHOW_PROTOTYPE_CONTROLS && (
+              <>
+                <div className="te-variant" role="group" aria-label="Prototype flow">
+                  {[
+                    { key: 'template', label: 'Template' },
+                    { key: 'outreach', label: 'Outreach' },
+                  ].map((v) => (
+                    <button
+                      key={v.key}
+                      type="button"
+                      aria-pressed={flow === v.key}
+                      className={flow === v.key ? 'is-active' : ''}
+                      onClick={() => setFlow(v.key)}
+                    >
+                      {v.label}
+                    </button>
+                  ))}
+                </div>
+                <div className="te-variant" role="group" aria-label="Email width">
+                  {EMAIL_WIDTHS.map((w) => (
+                    <button
+                      key={w}
+                      type="button"
+                      aria-pressed={emailWidth === w}
+                      className={emailWidth === w ? 'is-active' : ''}
+                      onClick={() => setEmailWidth(w)}
+                    >
+                      {w}px
+                    </button>
+                  ))}
+                </div>
                 <button
-                  key={v.key}
                   type="button"
-                  aria-pressed={flow === v.key}
-                  className={flow === v.key ? 'is-active' : ''}
-                  onClick={() => setFlow(v.key)}
+                  className={`te-send-btn${sending ? ' is-active' : ''}`}
+                  aria-pressed={sending}
+                  onClick={() => setSending((v) => !v)}
                 >
-                  {v.label}
+                  <Icon name="send" size={14} /> Send
                 </button>
-              ))}
-            </div>
-            <div className="te-variant" role="group" aria-label="Email width">
-              {EMAIL_WIDTHS.map((w) => (
-                <button
-                  key={w}
-                  type="button"
-                  aria-pressed={emailWidth === w}
-                  className={emailWidth === w ? 'is-active' : ''}
-                  onClick={() => setEmailWidth(w)}
-                >
-                  {w}px
-                </button>
-              ))}
-            </div>
-            <button
-              type="button"
-              className={`te-send-btn${sending ? ' is-active' : ''}`}
-              aria-pressed={sending}
-              onClick={() => setSending((v) => !v)}
-            >
-              <Icon name="send" size={14} /> Send
-            </button>
+              </>
+            )}
             <button type="button" className="te-icon-btn" aria-label="Close">
               <Icon name="close" size={20} />
             </button>
