@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import emptyTemplateIllustration from './assets/empty-template.svg';
 import InboxSimulator, { EMAIL_WIDTHS } from './InboxSimulator';
+import EmailLayoutMenu from './toolbar/EmailLayoutMenu';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
@@ -376,10 +377,20 @@ function SelectTemplateButton() {
 }
 
 // "Send": the composed email as received in Gmail / Outlook / Yahoo.
-function SendSimulation({ sender, subject, maxWidth, onBack }) {
+function SendSimulation({ sender, subject, maxWidth, layout, onLayoutChange, onBack }) {
   const [editor] = useLexicalComposerContext();
   const [html] = useState(() => editor.getEditorState().read(() => $recipientHtml(editor)));
-  return <InboxSimulator html={html} sender={sender} subject={subject} maxWidth={maxWidth} onBack={onBack} />;
+  return (
+    <InboxSimulator
+      html={html}
+      sender={sender}
+      subject={subject}
+      maxWidth={maxWidth}
+      layout={layout}
+      onLayoutChange={onLayoutChange}
+      onBack={onBack}
+    />
+  );
 }
 
 /* ---------- Create Outreach (step 1) ---------- */
@@ -459,13 +470,13 @@ function MessageSettings({ sender, setSender, subject, setSubject }) {
 
 /* ---------- Editor card ---------- */
 
-function EditorCard({ mode, device, canvasElem }) {
+function EditorCard({ mode, device, canvasElem, layout, onLayoutChange }) {
   const [anchorElem, setAnchorElem] = useState(null);
   const [slotElem, setSlotElem] = useState(null);
   const mobile = mode === 'preview' && device === 'mobile';
 
   return (
-    <div className={`te-card${mobile ? ' is-mobile' : ''}`}>
+    <div className={`te-card is-layout-${layout}${mobile ? ' is-mobile' : ''}`}>
       {/* Fixed (Jira-style) toolbar lives in this sticky strip at the top of the card */}
       <div className="te-fixed-tb-slot" ref={setSlotElem} hidden={mode !== 'edit'} />
       <div className="te-card-inner" ref={setAnchorElem} hidden={mode !== 'edit'}>
@@ -506,8 +517,9 @@ function EditorCard({ mode, device, canvasElem }) {
             slotElem={slotElem}
             trailing={
               <>
-                <SelectTemplateButton />
                 <ToolbarAddElement />
+                <SelectTemplateButton />
+                <EmailLayoutMenu value={layout} onChange={onLayoutChange} />
               </>
             }
           />
@@ -521,8 +533,8 @@ function EditorCard({ mode, device, canvasElem }) {
 
 /* ---------- Page ---------- */
 
-// Prototype-only controls in the header (Template/Outreach, 640/800, Send). Hidden for the demo.
-const SHOW_PROTOTYPE_CONTROLS = false;
+// Prototype-only controls in the header (Template/Outreach, 640/800, Send). false hides them (demo).
+const SHOW_PROTOTYPE_CONTROLS = true;
 
 export default function TemplateEditor() {
   const [mode, setMode] = useState('edit');
@@ -531,7 +543,8 @@ export default function TemplateEditor() {
   const [flow, setFlow] = useState('template');
   const outreach = flow === 'outreach';
   const [sending, setSending] = useState(false); // "Send" simulation open
-  const [emailWidth, setEmailWidth] = useState(800); // composer + email max width, 640 vs 800
+  const [emailWidth, setEmailWidth] = useState(800); // narrow layout max width, 640 vs 800
+  const [layout, setLayout] = useState('narrow'); // email layout: 'full' width or 'narrow' & centred
   const [sender, setSender] = useState('');
   const [subject, setSubject] = useState('');
   const editorMode = outreach ? 'edit' : mode; // Outreach has no preview toggle
@@ -620,14 +633,23 @@ export default function TemplateEditor() {
 
         {outreach && !sending && <Stepper current={0} />}
 
-        {sending && <SendSimulation sender={sender} subject={subject} maxWidth={emailWidth} onBack={() => setSending(false)} />}
+        {sending && (
+          <SendSimulation
+            sender={sender}
+            subject={subject}
+            maxWidth={emailWidth}
+            layout={layout}
+            onLayoutChange={setLayout}
+            onBack={() => setSending(false)}
+          />
+        )}
 
         {/* Kept mounted (hidden) during the Send simulation so the editor keeps its state */}
         <main className="te-canvas" ref={setCanvasElem} hidden={sending}>
           {outreach && <MessageSettings sender={sender} setSender={setSender} subject={subject} setSubject={setSubject} />}
           <section className="te-frame te-message">
             <CanvasBar flow={flow} mode={editorMode} onModeChange={setMode} device={device} onDeviceChange={setDevice} />
-            <EditorCard mode={editorMode} device={device} canvasElem={canvasElem} />
+            <EditorCard mode={editorMode} device={device} canvasElem={canvasElem} layout={layout} onLayoutChange={setLayout} />
           </section>
         </main>
 

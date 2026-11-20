@@ -115,7 +115,9 @@ button { font-family: inherit; }
 .te-settings-head svg { transition: transform 0.15s; transform: rotate(-90deg); } /* collapsed: points right */
 .te-settings-head.is-open svg { transform: none; } /* open: points down, as in the design */
 .te-settings-head:focus-visible { outline: 2px solid var(--te-teal); outline-offset: 2px; border-radius: 4px; }
-.te-settings-body { width: 100%; display: flex; flex-direction: column; gap: 16px; padding-bottom: 0; }
+/* Sender and Subject side by side (subject gets more room); stacked on narrow screens */
+.te-settings-body { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); align-items: start; gap: 16px; padding-bottom: 0; }
+@media (max-width: 720px) { .te-settings-body { grid-template-columns: minmax(0, 1fr); } }
 .te-field { position: relative; display: block; }
 .te-field input, .te-field select {
   width: 100%;
@@ -222,7 +224,9 @@ button { font-family: inherit; }
 /* White frame holding the "Build Your Template" heading, the toggles and the editor card */
 .te-frame {
   width: 100%;
-  max-width: calc(var(--te-email-w, 800px) + 36px); /* card + side padding */
+  /* Fills the canvas width up to a cap, so on big screens the toolbar stays near the content;
+     the email layout (full / narrow) decides the content width inside */
+  max-width: 1430px; /* one-row toolbar needs 1380px; 1430 matches common laptop windows */
   flex: 1 0 auto;
   display: flex;
   flex-direction: column;
@@ -295,7 +299,6 @@ button { font-family: inherit; }
 
 .te-card {
   width: 100%;
-  max-width: var(--te-email-w, 800px); /* email max width (640/800 switch in the header) */
   transition: max-width 0.25s ease;
   /* Fill the canvas height left under the "Build Your Template" bar; grows past it with content. */
   flex: 1 0 auto;
@@ -303,6 +306,13 @@ button { font-family: inherit; }
   border: 1px solid var(--te-border);
   border-radius: 8px;
 }
+/* Narrow & Centered layout: content capped at the email max width (+ its side padding) and centred */
+.te-card.is-layout-narrow .te-content { max-width: calc(var(--te-email-w, 800px) + 80px); margin: 0 auto; }
+/* Gutter controls follow the centred content (percentages = the card's inner width) */
+.te-card.is-layout-narrow { --te-narrow-gap: max(0px, (100% - var(--te-email-w, 800px) - 80px) / 2); }
+.te-card.is-layout-narrow .te-drag-handle { left: calc(var(--te-narrow-gap) + 12px); }
+.te-card.is-layout-narrow .te-add-wrap { margin-left: calc(var(--te-narrow-gap) + 20px); }
+.te-card.is-layout-narrow:not(.is-mobile) .te-preview { max-width: calc(var(--te-email-w, 800px) + 48px); margin: 0 auto; }
 .te-card-inner { position: relative; padding: 18px 0 24px; isolation: isolate; } /* overlays scroll under the sticky bars */
 
 /* Mobile preview: a 375px email viewport, laid out the way responsive emails stack. */
@@ -1145,7 +1155,6 @@ button { font-family: inherit; }
 /* Select Template: visual only for now (no interaction) */
 .te-select-template { margin-left: 2px; cursor: default; }
 .te-select-template:hover { background: transparent; }
-.te-add-menu-right { left: auto; right: 0; }
 .te-link.te-link-menu { position: absolute; top: calc(100% + 8px); left: 0; z-index: 25; }
 
 /* Tooltips */
@@ -1483,7 +1492,7 @@ button { font-family: inherit; }
 .te-mail-email.te-preview img { max-width: 100% !important; height: auto; }
 .te-mail-email.te-preview.is-mobile table { font-size: 13px; }
 .te-mail-email.te-preview.is-mobile td, .te-mail-email.te-preview.is-mobile th { padding: 8px 10px; }
-.te-sim-stage.is-center .te-mail-email { margin-left: auto; margin-right: auto; } /* centred version */
+.te-sim-stage.is-narrow .te-mail-email { max-width: var(--te-email-w, 800px); margin-left: auto; margin-right: auto; } /* narrow & centred layout */
 .te-mail-replies { display: flex; gap: 12px; margin: 28px 0 40px; }
 .te-mail-replies span { padding: 8px 20px; border: 1px solid #747775; border-radius: 18px; font-size: 14px; color: #444746; }
 
@@ -1568,3 +1577,41 @@ button { font-family: inherit; }
 .te-phone-outlook .te-phone-subject, .te-phone-yahoo .te-phone-subject { font-weight: 600; }
 .te-phone-from { display: flex; gap: 10px; align-items: flex-start; }
 .te-phone .te-mail-body-wrap { margin-top: 16px; }
+
+/* Email layout dropdown (toolbar) */
+.te-layout-menu-wrap { position: relative; }
+.te-layout-trigger { gap: 6px; }
+.te-layout-caret { margin-left: -2px; }
+.te-layout-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 25;
+  width: 320px;
+  padding: 8px 0;
+  background: var(--te-surface);
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18), 0 6px 18px rgba(0, 0, 0, 0.14);
+  animation: te-pop 0.12s ease-out;
+}
+.te-layout-menu-title { padding: 8px 16px 10px; font-size: 13px; font-weight: 700; color: var(--te-text); }
+.te-layout-option {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 10px 16px;
+  border: 0;
+  background: none;
+  text-align: left;
+  font-family: inherit;
+  color: var(--te-text);
+  cursor: pointer;
+}
+.te-layout-option:hover, .te-layout-option:focus-visible { background: #f5f5f5; outline: none; }
+.te-layout-option.is-selected { background: var(--te-teal-tint); box-shadow: inset 3px 0 0 var(--te-teal); }
+.te-layout-option-icon { flex-shrink: 0; padding-top: 2px; color: var(--te-text-2); }
+.te-layout-option.is-selected .te-layout-option-icon { color: var(--te-teal); }
+.te-layout-option-label { display: block; font-size: 14px; line-height: 20px; }
+.te-layout-option.is-selected .te-layout-option-label { font-weight: 700; }
+.te-layout-option-hint { display: block; margin-top: 2px; font-size: 12px; line-height: 16px; color: var(--te-text-2); }

@@ -396,7 +396,6 @@ export function ToolbarAddElement() {
             triggerRef={triggerRef}
             wrapRef={wrapRef}
             exclude={context.parentKey ? ['columns'] : []} // no layouts inside a column
-            className="te-add-menu-right"
             onSelect={select}
             onClose={close}
           />

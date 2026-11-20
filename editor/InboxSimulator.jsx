@@ -1,10 +1,11 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Icon } from './icons';
+import { EMAIL_LAYOUTS } from './toolbar/EmailLayoutMenu';
 
 /*
  * "Send" simulation: the composed email as a recipient would open it in Gmail, Outlook and Yahoo
- * (web on desktop, app on mobile). The email body is fluid with a max width (--te-email-w), the
- * same constraint as the composer, so we can judge whether that width reads like a normal message
+ * (web on desktop, app on mobile), with the email layout chosen in the editor: full width (fluid) or
+ * narrow & centred (capped at --te-email-w), so we can judge whether it reads like a normal message
  * or like an email-marketing layout. Client chrome is a simplified mock, not the real product UI.
  */
 
@@ -37,7 +38,7 @@ const initials = (name) =>
 
 /* ---------- Shared pieces ---------- */
 
-// The email itself: fluid up to the email max width (--te-email-w). Reports its rendered width for the readout.
+// The email itself: fluid; capped and centred in the narrow layout (see .te-sim-stage.is-narrow). Reports its rendered width for the readout.
 function EmailBody({ html, mobile, onMeasure }) {
   const ref = useRef(null);
   useLayoutEffect(() => {
@@ -54,7 +55,6 @@ function EmailBody({ html, mobile, onMeasure }) {
     <div
       ref={ref}
       className={`te-mail-email te-preview${mobile ? ' is-mobile' : ''}`}
-      style={{ maxWidth: 'var(--te-email-w, 800px)' }}
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );
@@ -277,11 +277,10 @@ const DESKTOP = { gmail: GmailDesktop, outlook: OutlookDesktop, yahoo: YahooDesk
 
 /* ---------- Simulator ---------- */
 
-export default function InboxSimulator({ html, sender, subject, maxWidth, onBack }) {
+export default function InboxSimulator({ html, sender, subject, maxWidth, layout, onLayoutChange, onBack }) {
   const [client, setClient] = useState('gmail');
   const [device, setDevice] = useState('desktop');
   const [screen, setScreen] = useState('fit');
-  const [align, setAlign] = useState('center'); // email block: centred or left-aligned in the reading pane
   const [sizes, setSizes] = useState(null);
   const [stageWidth, setStageWidth] = useState(0);
   const stageRef = useRef(null);
@@ -329,13 +328,11 @@ export default function InboxSimulator({ html, sender, subject, maxWidth, onBack
             </button>
           ))}
         </div>
-        <div className="te-variant" role="group" aria-label="Email alignment">
-          {[
-            { key: 'left', label: 'Left' },
-            { key: 'center', label: 'Centered' },
-          ].map((a) => (
-            <button key={a.key} type="button" aria-pressed={align === a.key} className={align === a.key ? 'is-active' : ''} onClick={() => setAlign(a.key)}>
-              {a.label}
+        {/* Same setting as the toolbar's email layout dropdown */}
+        <div className="te-variant" role="group" aria-label="Email layout">
+          {EMAIL_LAYOUTS.map((l) => (
+            <button key={l.key} type="button" aria-pressed={layout === l.key} className={layout === l.key ? 'is-active' : ''} onClick={() => onLayoutChange(l.key)}>
+              {l.label}
             </button>
           ))}
         </div>
@@ -353,13 +350,13 @@ export default function InboxSimulator({ html, sender, subject, maxWidth, onBack
         )}
         {sizes && (
           <span className="te-sim-readout">
-            Email {Math.round(sizes.email)}px <span>·</span> max {maxWidth}px <span>·</span> reading area{' '}
+            Email {Math.round(sizes.email)}px <span>·</span> max {layout === 'narrow' ? `${maxWidth}px` : 'none'} <span>·</span> reading area{' '}
             {Math.round(sizes.pane)}px
           </span>
         )}
       </div>
 
-      <div className={`te-sim-stage is-${align}`} ref={stageRef}>
+      <div className={`te-sim-stage is-${layout}`} ref={stageRef}>
         {device === 'mobile' ? (
           <MobileApp key={client} client={client} mail={mail} html={html} onMeasure={setSizes} />
         ) : (
